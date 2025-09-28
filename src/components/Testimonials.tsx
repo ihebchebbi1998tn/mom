@@ -10,7 +10,7 @@ const Testimonials = () => {
   const testimonials = [{
     name: "سارة أحمد",
     role: "أم لطفلين",
-    quote: "تحدي رائع ، نحب نشركك برشا وحتى من راجلي لاحض تحسن متعي ..",
+    quote: "دورات مش عاديا ! حبيت نشكرك برشا",
     rating: 5,
     audioUrl: "/audio/testimonial1.mp3"
   }, {
@@ -22,7 +22,7 @@ const Testimonials = () => {
   }, {
     name: "مريم علي",
     role: "أم عاملة",
-    quote: "مجتمع رائع من الأمهات المتعلمات، والدعم المتبادل جعل التجربة أكثر إثراءً. الدورات عملية ومفيدة جداً",
+    quote: "تحدي روعا علخر ، لاحظت برشة تغاير .. لاحظت إن و لاحظوا راجلي",
     rating: 5,
     audioUrl: "/audio/testimonial3.mp3"
   }];
