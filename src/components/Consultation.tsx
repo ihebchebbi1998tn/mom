@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Calendar as CalendarIcon, CheckCircle, ArrowLeft, Clock, Phone, Users, MessageSquare } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -243,14 +244,14 @@ const Consultation = () => {
                     {/* Calendar */}
                     <div className="space-y-3">
                       <Label className="text-right block text-sm font-medium">اختاري تاريخ الموعد</Label>
-                      <div className="border rounded-lg p-3 bg-card shadow-inner flex justify-center items-center">
-                        <div className="w-full max-w-sm mx-auto">
-                          <Calendar
-                            mode="single"
-                            selected={selectedDate}
-                            onSelect={setSelectedDate}
-                            disabled={isDateDisabled}
-                            className="w-full pointer-events-auto mx-auto bg-card text-card-foreground [&_.rdp-caption]:text-foreground [&_.rdp-head_cell]:text-foreground [&_.rdp-button]:text-foreground [&_.rdp-day]:font-medium"
+                       <div className="border rounded-lg p-3 bg-card shadow-inner flex justify-center items-center">
+                         <div className="max-w-sm">
+                           <Calendar
+                             mode="single"
+                             selected={selectedDate}
+                             onSelect={setSelectedDate}
+                             disabled={isDateDisabled}
+                             className="pointer-events-auto mx-auto bg-card text-card-foreground [&_.rdp-caption]:text-foreground [&_.rdp-head_cell]:text-foreground [&_.rdp-button]:text-foreground [&_.rdp-day]:font-medium"
                             dir="ltr"
                             style={{ direction: 'ltr' }}
                             modifiers={{
