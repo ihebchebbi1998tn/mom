@@ -61,7 +61,7 @@ const About = () => {
             {/* Feature Sections */}
             <div className="space-y-4 text-right">
               {features.map((feature, index) => (
-                <div key={index} className="flex items-center gap-3">
+                <div key={index} className="hidden lg:flex items-center gap-3">
                   <div className="w-3 h-3 bg-gradient-to-br from-primary to-secondary rounded-full flex-shrink-0"></div>
                   <div>
                     <h4 className="font-semibold text-foreground text-sm mb-1">{feature.title}</h4>
