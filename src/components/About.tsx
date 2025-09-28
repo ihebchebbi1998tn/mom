@@ -30,65 +30,89 @@ const About = () => {
   ];
 
   return (
-    <section id="about" className="relative py-24 overflow-hidden" ref={sectionRef}>
-      {/* Background Image with Pink Overlay */}
-      <div 
-        className="absolute inset-0 bg-cover bg-top md:bg-center bg-no-repeat opacity-20"
-        style={{
-          backgroundImage: `url('/src/assets/mother-children-background.png')`
-        }}
-      ></div>
-      <div className="absolute inset-0 bg-gradient-to-br from-pink-500/30 via-pink-400/20 to-pink-600/25"></div>
-      {/* Decorative Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/10"></div>
-      <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-secondary/20 to-accent/20 rounded-full blur-3xl"></div>
-      <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-gradient-to-br from-accent/15 to-primary/15 rounded-full blur-2xl"></div>
-      
-      {/* Floating Decorative Shapes */}
-      <div className="absolute top-32 right-1/4 w-6 h-6 bg-primary/30 rounded-full animate-pulse"></div>
-      <div className="absolute bottom-32 left-1/3 w-4 h-4 bg-secondary/40 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-      <div className="absolute top-1/3 right-1/3 w-8 h-8 bg-accent/25 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+    <section id="about" className="relative py-16 md:py-24 overflow-hidden" ref={sectionRef}>
+      {/* Subtle gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-pink-50/50 via-white to-rose-50/30"></div>
+      <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-secondary/10 to-accent/10 rounded-full blur-3xl"></div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className={`max-w-4xl mx-auto text-center mb-20 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          <div className="relative inline-block mb-8">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6 relative">
-              لماذا{" "}
-              <span className="text-pink-500 relative">
-                أكاديمية الأم؟
-                <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-primary/30 via-secondary/30 to-accent/30 rounded-full"></div>
-              </span>
-            </h2>
-            {/* Decorative stars around title */}
-            <div className="absolute -top-4 -right-8 text-primary/40 text-2xl">✨</div>
-            <div className="absolute -bottom-4 -left-6 text-secondary/40 text-xl">💖</div>
+        {/* Hero Section with Image */}
+        <div className={`grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-20 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          {/* Content Side */}
+          <div className="order-2 lg:order-1 text-center lg:text-right">
+            <div className="relative inline-block mb-8">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6 relative">
+                لماذا{" "}
+                <span className="text-pink-500 relative">
+                  أكاديمية الأم؟
+                  <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-primary/30 via-secondary/30 to-accent/30 rounded-full"></div>
+                </span>
+              </h2>
+              {/* Decorative elements */}
+              <div className="absolute -top-4 -right-8 text-primary/40 text-2xl">✨</div>
+              <div className="absolute -bottom-4 -left-6 text-secondary/40 text-xl">💖</div>
+            </div>
+            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed font-medium mb-8">
+              تطوير مهارات الأمهات مع الحفاظ على التوازن الأسري
+            </p>
+            
+            {/* Feature Sections */}
+            <div className="space-y-4 text-right">
+              {features.map((feature, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-gradient-to-br from-primary to-secondary rounded-full flex-shrink-0"></div>
+                  <div>
+                    <h4 className="font-semibold text-foreground text-sm mb-1">{feature.title}</h4>
+                    <p className="text-xs text-muted-foreground">{feature.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
-            تطوير مهارات الأمهات مع الحفاظ على التوازن الأسري
-          </p>
+
+          {/* Image Side */}
+          <div className="order-1 lg:order-2 relative">
+            <div className="relative group">
+              {/* Main image container */}
+              <div className="relative overflow-hidden rounded-3xl shadow-2xl transform transition-all duration-700 group-hover:scale-105">
+                <img 
+                  src="/src/assets/mother-children-background.png" 
+                  alt="أم مع أطفالها - أكاديمية الأم"
+                  className="w-full h-[300px] md:h-[400px] lg:h-[500px] object-cover object-center"
+                  loading="lazy"
+                />
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-pink-500/20 via-transparent to-transparent"></div>
+              </div>
+              
+              {/* Floating decorative elements */}
+              <div className="absolute -top-4 -right-4 w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-full shadow-lg animate-pulse"></div>
+              <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-gradient-to-br from-secondary to-accent rounded-full shadow-lg animate-pulse" style={{ animationDelay: '1s' }}></div>
+              <div className="absolute top-1/2 -left-6 w-4 h-4 bg-gradient-to-br from-accent to-primary rounded-full shadow-lg animate-pulse" style={{ animationDelay: '2s' }}></div>
+            </div>
+          </div>
         </div>
 
-        <div className={`grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+        {/* Mobile Feature Cards */}
+        <div className={`lg:hidden grid grid-cols-2 gap-4 transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           {features.map((feature, index) => (
-            <Card key={index} className="group relative bg-white/60 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl p-4 md:p-8 text-center transition-all duration-500 hover:scale-105 hover:-translate-y-2 rounded-2xl md:rounded-3xl overflow-hidden">
+            <Card key={index} className="group relative bg-white/70 backdrop-blur-sm border-0 shadow-lg p-4 text-center transition-all duration-500 hover:scale-105 rounded-2xl overflow-hidden">
               {/* Card decorative background */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               
-              {/* Icon container with enhanced styling */}
-              <div className="relative w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:shadow-xl transition-all duration-500 group-hover:rotate-3">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl"></div>
-                <feature.icon className="w-10 h-10 text-white relative z-10" />
-                {/* Sparkle effect */}
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              {/* Icon container */}
+              <div className="relative w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                <feature.icon className="w-6 h-6 text-white relative z-10" />
               </div>
               
-              <h3 className="text-xl font-bold text-foreground mb-6 relative z-10 text-center">
+              <h3 className="text-sm font-bold text-foreground mb-2 relative z-10">
                 {feature.title}
               </h3>
               
-              {/* Bottom decorative line */}
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-primary to-secondary group-hover:w-3/4 transition-all duration-500 rounded-full"></div>
+              <p className="text-xs text-muted-foreground leading-relaxed relative z-10">
+                {feature.description}
+              </p>
             </Card>
           ))}
         </div>

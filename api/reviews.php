@@ -49,6 +49,29 @@ try {
                 exit;
             }
             
+            // Ensure user_id is integer
+            $user_id = (int) $input['user_id'];
+            if ($user_id <= 0) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Invalid user ID'
+                ]);
+                exit;
+            }
+            
+            // Validate and sanitize inputs
+            $user_name = trim($input['user_name']);
+            $user_email = trim($input['user_email']);
+            $review_text = trim($input['review_text']);
+            
+            if (empty($user_name) || empty($user_email) || empty($review_text)) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'All fields are required'
+                ]);
+                exit;
+            }
+            
             // Validate rating
             if ($input['rating'] < 1 || $input['rating'] > 5) {
                 echo json_encode([
@@ -60,7 +83,7 @@ try {
             
             // Check if user already has a review
             $checkStmt = $db->prepare("SELECT id FROM mom_reviews WHERE user_id = ?");
-            $checkStmt->execute([$input['user_id']]);
+            $checkStmt->execute([$user_id]);
             
             if ($checkStmt->fetch()) {
                 echo json_encode([
@@ -77,11 +100,11 @@ try {
             ");
             
             $stmt->execute([
-                $input['user_id'],
-                $input['user_name'],
-                $input['user_email'],
+                $user_id,
+                $user_name,
+                $user_email,
                 $input['rating'],
-                $input['review_text']
+                $review_text
             ]);
             
             echo json_encode([

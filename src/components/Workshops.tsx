@@ -49,21 +49,9 @@ const Workshops = () => {
       day: 'numeric'
     });
   };
-  return <section id="workshops" className="py-20 bg-background" ref={sectionRef}>
-      <div className="container mx-auto px-4">
-        {/* Back Button */}
-        <div className="mb-8">
-          <Button variant="ghost" onClick={() => {
-          // Navigate back to dashboard - assuming this component will be used in a router context
-          if (typeof window !== 'undefined' && window.history) {
-            window.history.back();
-          }
-        }} className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0 transition-all duration-200 transform hover:scale-[1.02] shadow-md">
-            <ArrowLeft className="w-4 h-4 ml-2" />
-            العودة للقائمة
-          </Button>
-        </div>
-        
+  return (
+    <section id="workshops" className="py-20 bg-background" ref={sectionRef}>
+      <div className="container mx-auto px-4">        
         {/* Section Header */}
         <div className={`text-center mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <h2 className="text-3xl lg:text-5xl font-bold text-foreground mb-6">ورشات</h2>
@@ -154,6 +142,8 @@ const Workshops = () => {
           </div>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default Workshops;
