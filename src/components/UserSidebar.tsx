@@ -241,6 +241,94 @@ export function UserSidebar({ onSectionSelect, isOpen = false, onToggle }: UserS
         />
       )}
       
+      {/* Consultation Booking Modal */}
+      <Dialog open={isBookingOpen} onOpenChange={setIsBookingOpen}>
+        <DialogContent className="sm:max-w-md" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="text-right">حجز موعد استشارة</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Date Selection */}
+            <div className="space-y-3">
+              <Label htmlFor="consultation-date" className="text-right block">
+                اختر التاريخ المناسب
+              </Label>
+              <div className="flex justify-center">
+                <CustomCalendar
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  disabled={(date) => {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    // Disable past dates
+                    if (date < today) return true;
+                    
+                    // Check if date is available
+                    const dateStr = format(date, 'yyyy-MM-dd');
+                    const availability = availabilities.find(av => av.date === dateStr);
+                    
+                    // If no specific availability record, check against default limit
+                    if (!availability) {
+                      const defaultConfig = availabilities.find(av => av.date === '0000-00-00');
+                      return false; // Allow booking if no specific restriction
+                    }
+                    
+                    return availability.status === 'unavailable' || 
+                           availability.current_reservations >= availability.max_reservations;
+                  }}
+                  availabilities={availabilities}
+                />
+              </div>
+              
+              {selectedDate && (
+                <p className="text-sm text-center text-green-600 font-medium">
+                  التاريخ المختار: {format(selectedDate, 'dd/MM/yyyy')}
+                </p>
+              )}
+            </div>
+
+            {/* Name Input */}
+            <div className="space-y-2">
+              <Label htmlFor="client-name" className="text-right block">
+                الاسم الكامل
+              </Label>
+              <Input
+                id="client-name"
+                type="text"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                placeholder="أدخل اسمك الكامل"
+                className="text-right"
+                dir="rtl"
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 justify-end">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setIsBookingOpen(false);
+                  setSelectedDate(undefined);
+                  setClientName("");
+                }}
+              >
+                إلغاء
+              </Button>
+              <Button 
+                onClick={handleBooking}
+                disabled={!selectedDate || !clientName.trim()}
+                className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+              >
+                تأكيد الحجز
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
       {/* Sidebar */}
       <div className={`
         ${isMobile ? 'fixed' : 'relative'} 

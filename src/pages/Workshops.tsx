@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, ArrowLeft, Clock, MessageSquare, MapPin } from 'lucide-react';
+import { Calendar, Users, ArrowLeft, Clock, MessageSquare, MapPin, Menu } from 'lucide-react';
 import { useAuth } from "@/contexts/AuthContext";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useNavigate } from "react-router-dom";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { UserSidebar } from "@/components/UserSidebar";
 import EnhancedFloatingWhatsApp from "@/components/EnhancedFloatingWhatsApp";
 import Footer from "@/components/Footer";
 import { getTextAlignmentClasses, getTextDirection, getContainerDirection } from "@/utils/textAlignment";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Workshop {
   id: number;
@@ -31,11 +31,29 @@ const Workshops = () => {
   const { user } = useAuth();
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { ref, isVisible } = useScrollAnimation();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const handleBackToDashboard = () => {
     navigate('/dashboard');
+  };
+
+  const handleSectionSelect = (section: string) => {
+    if (section === 'packs') {
+      navigate('/dashboard');
+    } else if (section === 'reviews') {
+      navigate('/reviews');
+    } else if (section === 'challenges') {
+      navigate('/challenges');
+    } else if (section === 'blogs') {
+      navigate('/blogs');
+    } else if (section === 'workshops') {
+      // Already on workshops page
+    } else {
+      // Handle other sections
+    }
   };
 
   const fetchWorkshops = async () => {
@@ -95,35 +113,47 @@ const Workshops = () => {
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen w-full bg-gradient-to-br from-pink-50 via-white to-purple-50">
-        {/* Sidebar */}
-        <UserSidebar />
-        
-        <div className="flex flex-col min-h-screen">
-          {/* Header - Full width on mobile, accounts for sidebar on desktop */}
-          <header className="bg-gradient-to-r from-white via-pink-50/30 to-white backdrop-blur-md border-b border-pink-100/50 sticky top-0 z-30 shadow-lg shadow-pink-100/20 w-full md:mr-0 md:pr-[var(--sidebar-width)] transition-all duration-300">
-            <div className="px-3 sm:px-4 md:px-8 py-3 sm:py-4 lg:py-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 lg:hidden">
-                  <img src="/lovable-uploads/134a7f12-f652-4af0-b56a-5fef2c8109bb.png" alt="MomAcademy - أكاديمية الأم" className="h-8 sm:h-10 lg:h-12 w-auto drop-shadow-sm" />
-                  <div className="flex-1 min-w-0">
-                    <h1 className="text-base sm:text-lg font-semibold text-slate-800 truncate">ورشات عملية ومكثفة</h1>
-                    <p className="text-xs sm:text-sm text-slate-500 hidden sm:block">ورش تدريبية متخصصة للأمهات</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <SidebarTrigger className="lg:hidden hover:bg-pink-50 rounded-xl p-2.5 transition-colors duration-200" />
-                  <Button variant="ghost" onClick={handleBackToDashboard} className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0 transition-all duration-200 transform hover:scale-[1.02] shadow-md p-2">
-                    <ArrowLeft className="w-4 h-4" />
-                  </Button>
-                </div>
+    <div className="min-h-screen w-full bg-gradient-to-br from-pink-50 via-white to-purple-50">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-white via-pink-50/30 to-white backdrop-blur-md border-b border-pink-100/50 sticky top-0 z-30 shadow-lg shadow-pink-100/20 w-full transition-all duration-300">
+        <div className="px-3 sm:px-4 md:px-8 py-3 sm:py-4 lg:py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img src="/lovable-uploads/134a7f12-f652-4af0-b56a-5fef2c8109bb.png" alt="MomAcademy - أكاديمية الأم" className="h-8 sm:h-10 lg:h-12 w-auto drop-shadow-sm" />
+              <div className="flex-1 min-w-0">
+                <h1 className="text-base sm:text-lg font-semibold text-slate-800 truncate">ورشات عملية ومكثفة</h1>
+                <p className="text-xs sm:text-sm text-slate-500 hidden sm:block">ورش تدريبية متخصصة للأمهات</p>
               </div>
             </div>
-          </header>
+            <div className="flex items-center gap-3">
+              {/* Mobile Menu Button */}
+              {isMobile && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  className="p-2 hover:bg-pink-50 rounded-xl transition-colors duration-200"
+                >
+                  <Menu className="w-5 h-5" />
+                </Button>
+              )}
+              
+              <Button 
+                variant="ghost" 
+                onClick={handleBackToDashboard} 
+                className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0 transition-all duration-200 transform hover:scale-[1.02] shadow-md p-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
 
-          {/* Main Content Area - Properly spaced for desktop sidebar */}
-          <main className="flex-1 w-full md:pr-[var(--sidebar-width)] px-4 md:px-8 py-6 lg:py-8 transition-all duration-200 overflow-x-hidden">
+      {/* Main Layout - Content + Sidebar Side by Side */}
+      <div className="flex h-[calc(100vh-80px)]">
+        {/* Content Area - Left Side */}
+        <main className="flex-1 px-4 md:px-8 py-6 lg:py-8 transition-all duration-200 overflow-x-hidden overflow-y-auto">
             {/* Header Section */}
             <div ref={ref} className={`text-center mb-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               <div className="mb-4">
@@ -247,18 +277,19 @@ const Workshops = () => {
                 </CardContent>
               </Card>
             </div>
-          </main>
+        </main>
 
-          {/* Footer - Full width on mobile, accounts for sidebar on desktop */}
-          <footer className="border-t border-slate-200/60 bg-white/80 backdrop-blur-sm w-full md:pr-[var(--sidebar-width)] transition-all duration-200">
-            <Footer />
-          </footer>
-        </div>
-        
-        {/* Floating WhatsApp */}
-        <EnhancedFloatingWhatsApp />
+        {/* Sidebar - Right Side */}
+        <UserSidebar 
+          onSectionSelect={handleSectionSelect}
+          isOpen={isMobile ? isSidebarOpen : true}
+          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
       </div>
-    </SidebarProvider>
+      
+      {/* Floating WhatsApp */}
+      <EnhancedFloatingWhatsApp />
+    </div>
   );
 };
 

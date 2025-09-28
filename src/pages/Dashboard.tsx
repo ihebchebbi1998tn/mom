@@ -372,9 +372,9 @@ const Dashboard = () => {
       setIsConsultationOpen(true);
     } else if (section === 'reviews') {
       navigate('/reviews');
-    } else if (section === 'workshops') {
-      setCurrentView('workshops');
-    } else if (section === 'specialized-courses') {
+  } else if (section === 'workshops') {
+    navigate('/workshops');
+  } else if (section === 'specialized-courses') {
       navigate('/specialized-courses');
     } else if (section === 'challenges') {
       navigate('/challenges');
