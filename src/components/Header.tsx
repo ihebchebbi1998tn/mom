@@ -1,5 +1,6 @@
+
 import { Button } from "@/components/ui/button";
-import { Menu, X, Instagram, Facebook, UserPlus } from "lucide-react";
+import { Menu, X, Instagram, Facebook, UserCircle } from "lucide-react";
 import { AiOutlineWhatsApp } from "react-icons/ai";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -84,7 +85,7 @@ const Header = () => {
             {/* Logo - Centered on mobile, left on desktop */}
             <div className="flex items-center lg:flex-none lg:flex-initial">
               {/* Mobile User Icon - Left Side */}
-              <UserPlus 
+              <UserCircle 
                 className="lg:hidden text-pink-500 w-6 h-6 cursor-pointer hover:text-pink-600 transition-colors mr-4"
                 onClick={() => navigate('/auth')}
                 aria-label="الحساب"
