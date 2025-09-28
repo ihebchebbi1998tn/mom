@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Star, Clock, Trophy, Users2 } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { getTextAlignmentClasses, getTextDirection, getContainerDirection } from "@/utils/textAlignment";
+import motherChildrenBackground from "@/assets/mother-children-background.png";
 
 const About = () => {
   const { ref: sectionRef, isVisible } = useScrollAnimation();
@@ -77,7 +78,7 @@ const About = () => {
               {/* Main image container */}
               <div className="relative overflow-hidden rounded-3xl shadow-2xl transform transition-all duration-700 group-hover:scale-105">
                 <img 
-                  src="/src/assets/mother-children-background.png" 
+                  src={motherChildrenBackground} 
                   alt="أم مع أطفالها - أكاديمية الأم"
                   className="w-full h-[300px] md:h-[400px] lg:h-[500px] object-cover object-center"
                   loading="lazy"
