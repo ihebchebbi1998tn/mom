@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ShoppingCart, Eye, Clock, Users, Star, ArrowRight, ArrowLeft, CheckCircle, XCircle, AlertCircle, Sparkles, BookOpen, Award, Target } from "lucide-react";
+import { ShoppingCart, Eye, Clock, Users, Star, ArrowRight, ArrowLeft, CheckCircle, XCircle, AlertCircle, Sparkles, BookOpen, Award, Target, FileImage } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ReceiptUpload from "@/components/ReceiptUpload";
 import EnhancedFloatingWhatsApp from "@/components/EnhancedFloatingWhatsApp";
 import motherChildrenHero from "@/assets/mother-children-hero.png";
 
@@ -30,6 +31,8 @@ interface RequestStatus {
   request_date?: string;
   response_date?: string;
   message?: string;
+  request_id?: number;
+  recu_link?: string;
 }
 
 const CoursePacks = () => {
@@ -41,6 +44,8 @@ const CoursePacks = () => {
   const [requestingPurchase, setRequestingPurchase] = useState<{[key: number]: boolean}>({});
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [selectedPackId, setSelectedPackId] = useState<number | null>(null);
+  const [showReceiptUpload, setShowReceiptUpload] = useState<{[key: number]: number}>({});
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   
   // Get current user from localStorage (like in dashboard)
   const getCurrentUser = () => {
@@ -95,6 +100,15 @@ const CoursePacks = () => {
       try {
         const response = await fetch(`https://spadadibattaglia.com/mom/api/check_access.php?user_id=${currentUserId}&pack_id=${pack.id}`);
         const data = await response.json();
+        
+        // If there's a pending request, set up the receipt upload option
+        if (data.request_id && data.status === 'pending') {
+          setShowReceiptUpload(prev => ({
+            ...prev,
+            [pack.id]: data.request_id
+          }));
+        }
+        
         return { packId: pack.id, status: data };
       } catch (error) {
         return { packId: pack.id, status: { has_access: false, status: 'error' } };
@@ -149,10 +163,20 @@ const CoursePacks = () => {
           description: "سيتم مراجعة طلبك والرد عليك قريباً",
         });
         
-        // Update access status
+        // Update access status and show receipt upload
         setAccessStatus(prev => ({
           ...prev,
-          [selectedPackId]: { has_access: false, status: 'pending' }
+          [selectedPackId]: { 
+            has_access: false, 
+            status: 'pending', 
+            request_id: data.data.id 
+          }
+        }));
+        
+        // Show receipt upload option
+        setShowReceiptUpload(prev => ({
+          ...prev,
+          [selectedPackId]: data.data.id
         }));
       } else {
         toast({
@@ -175,6 +199,32 @@ const CoursePacks = () => {
 
   const handleViewPack = (packId: number) => {
     navigate(`/chapter/${packId}`);
+  };
+
+  const handleReceiptUpload = (packId: number) => {
+    setSelectedPackId(packId);
+    setUploadDialogOpen(true);
+  };
+
+  const handleReceiptUploadComplete = (imageUrl: string) => {
+    if (!selectedPackId) return;
+    
+    // Update the access status to include the receipt link
+    setAccessStatus(prev => ({
+      ...prev,
+      [selectedPackId]: {
+        ...prev[selectedPackId],
+        recu_link: imageUrl
+      }
+    }));
+    
+    setUploadDialogOpen(false);
+    setSelectedPackId(null);
+    
+    toast({
+      title: "تم رفع الإيصال بنجاح",
+      description: "شكراً لك، سيتم مراجعة طلبك مع الإيصال قريباً",
+    });
   };
 
   const getStatusIcon = (status: string) => {
@@ -480,6 +530,26 @@ const CoursePacks = () => {
                          status?.status === 'pending' ? 'قيد المراجعة' : 'شراء الباقة الآن'}
                       </Button>
 
+                      {/* Receipt Upload Button - Show for pending requests without receipt */}
+                      {status?.status === 'pending' && !status?.recu_link && showReceiptUpload[pack.id] && (
+                        <Button
+                          onClick={() => handleReceiptUpload(pack.id)}
+                          variant="outline"
+                          className="w-full h-12 border-2 border-yellow-300 text-yellow-700 hover:bg-yellow-50 hover:border-yellow-400 rounded-xl font-semibold transition-all duration-300"
+                        >
+                          <FileImage className="w-5 h-5 ml-2" />
+                          رفع إيصال الدفع
+                        </Button>
+                      )}
+
+                      {/* Receipt Status - Show if receipt was uploaded */}
+                      {status?.status === 'pending' && status?.recu_link && (
+                        <div className="w-full p-3 bg-green-50 border border-green-200 rounded-xl text-center">
+                          <CheckCircle className="w-5 h-5 text-green-600 mx-auto mb-1" />
+                          <span className="text-green-700 font-medium text-sm">تم رفع الإيصال بنجاح</span>
+                        </div>
+                      )}
+
                       {/* View Button */}
                       <Button
                         onClick={() => handleViewPack(pack.id)}
@@ -567,6 +637,26 @@ const CoursePacks = () => {
                 إلغاء
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Receipt Upload Dialog */}
+      <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+        <DialogContent className="max-w-lg mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-right text-slate-900 text-xl font-bold">
+              رفع إيصال الدفع
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4">
+            {selectedPackId && showReceiptUpload[selectedPackId] && (
+              <ReceiptUpload
+                requestId={showReceiptUpload[selectedPackId]}
+                onUploadComplete={handleReceiptUploadComplete}
+              />
+            )}
           </div>
         </DialogContent>
       </Dialog>

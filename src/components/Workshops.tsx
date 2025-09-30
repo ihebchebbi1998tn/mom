@@ -71,9 +71,6 @@ const Workshops = () => {
         }}>
                 {/* Workshop Header */}
                 <div className="mb-4">
-                  <span className="inline-block px-3 py-1 bg-primary-soft text-primary text-sm font-medium rounded-full mb-3">
-                    {workshop.type}
-                  </span>
                   <h3 className={`text-xl font-bold text-foreground mb-2 ${getTextAlignmentClasses(workshop.title)} ${getContainerDirection(workshop.title)}`} dir={getTextDirection(workshop.title)} style={{
               unicodeBidi: 'plaintext'
             }}>

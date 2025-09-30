@@ -44,9 +44,9 @@ const About = () => {
           <div className="order-2 lg:order-1 text-center lg:text-right">
             <div className="relative inline-block mb-8">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6 relative">
-                لماذا{" "}
+                تعرفي على{" "}
                 <span className="text-pink-500 relative">
-                  أكاديمية الأم؟
+                  أكاديمية الأم
                   <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-primary/30 via-secondary/30 to-accent/30 rounded-full"></div>
                 </span>
               </h2>
@@ -54,21 +54,16 @@ const About = () => {
               <div className="absolute -top-4 -right-8 text-primary/40 text-2xl">✨</div>
               <div className="absolute -bottom-4 -left-6 text-secondary/40 text-xl">💖</div>
             </div>
-            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed font-medium mb-8">
-              تطوير مهارات الأمهات مع الحفاظ على التوازن الأسري
-            </p>
-            
-            {/* Feature Sections */}
-            <div className="space-y-4 text-right">
-              {features.map((feature, index) => (
-                <div key={index} className="hidden lg:flex items-center gap-3">
-                  <div className="w-3 h-3 bg-gradient-to-br from-primary to-secondary rounded-full flex-shrink-0"></div>
-                  <div>
-                    <h4 className="font-semibold text-foreground text-sm mb-1">{feature.title}</h4>
-                    <p className="text-xs text-muted-foreground">{feature.description}</p>
-                  </div>
-                </div>
-              ))}
+            <h3 className="text-xl md:text-2xl text-pink-500 font-semibold mb-6">
+              لتساعدك على الإستمتاع بحياتك و أمومتك
+            </h3>
+            <div className="text-right space-y-4 text-lg text-muted-foreground leading-relaxed">
+              <p className="mb-4 text-pink-600 font-medium">
+                شعارنا : أم متوازنة.. بالتالي طفل؛زوج؛أسرة متوازنة
+              </p>
+              <p className="mb-4">
+                أكاديمية الأم هي منصة تدريبية إلكترونية ساعدت ألاف الأمهات للوصول لأفضل نسخة منهم.. ولتربية أطفال مسؤولين.. واثقين.. ناجحين..وخاصة سويين نفسياً ❤️
+              </p>
             </div>
           </div>
 
@@ -79,7 +74,7 @@ const About = () => {
               <div className="relative overflow-hidden rounded-3xl shadow-2xl transform transition-all duration-700 group-hover:scale-105">
                 <img 
                   src={motherChildrenBackground} 
-                  alt="أم مع أطفالها - أكاديمية الأم"
+                  alt="مروى الأمير - مؤسسة أكاديمية الأم"
                   className="w-full h-[300px] md:h-[400px] lg:h-[500px] object-cover object-center"
                   loading="lazy"
                 />

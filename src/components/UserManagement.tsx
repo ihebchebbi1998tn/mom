@@ -201,8 +201,8 @@ const UserManagement = () => {
 
   return (
     <div className="space-y-6" dir="ltr">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-foreground">Liste des Utilisateurs</h2>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground">Liste des Utilisateurs</h2>
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) {
@@ -211,15 +211,14 @@ const UserManagement = () => {
         }}>
           <DialogTrigger asChild>
             <Button 
-              className="btn-hero" 
+              className="btn-hero w-full sm:w-auto" 
               onClick={() => {
                 resetForm();
                 setIsDialogOpen(true);
               }}
             >
               <Plus className="w-4 h-4 ml-2" />
-              <span className="hidden sm:inline">Ajouter un utilisateur</span>
-              <span className="sm:hidden">Ajouter</span>
+              <span>Ajouter</span>
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md" dir="ltr">
@@ -336,40 +335,43 @@ const UserManagement = () => {
           </div>
         ) : (
           users.map((user) => (
-            <Card key={user.id} className="card-elegant p-6">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <Card key={user.id} className="card-elegant p-4 sm:p-6">
+              <div className="flex flex-col gap-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-semibold text-foreground text-lg text-left" dir="ltr">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <h3 className="font-semibold text-foreground text-base sm:text-lg text-left break-words" dir="ltr">
                       {user.name}
                     </h3>
-                    <Badge variant={user.status === "active" ? "default" : "secondary"}>
+                    <Badge variant={user.status === "active" ? "default" : "secondary"} className="text-xs">
                       {user.status === "active" ? "Actif" : "Inactif"}
                     </Badge>
-                    <Badge variant="outline">
-                      {user.role === "admin" ? "Administrateur" : "Membre"}
+                    <Badge variant="outline" className="text-xs">
+                      {user.role === "admin" ? "Admin" : "Membre"}
                     </Badge>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-muted-foreground text-left" dir="ltr">
-                    <div>Email: {user.email}</div>
-                    <div>Téléphone: {user.phone || "Non spécifié"}</div>
-                    <div>Date d'inscription: {formatDate(user.created_at)}</div>
+                  <div className="space-y-1 text-xs sm:text-sm text-muted-foreground text-left" dir="ltr">
+                    <div className="break-words"><span className="font-medium">Email:</span> {user.email}</div>
+                    <div><span className="font-medium">Tél:</span> {user.phone || "Non spécifié"}</div>
+                    <div><span className="font-medium">Inscrit:</span> {formatDate(user.created_at)}</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" variant="outline">
-                    <Eye className="w-4 h-4" />
+                <div className="flex items-center gap-2 pt-2 border-t">
+                  <Button size="sm" variant="outline" className="flex-1">
+                    <Eye className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Voir</span>
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleEdit(user)}>
-                    <Edit className="w-4 h-4" />
+                  <Button size="sm" variant="outline" onClick={() => handleEdit(user)} className="flex-1">
+                    <Edit className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Modifier</span>
                   </Button>
                   <Button 
                     size="sm" 
                     variant="outline" 
-                    className="text-red-500 hover:text-red-600"
+                    className="text-red-500 hover:text-red-600 flex-1"
                     onClick={() => handleDelete(user.id)}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Supprimer</span>
                   </Button>
                 </div>
               </div>

@@ -8,6 +8,7 @@ import {
   FileText, 
   Star 
 } from "lucide-react";
+import oldLogo from "@/assets/maman-attentionnee-logo.png";
 
 interface MobileLandingProps {
   onSectionSelect: (section: string) => void;
@@ -25,6 +26,13 @@ const MobileLanding: React.FC<MobileLandingProps> = ({ onSectionSelect }) => {
       delay: 0
     },
     {
+      id: 'courses',
+      title: 'المواد التدريبية',
+      icon: FileText,
+      description: 'الوصول المباشر للدروس',
+      delay: 50
+    },
+    {
       id: 'workshops',
       title: 'الورشات',
       icon: Calendar,
@@ -36,28 +44,28 @@ const MobileLanding: React.FC<MobileLandingProps> = ({ onSectionSelect }) => {
       title: 'الاستشارات',
       icon: MessageCircle,
       description: 'استشارات شخصية مخصصة',
-      delay: 200
+      delay: 150
     },
     {
       id: 'challenges',
       title: 'التحديات',
       icon: Target,
       description: 'تحديات تطوير الذات',
-      delay: 300
+      delay: 200
     },
     {
       id: 'blogs',
       title: 'المدوَّنات',
       icon: FileText,
       description: 'مقالات ونصائح مفيدة',
-      delay: 400
+      delay: 250
     },
     {
       id: 'reviews',
       title: 'التقييمات',
       icon: Star,
       description: 'آراء وتجارب العملاء',
-      delay: 500
+      delay: 300
     }
   ];
 

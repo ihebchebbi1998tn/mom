@@ -10,6 +10,7 @@ import { UserSidebar } from "@/components/UserSidebar";
 import EnhancedFloatingWhatsApp from "@/components/EnhancedFloatingWhatsApp";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
+import oldLogo from "@/assets/maman-attentionnee-logo.png";
 
 interface BlogPost {
   id: number;

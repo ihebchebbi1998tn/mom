@@ -14,46 +14,71 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
+        $id = $_GET['id'] ?? null;
         $user_id = $_GET['user_id'] ?? null;
-        $pack_id = $_GET['pack_id'] ?? null;
+        $sub_pack_id = $_GET['sub_pack_id'] ?? null;
         $status = $_GET['status'] ?? null;
         
         try {
-            $sql = "SELECT r.*, u.name as user_name, u.email as user_email, u.phone as user_phone, 
-                           p.title as pack_title, p.price as pack_price, r.recu_link
-                    FROM mom_requests r 
-                    JOIN mom_users u ON r.user_id = u.id 
-                    JOIN mom_packs p ON r.pack_id = p.id";
-            
-            $conditions = [];
-            $params = [];
-            
-            if ($user_id) {
-                $conditions[] = "r.user_id = ?";
-                $params[] = $user_id;
+            if ($id) {
+                // Get specific request with details
+                $sql = "SELECT spr.*, u.name as user_name, u.email as user_email, u.phone as user_phone,
+                               sp.title as sub_pack_title, cp.title as pack_title, spr.recu_link
+                        FROM mom_sub_pack_requests spr
+                        LEFT JOIN mom_users u ON spr.user_id = u.id
+                        LEFT JOIN mom_sub_packs sp ON spr.sub_pack_id = sp.id
+                        LEFT JOIN mom_packs cp ON sp.pack_id = cp.id
+                        WHERE spr.id = ?";
+                
+                $stmt = $db->prepare($sql);
+                $stmt->execute([$id]);
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($result) {
+                    echo json_encode(['success' => true, 'data' => $result], JSON_UNESCAPED_UNICODE);
+                } else {
+                    http_response_code(404);
+                    echo json_encode(['success' => false, 'message' => 'Request not found'], JSON_UNESCAPED_UNICODE);
+                }
+            } else {
+                // Get all requests with filters
+                $sql = "SELECT spr.*, u.name as user_name, u.email as user_email, u.phone as user_phone,
+                               sp.title as sub_pack_title, cp.title as pack_title, cp.id as pack_id, spr.recu_link
+                        FROM mom_sub_pack_requests spr
+                        LEFT JOIN mom_users u ON spr.user_id = u.id
+                        LEFT JOIN mom_sub_packs sp ON spr.sub_pack_id = sp.id
+                        LEFT JOIN mom_packs cp ON sp.pack_id = cp.id";
+                
+                $conditions = [];
+                $params = [];
+                
+                if ($user_id) {
+                    $conditions[] = "spr.user_id = ?";
+                    $params[] = $user_id;
+                }
+                
+                if ($sub_pack_id) {
+                    $conditions[] = "spr.sub_pack_id = ?";
+                    $params[] = $sub_pack_id;
+                }
+                
+                if ($status) {
+                    $conditions[] = "spr.status = ?";
+                    $params[] = $status;
+                }
+                
+                if (!empty($conditions)) {
+                    $sql .= " WHERE " . implode(" AND ", $conditions);
+                }
+                
+                $sql .= " ORDER BY spr.created_at DESC";
+                
+                $stmt = $db->prepare($sql);
+                $stmt->execute($params);
+                $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                echo json_encode(['success' => true, 'data' => $requests], JSON_UNESCAPED_UNICODE);
             }
-            
-            if ($pack_id) {
-                $conditions[] = "r.pack_id = ?";
-                $params[] = $pack_id;
-            }
-            
-            if ($status) {
-                $conditions[] = "r.status = ?";
-                $params[] = $status;
-            }
-            
-            if (!empty($conditions)) {
-                $sql .= " WHERE " . implode(" AND ", $conditions);
-            }
-            
-            $sql .= " ORDER BY r.created_at DESC";
-            
-            $stmt = $db->prepare($sql);
-            $stmt->execute($params);
-            $requests = $stmt->fetchAll();
-            
-            echo json_encode(['success' => true, 'data' => $requests], JSON_UNESCAPED_UNICODE);
         } catch (Exception $e) {
             echo json_encode(['success' => false, 'message' => 'Failed to fetch requests: ' . $e->getMessage()], JSON_UNESCAPED_UNICODE);
         }
@@ -112,14 +137,14 @@ switch ($method) {
                 }
                 
                 $params[] = $id; // Add ID for WHERE clause
-                $sql = "UPDATE mom_requests SET " . implode(", ", $updateFields) . " WHERE id = ?";
+                $sql = "UPDATE mom_sub_pack_requests SET " . implode(", ", $updateFields) . " WHERE id = ?";
                 $stmt = $db->prepare($sql);
                 $stmt->execute($params);
 
                 if ($stmt->rowCount() > 0) {
                     echo json_encode(['success' => true, 'message' => 'Request updated successfully'], JSON_UNESCAPED_UNICODE);
                 } else {
-                    echo json_encode(['success' => false, 'message' => 'Request not found'], JSON_UNESCAPED_UNICODE);
+                    echo json_encode(['success' => false, 'message' => 'Request not found or no changes made'], JSON_UNESCAPED_UNICODE);
                 }
             } catch (Exception $e) {
                 echo json_encode(['success' => false, 'message' => 'Failed to update request: ' . $e->getMessage()], JSON_UNESCAPED_UNICODE);
@@ -127,32 +152,45 @@ switch ($method) {
             exit;
         }
         
+        // Regular POST - create new sub-pack request
         $user_id = $input['user_id'] ?? null;
-        $pack_id = $input['pack_id'] ?? null;
+        $sub_pack_id = $input['sub_pack_id'] ?? null;
 
-        if (!$user_id || !$pack_id) {
-            echo json_encode(['success' => false, 'message' => 'User ID and Pack ID are required'], JSON_UNESCAPED_UNICODE);
+        if (!$user_id || !$sub_pack_id) {
+            echo json_encode(['success' => false, 'message' => 'User ID and Sub-Pack ID are required'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
         try {
             // Check if request already exists
-            $stmt = $db->prepare("SELECT id, status FROM mom_requests WHERE user_id = ? AND pack_id = ?");
-            $stmt->execute([$user_id, $pack_id]);
-            $existing = $stmt->fetch();
+            $stmt = $db->prepare("SELECT id, status FROM mom_sub_pack_requests WHERE user_id = ? AND sub_pack_id = ?");
+            $stmt->execute([$user_id, $sub_pack_id]);
+            $existing = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($existing) {
-                echo json_encode([
-                    'success' => false, 
-                    'message' => 'Request already exists',
-                    'existing_status' => $existing['status']
-                ], JSON_UNESCAPED_UNICODE);
+                if ($existing['status'] === 'pending') {
+                    echo json_encode([
+                        'success' => false, 
+                        'message' => 'You already have a pending request for this course'
+                    ], JSON_UNESCAPED_UNICODE);
+                } elseif ($existing['status'] === 'accepted') {
+                    echo json_encode([
+                        'success' => false, 
+                        'message' => 'You already have access to this course'
+                    ], JSON_UNESCAPED_UNICODE);
+                } else {
+                    echo json_encode([
+                        'success' => false, 
+                        'message' => 'Request already exists',
+                        'existing_status' => $existing['status']
+                    ], JSON_UNESCAPED_UNICODE);
+                }
                 exit;
             }
 
             // Create new request
-            $stmt = $db->prepare("INSERT INTO mom_requests (user_id, pack_id, status) VALUES (?, ?, 'pending')");
-            $stmt->execute([$user_id, $pack_id]);
+            $stmt = $db->prepare("INSERT INTO mom_sub_pack_requests (user_id, sub_pack_id, status) VALUES (?, ?, 'pending')");
+            $stmt->execute([$user_id, $sub_pack_id]);
 
             $requestId = $db->lastInsertId();
             
@@ -162,7 +200,7 @@ switch ($method) {
                 'data' => [
                     'id' => $requestId,
                     'user_id' => $user_id,
-                    'pack_id' => $pack_id,
+                    'sub_pack_id' => $sub_pack_id,
                     'status' => 'pending'
                 ]
             ], JSON_UNESCAPED_UNICODE);
@@ -220,14 +258,14 @@ switch ($method) {
             }
             
             $params[] = $id; // Add ID for WHERE clause
-            $sql = "UPDATE mom_requests SET " . implode(", ", $updateFields) . " WHERE id = ?";
+            $sql = "UPDATE mom_sub_pack_requests SET " . implode(", ", $updateFields) . " WHERE id = ?";
             $stmt = $db->prepare($sql);
             $stmt->execute($params);
 
             if ($stmt->rowCount() > 0) {
                 echo json_encode(['success' => true, 'message' => 'Request updated successfully'], JSON_UNESCAPED_UNICODE);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Request not found'], JSON_UNESCAPED_UNICODE);
+                echo json_encode(['success' => false, 'message' => 'Request not found or no changes made'], JSON_UNESCAPED_UNICODE);
             }
         } catch (Exception $e) {
             echo json_encode(['success' => false, 'message' => 'Failed to update request: ' . $e->getMessage()], JSON_UNESCAPED_UNICODE);
@@ -244,7 +282,7 @@ switch ($method) {
         }
 
         try {
-            $stmt = $db->prepare("DELETE FROM mom_requests WHERE id = ?");
+            $stmt = $db->prepare("DELETE FROM mom_sub_pack_requests WHERE id = ?");
             $stmt->execute([$id]);
 
             if ($stmt->rowCount() > 0) {

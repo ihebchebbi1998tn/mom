@@ -9,6 +9,7 @@ import { UserSidebar } from "@/components/UserSidebar";
 import EnhancedFloatingWhatsApp from "@/components/EnhancedFloatingWhatsApp";
 import Footer from "@/components/Footer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import oldLogo from "@/assets/maman-attentionnee-logo.png";
 
 interface Challenge {
   id: number;

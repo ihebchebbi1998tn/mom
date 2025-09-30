@@ -10,8 +10,8 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
-  register: (name: string, email: string, password: string, phone: string) => Promise<{ success: boolean; message?: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; message?: string; field?: string }>;
+  register: (name: string, email: string, password: string, phone: string) => Promise<{ success: boolean; message?: string; field?: string }>;
   logout: () => void;
   loading: boolean;
 }
@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; message?: string }> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; message?: string; field?: string }> => {
     try {
       const response = await fetch('https://spadadibattaglia.com/mom/api/auth.php', {
         method: 'POST',
@@ -78,7 +78,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         return { success: true };
       } else {
-        return { success: false, message: data.message || 'فشل في تسجيل الدخول' };
+        return { 
+          success: false, 
+          message: data.message || 'فشل في تسجيل الدخول',
+          field: data.field 
+        };
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -86,7 +90,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (name: string, email: string, password: string, phone: string): Promise<{ success: boolean; message?: string }> => {
+  const register = async (name: string, email: string, password: string, phone: string): Promise<{ success: boolean; message?: string; field?: string }> => {
     try {
       const response = await fetch('https://spadadibattaglia.com/mom/api/auth.php', {
         method: 'POST',
@@ -117,7 +121,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         return { success: true };
       } else {
-        return { success: false, message: data.message || 'فشل في إنشاء الحساب' };
+        return { 
+          success: false, 
+          message: data.message || 'فشل في إنشاء الحساب',
+          field: data.field 
+        };
       }
     } catch (error) {
       console.error('Register error:', error);

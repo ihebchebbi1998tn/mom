@@ -30,53 +30,218 @@ if ($method === 'POST') {
     $action = $input['action'];
 
     if ($action === 'login') {
-        $email = $input['email'] ?? '';
+        $email = trim($input['email'] ?? '');
         $password = $input['password'] ?? '';
 
-        if (empty($email) || empty($password)) {
-            echo json_encode(['success' => false, 'message' => 'يرجى إدخال البريد الإلكتروني وكلمة المرور']);
+        // Validate email presence
+        if (empty($email)) {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'يرجى إدخال البريد الإلكتروني',
+                'field' => 'email'
+            ]);
+            exit;
+        }
+
+        // Validate password presence
+        if (empty($password)) {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'يرجى إدخال كلمة المرور',
+                'field' => 'password'
+            ]);
+            exit;
+        }
+
+        // Validate email format
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'صيغة البريد الإلكتروني غير صحيحة',
+                'field' => 'email'
+            ]);
             exit;
         }
 
         try {
-            $stmt = $db->prepare("SELECT id, name, email, password, role, status FROM mom_users WHERE email = ? AND status = 'active'");
+            // Check if user exists
+            $stmt = $db->prepare("SELECT id, name, email, password, role, status FROM mom_users WHERE email = ?");
             $stmt->execute([$email]);
             $user = $stmt->fetch();
 
-            if ($user && password_verify($password, $user['password'])) {
-                unset($user['password']);
+            if (!$user) {
                 echo json_encode([
-                    'success' => true,
-                    'message' => 'تم تسجيل الدخول بنجاح',
-                    'user' => $user
+                    'success' => false, 
+                    'message' => 'البريد الإلكتروني غير مسجل. يرجى إنشاء حساب جديد',
+                    'field' => 'email'
                 ]);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'البريد الإلكتروني أو كلمة المرور غير صحيحة']);
+                exit;
             }
+
+            // Check if account is active
+            if ($user['status'] !== 'active') {
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'حسابك غير مفعل. يرجى التواصل مع الإدارة',
+                    'field' => 'status'
+                ]);
+                exit;
+            }
+
+            // Verify password
+            if (!password_verify($password, $user['password'])) {
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'كلمة المرور غير صحيحة. يرجى التحقق من كلمة المرور والمحاولة مرة أخرى',
+                    'field' => 'password'
+                ]);
+                exit;
+            }
+
+            // Successful login
+            unset($user['password']);
+            echo json_encode([
+                'success' => true,
+                'message' => 'تم تسجيل الدخول بنجاح',
+                'user' => $user
+            ]);
         } catch (Exception $e) {
-            echo json_encode(['success' => false, 'message' => 'حدث خطأ في تسجيل الدخول، يرجى المحاولة مرة أخرى']);
+            echo json_encode([
+                'success' => false, 
+                'message' => 'حدث خطأ في تسجيل الدخول، يرجى المحاولة مرة أخرى',
+                'error' => $e->getMessage()
+            ]);
         }
     }
 
     if ($action === 'signup') {
-        $name = $input['name'] ?? '';
-        $email = $input['email'] ?? '';
+        $name = trim($input['name'] ?? '');
+        $email = trim($input['email'] ?? '');
         $password = $input['password'] ?? '';
-        $phone = $input['phone'] ?? null;
+        $phone = trim($input['phone'] ?? '');
 
-        if (empty($name) || empty($email) || empty($password)) {
-            echo json_encode(['success' => false, 'message' => 'يرجى إدخال الاسم والبريد الإلكتروني وكلمة المرور']);
+        // Validate name presence
+        if (empty($name)) {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'يرجى إدخال الاسم الكامل',
+                'field' => 'name'
+            ]);
             exit;
         }
 
+        // Validate name length
+        if (strlen($name) < 2) {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'الاسم يجب أن يكون على الأقل حرفين',
+                'field' => 'name'
+            ]);
+            exit;
+        }
+
+        if (strlen($name) > 100) {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'الاسم طويل جداً (الحد الأقصى 100 حرف)',
+                'field' => 'name'
+            ]);
+            exit;
+        }
+
+        // Validate email presence
+        if (empty($email)) {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'يرجى إدخال البريد الإلكتروني',
+                'field' => 'email'
+            ]);
+            exit;
+        }
+
+        // Validate email format
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            echo json_encode(['success' => false, 'message' => 'صيغة البريد الإلكتروني غير صحيحة']);
+            echo json_encode([
+                'success' => false, 
+                'message' => 'صيغة البريد الإلكتروني غير صحيحة. مثال صحيح: name@example.com',
+                'field' => 'email'
+            ]);
             exit;
         }
 
-        if (strlen($password) < 6) {
-            echo json_encode(['success' => false, 'message' => 'كلمة المرور يجب أن تكون على الأقل 6 أحرف']);
+        // Validate email length
+        if (strlen($email) > 255) {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'البريد الإلكتروني طويل جداً (الحد الأقصى 255 حرف)',
+                'field' => 'email'
+            ]);
             exit;
+        }
+
+        // Validate password presence
+        if (empty($password)) {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'يرجى إدخال كلمة المرور',
+                'field' => 'password'
+            ]);
+            exit;
+        }
+
+        // Validate password length
+        if (strlen($password) < 6) {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'كلمة المرور يجب أن تكون على الأقل 6 أحرف',
+                'field' => 'password'
+            ]);
+            exit;
+        }
+
+        if (strlen($password) > 255) {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'كلمة المرور طويلة جداً (الحد الأقصى 255 حرف)',
+                'field' => 'password'
+            ]);
+            exit;
+        }
+
+        // Validate phone if provided
+        if (!empty($phone)) {
+            // Remove all non-numeric characters for validation
+            $cleanPhone = preg_replace('/[^0-9+]/', '', $phone);
+            
+            // Check minimum length (e.g., +216 12345678 = at least 8 digits after country code)
+            if (strlen($cleanPhone) < 8) {
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'رقم الهاتف قصير جداً. يجب أن يحتوي على 8 أرقام على الأقل',
+                    'field' => 'phone'
+                ]);
+                exit;
+            }
+
+            // Check maximum length
+            if (strlen($cleanPhone) > 20) {
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'رقم الهاتف طويل جداً',
+                    'field' => 'phone'
+                ]);
+                exit;
+            }
+
+            // Validate phone format (must start with + or digit)
+            if (!preg_match('/^[\+]?[0-9]+$/', $cleanPhone)) {
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'صيغة رقم الهاتف غير صحيحة. مثال صحيح: +216 12345678',
+                    'field' => 'phone'
+                ]);
+                exit;
+            }
         }
 
         try {
@@ -84,14 +249,20 @@ if ($method === 'POST') {
             $stmt = $db->prepare("SELECT id FROM mom_users WHERE email = ?");
             $stmt->execute([$email]);
             if ($stmt->fetch()) {
-                echo json_encode(['success' => false, 'message' => 'هذا البريد الإلكتروني مسجل مسبقاً، يرجى استخدام بريد آخر أو تسجيل الدخول']);
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'هذا البريد الإلكتروني مسجل مسبقاً. يرجى استخدام بريد آخر أو تسجيل الدخول',
+                    'field' => 'email'
+                ]);
                 exit;
             }
 
             // Create new user
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $phoneValue = !empty($phone) ? $phone : null;
+            
             $stmt = $db->prepare("INSERT INTO mom_users (name, email, password, phone, role) VALUES (?, ?, ?, ?, 'client')");
-            $stmt->execute([$name, $email, $hashedPassword, $phone]);
+            $stmt->execute([$name, $email, $hashedPassword, $phoneValue]);
 
             $userId = $db->lastInsertId();
             
@@ -99,16 +270,20 @@ if ($method === 'POST') {
                 'success' => true,
                 'message' => 'تم إنشاء الحساب بنجاح! مرحباً بك في أكاديمية الأم',
                 'user' => [
-                    'id' => $userId,
+                    'id' => (string)$userId,
                     'name' => $name,
                     'email' => $email,
-                    'phone' => $phone,
+                    'phone' => $phoneValue,
                     'role' => 'client',
                     'status' => 'active'
                 ]
             ]);
         } catch (Exception $e) {
-            echo json_encode(['success' => false, 'message' => 'حدث خطأ في إنشاء الحساب، يرجى المحاولة مرة أخرى']);
+            echo json_encode([
+                'success' => false, 
+                'message' => 'حدث خطأ في إنشاء الحساب، يرجى المحاولة مرة أخرى',
+                'error' => $e->getMessage()
+            ]);
         }
     }
 }

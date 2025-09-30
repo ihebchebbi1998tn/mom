@@ -34,11 +34,11 @@ const FloatingWhatsApp = () => {
       {/* WhatsApp Button */}
       <button
         onClick={handleWhatsAppClick}
-        className="relative bg-pink-500 hover:bg-pink-600 text-white rounded-full p-4 shadow-[var(--shadow-elegant)] hover:shadow-[var(--shadow-card)] transition-all duration-300 group hover:scale-105"
+        className="relative bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-[var(--shadow-elegant)] hover:shadow-[var(--shadow-card)] transition-all duration-300 group hover:scale-105"
         aria-label="تواصلي معنا عبر واتساب"
       >
         {/* Pulse Animation Ring */}
-        <div className="absolute inset-0 bg-pink-500 rounded-full animate-ping opacity-75"></div>
+        <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-75"></div>
         
         <AiOutlineWhatsApp className="w-7 h-7 relative z-10" />
         

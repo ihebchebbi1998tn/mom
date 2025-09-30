@@ -4,10 +4,11 @@ import About from "@/components/About";
 import Courses from "@/components/Courses";
 import Workshops from "@/components/Workshops";
 import Consultation from "@/components/Consultation";
+import Founder from "@/components/Founder";
 import Testimonials from "@/components/Testimonials";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
-import InstagramDrawer from "@/components/InstagramDrawer";
+
 import LoadingScreen from "@/components/LoadingScreen";
 import useVisitorTracking from "@/hooks/useVisitorTracking";
 import { useState, useEffect } from "react";
@@ -37,11 +38,11 @@ const Index = () => {
         <About />
         <Workshops />
         <Consultation />
+        <Founder />
         <Testimonials />
       </main>
       <Footer />
       <FloatingWhatsApp />
-      <InstagramDrawer />
     </div>
   );
 };

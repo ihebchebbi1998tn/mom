@@ -1,6 +1,7 @@
 import { Instagram, Facebook } from "lucide-react";
 import { AiOutlineWhatsApp } from "react-icons/ai";
 import { FaTiktok } from "react-icons/fa";
+import oldLogo from "@/assets/maman-attentionnee-logo.png";
 
 const Footer = () => {
   return (

@@ -1,6 +1,5 @@
-
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Calendar as CalendarIcon, CheckCircle, ArrowLeft, Clock, Phone, Users, MessageSquare } from "lucide-react";
+import { MessageCircle, Calendar as CalendarIcon, CheckCircle, ArrowLeft, Clock, Phone, Users, MessageSquare, Video, AlertCircle, FileText, MapPin } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -172,22 +171,6 @@ const Consultation = () => {
   return (
     <section id="consultation" className="py-20 section-gradient" ref={sectionRef}>
       <div className="container mx-auto px-4">
-        {/* Back Button */}
-        <div className="mb-8">
-          <Button 
-            variant="ghost" 
-            onClick={() => {
-              // Navigate back to dashboard - assuming this component will be used in a router context
-              if (typeof window !== 'undefined' && window.history) {
-                window.history.back();
-              }
-            }}
-            className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0 transition-all duration-200 transform hover:scale-[1.02] shadow-md"
-          >
-            <ArrowLeft className="w-4 h-4 ml-2" />
-            العودة للقائمة
-          </Button>
-        </div>
         
         {/* Section Header */}
         <div className={`text-center mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -251,7 +234,7 @@ const Consultation = () => {
                              selected={selectedDate}
                              onSelect={setSelectedDate}
                              disabled={isDateDisabled}
-                             className="pointer-events-auto mx-auto bg-card text-card-foreground [&_.rdp-caption]:text-foreground [&_.rdp-head_cell]:text-foreground [&_.rdp-button]:text-foreground [&_.rdp-day]:font-medium"
+                             className="pointer-events-auto mx-auto bg-card text-card-foreground [&_.rdp-caption]:text-foreground [&_.rdp-caption]:text-center [&_.rdp-head_cell]:text-foreground [&_.rdp-button]:text-foreground [&_.rdp-day]:font-medium"
                             dir="ltr"
                             style={{ direction: 'ltr' }}
                             modifiers={{
@@ -301,37 +284,74 @@ const Consultation = () => {
             </div>
           </div>
 
-          {/* Benefits Section */}
+          {/* Benefits Section Removed - Now showing only Guidelines */}
           <div className="space-y-6">
-            <h3 className={`text-2xl font-bold text-foreground mb-8 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>ما تشمله الاستشارة</h3>
-            <div className="space-y-4">
-              <div className={`flex items-start gap-4 p-4 bg-white/50 rounded-lg transition-all duration-1000 hover:scale-105 hover:shadow-lg ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: isVisible ? '600ms' : '0ms' }}>
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <MessageSquare className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-foreground mb-2">استشارة شخصية مخصصة</h4>
-                  <p className="text-muted-foreground text-sm">جلسة فردية مع خبيرة التربية</p>
-                </div>
-              </div>
 
-              <div className={`flex items-start gap-4 p-4 bg-white/50 rounded-lg transition-all duration-1000 hover:scale-105 hover:shadow-lg ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: isVisible ? '750ms' : '0ms' }}>
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-6 h-6 text-primary" />
+            {/* Consultation Guidelines */}
+            <div className="mt-8">
+              <h3 className={`text-xl font-bold text-foreground mb-6 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                شروط وإرشادات الاستشارة
+              </h3>
+              
+              <div className="space-y-3">
+                {/* Country */}
+                <div className={`flex items-start gap-3 p-3 bg-rose-50/50 rounded-lg border border-rose-100 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: isVisible ? '1000ms' : '0ms' }}>
+                  <div className="w-10 h-10 bg-rose-500/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-5 h-5 text-rose-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-foreground">
+                      <span className="font-semibold">استشارة في أي بلد:</span> متاحة لجميع الدول
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-foreground mb-2">45 دقيقة</h4>
-                  <p className="text-muted-foreground text-sm">مناقشة مفصلة وحلول عملية</p>
-                </div>
-              </div>
 
-              <div className={`flex items-start gap-4 p-4 bg-white/50 rounded-lg transition-all duration-1000 hover:scale-105 hover:shadow-lg ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: isVisible ? '900ms' : '0ms' }}>
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Phone className="w-6 h-6 text-primary" />
+                {/* Duration */}
+                <div className={`flex items-start gap-3 p-3 bg-rose-50/50 rounded-lg border border-rose-100 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: isVisible ? '1100ms' : '0ms' }}>
+                  <div className="w-10 h-10 bg-rose-500/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-5 h-5 text-rose-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-foreground">
+                      <span className="font-semibold">المدة:</span> ساعة واحدة كاملة
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-foreground mb-2">متابعة مجانية</h4>
-                  <p className="text-muted-foreground text-sm">متابعة عبر واتساب خلال أسبوع</p>
+
+                {/* Camera Required */}
+                <div className={`flex items-start gap-3 p-3 bg-rose-50/50 rounded-lg border border-rose-100 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: isVisible ? '1200ms' : '0ms' }}>
+                  <div className="w-10 h-10 bg-rose-500/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Video className="w-5 h-5 text-rose-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-foreground">
+                      <span className="font-semibold">الكاميرا:</span> يجب تشغيل الكاميرا مع الأب والأم
+                    </p>
+                  </div>
+                </div>
+
+                {/* No Recording */}
+                <div className={`flex items-start gap-3 p-3 bg-rose-50/50 rounded-lg border border-rose-100 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: isVisible ? '1300ms' : '0ms' }}>
+                  <div className="w-10 h-10 bg-rose-500/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <AlertCircle className="w-5 h-5 text-rose-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-foreground">
+                      <span className="font-semibold">ممنوع التسجيل:</span> لا يسمح بتسجيل الاستشارة
+                    </p>
+                  </div>
+                </div>
+
+                {/* Preparation */}
+                <div className={`flex items-start gap-3 p-3 bg-rose-50/50 rounded-lg border border-rose-100 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: isVisible ? '1400ms' : '0ms' }}>
+                  <div className="w-10 h-10 bg-rose-500/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-5 h-5 text-rose-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-foreground">
+                      <span className="font-semibold">التحضير:</span> من فضلك حضّر ورقة وقلم للحصول على أقصى استفادة
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

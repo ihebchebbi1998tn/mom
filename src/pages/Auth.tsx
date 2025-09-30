@@ -61,7 +61,28 @@ const Auth = () => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     
-    const result = await login(email, password);
+    // Basic client-side validation
+    if (!email || !email.trim()) {
+      toast({
+        title: "خطأ في البيانات",
+        description: "يرجى إدخال البريد الإلكتروني",
+        variant: "destructive"
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    if (!password) {
+      toast({
+        title: "خطأ في البيانات",
+        description: "يرجى إدخال كلمة المرور",
+        variant: "destructive"
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    const result = await login(email.trim(), password);
     
     if (result.success) {
       toast({
@@ -70,9 +91,20 @@ const Auth = () => {
       });
       // Navigation is handled by useEffect
     } else {
+      // Display detailed error message from API
+      const errorMessage = result.message || "تحقق من البيانات المدخلة";
+      const fieldName = (result as any).field;
+      
+      let title = "خطأ في تسجيل الدخول";
+      if (fieldName === 'email') {
+        title = "خطأ في البريد الإلكتروني";
+      } else if (fieldName === 'password') {
+        title = "خطأ في كلمة المرور";
+      }
+      
       toast({
-        title: "خطأ في تسجيل الدخول",
-        description: result.message || "تحقق من البيانات المدخلة",
+        title,
+        description: errorMessage,
         variant: "destructive"
       });
     }
@@ -86,13 +118,13 @@ const Auth = () => {
     setIsLoading(true);
     
     const formData = new FormData(e.target as HTMLFormElement);
-    const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const countryCode = formData.get('countryCode') as string;
-    const phoneNumber = formData.get('phoneNumber') as string;
+    const name = (formData.get('name') as string || '').trim();
+    const email = (formData.get('email') as string || '').trim();
+    const password = formData.get('password') as string || '';
+    const countryCode = formData.get('countryCode') as string || '+216';
+    const phoneNumber = (formData.get('phoneNumber') as string || '').trim();
     
-    // Validate form data
+    // Validate form data with Zod
     try {
       const validatedData = signupSchema.parse({
         name,
@@ -114,17 +146,47 @@ const Auth = () => {
         });
         // Navigation is handled by useEffect
       } else {
+        // Display detailed error message from API
+        const errorMessage = result.message || "حاول مرة أخرى";
+        const fieldName = (result as any).field;
+        
+        let title = "خطأ في إنشاء الحساب";
+        if (fieldName === 'email') {
+          title = "خطأ في البريد الإلكتروني";
+        } else if (fieldName === 'password') {
+          title = "خطأ في كلمة المرور";
+        } else if (fieldName === 'name') {
+          title = "خطأ في الاسم";
+        } else if (fieldName === 'phone') {
+          title = "خطأ في رقم الهاتف";
+        }
+        
         toast({
-          title: "خطأ في إنشاء الحساب",
-          description: result.message || "حاول مرة أخرى",
+          title,
+          description: errorMessage,
           variant: "destructive"
         });
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
         const firstError = error.issues[0];
+        const fieldPath = firstError.path[0];
+        
+        let title = "خطأ في البيانات المدخلة";
+        if (fieldPath === 'email') {
+          title = "خطأ في البريد الإلكتروني";
+        } else if (fieldPath === 'password') {
+          title = "خطأ في كلمة المرور";
+        } else if (fieldPath === 'name') {
+          title = "خطأ في الاسم";
+        } else if (fieldPath === 'phoneNumber') {
+          title = "خطأ في رقم الهاتف";
+        } else if (fieldPath === 'countryCode') {
+          title = "خطأ في رمز البلد";
+        }
+        
         toast({
-          title: "خطأ في البيانات المدخلة",
+          title,
           description: firstError.message,
           variant: "destructive"
         });

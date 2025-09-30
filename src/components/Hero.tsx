@@ -3,7 +3,7 @@ import { ArrowLeft, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useIsMobile } from "@/hooks/use-mobile";
-import heroImage from "@/assets/hero-mother-baby.png";
+import heroImage from "@/assets/hero-mother-daughter-floral.png";
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -48,9 +48,9 @@ const Hero = () => {
               </span>
             </h1>
 
-            <p className="text-lg lg:text-xl text-white mb-6 max-w-lg mx-auto lg:mx-0 text-center lg:text-right leading-relaxed">
-              منصة تعليمية متخصصة تقدم دورات احترافية ونصائح عملية للأمهات لتطوير مهاراتهن في التربية وإدارة الحياة الأسرية
-            </p>
+          <p className="text-lg lg:text-xl text-white mb-6 max-w-lg mx-auto lg:mx-0 text-center lg:text-right leading-relaxed">
+            رحلتُكِ لعيش أمومة ممتعة وتربية طفل متوازن تبدأ من هنا، حيث نقدم لكِ الأدوات والمعرفة لتحقيق التوازن بين احتياجاتك واحتياجات أسرتك
+          </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-6">
@@ -106,7 +106,7 @@ const Hero = () => {
           <img
             src={heroImage}
             alt="أم وطفلها - أكاديمية الأم"
-            className="h-full max-w-[90%] object-cover"
+            className="h-full max-w-[45%] object-cover"
             loading="eager"
             decoding="async"
             fetchPriority="high"
@@ -120,7 +120,6 @@ const Hero = () => {
       {isMobile && (
         <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20">
           <div className="flex flex-col items-center text-white/80">
-            <div className="text-xs mb-2 text-center">اسحب للأسفل</div>
             <ChevronDown className="w-6 h-6 animate-bounce" />
           </div>
         </div>

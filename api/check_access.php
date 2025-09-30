@@ -26,7 +26,7 @@ if (!$user_id || !$pack_id) {
 
 try {
     // Check if user has accepted request for this pack
-    $stmt = $db->prepare("SELECT r.status, r.request_date, r.admin_response_date 
+    $stmt = $db->prepare("SELECT r.id, r.status, r.request_date, r.admin_response_date, r.recu_link
                          FROM mom_requests r 
                          WHERE r.user_id = ? AND r.pack_id = ?");
     $stmt->execute([$user_id, $pack_id]);
@@ -44,15 +44,19 @@ try {
             'success' => true,
             'has_access' => true,
             'status' => 'accepted',
+            'request_id' => $request['id'],
             'request_date' => $request['request_date'],
-            'response_date' => $request['admin_response_date']
+            'response_date' => $request['admin_response_date'],
+            'recu_link' => $request['recu_link']
         ], JSON_UNESCAPED_UNICODE);
     } else {
         echo json_encode([
             'success' => true,
             'has_access' => false,
             'status' => $request['status'],
+            'request_id' => $request['id'],
             'request_date' => $request['request_date'],
+            'recu_link' => $request['recu_link'],
             'message' => $request['status'] === 'pending' ? 'Request is pending approval' : 'Request was rejected'
         ], JSON_UNESCAPED_UNICODE);
     }

@@ -1,8 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X, Instagram, Facebook, UserCircle } from "lucide-react";
+import { Menu, Instagram, Facebook, UserCircle, X } from "lucide-react";
 import { AiOutlineWhatsApp } from "react-icons/ai";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { getTextDirection, getTextAlignmentClasses } from "@/utils/textAlignment";
+import mamanLogo from "@/assets/mamanattention.png";
+import oldLogo from "@/assets/maman-attentionnee-logo.png";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -15,66 +25,119 @@ const Header = () => {
     </svg>
   );
 
+  const openInstagram = () => {
+    window.open('https://instagram.com/maman_attentionnee', '_blank');
+  };
+
+  const openFacebook = () => {
+    window.open('https://facebook.com', '_blank');
+  };
+
+  const openWhatsApp = () => {
+    const message = encodeURIComponent("السلام عليكم، أريد معرفة المزيد عن أكاديمية الأم");
+    window.open(`https://wa.me/21652451892?text=${message}`, '_blank');
+  };
+
   return (
     <>
-      {/* Mobile Social Media Bar */}
-      <div className="lg:hidden bg-gradient-to-r from-white to-pink-50 border-b border-pink-200 py-2">
-        <div className="flex justify-center items-center gap-6 px-4">
-          <a 
-            href="#" 
-            className="text-pink-600 hover:text-pink-700 transition-colors"
-            aria-label="Instagram"
-          >
-            <Instagram className="w-5 h-5" />
-          </a>
-          <a 
-            href="#" 
-            className="text-pink-600 hover:text-pink-700 transition-colors"
-            aria-label="Facebook"
-          >
-            <Facebook className="w-5 h-5" />
-          </a>
-          <a 
-            href="#" 
-            className="text-pink-600 hover:text-pink-700 transition-colors"
-            aria-label="TikTok"
-          >
-            <TikTokIcon />
-          </a>
+      {/* Mobile Branding & Social Media Bar */}
+      <div className="lg:hidden">
+        {/* Branding Bar */}
+        <div className="bg-gradient-to-r from-pink-100 to-rose-100 border-b border-pink-200 py-2">
+          <div className="flex justify-center items-center gap-2 px-4">
+            <img 
+              src={mamanLogo} 
+              alt="أكاديمية الأم" 
+              className="w-6 h-6 object-contain"
+            />
+            <span className="text-xs font-medium text-pink-700">
+              تطبيق من تصميم
+            </span>
+            <span className="text-xs font-bold text-pink-600" dir="ltr">
+              @maman_attentionnee
+            </span>
+          </div>
+        </div>
+        
+        {/* Social Media Icons */}
+        <div className="bg-gradient-to-r from-white to-pink-50 border-b border-pink-200 py-2">
+          <div className="flex justify-center items-center gap-6 px-4">
+            <a 
+              href="#" 
+              className="text-pink-600 hover:text-pink-700 transition-colors"
+              aria-label="Instagram"
+            >
+              <Instagram className="w-5 h-5" />
+            </a>
+            <a 
+              href="#" 
+              className="text-pink-600 hover:text-pink-700 transition-colors"
+              aria-label="Facebook"
+            >
+              <Facebook className="w-5 h-5" />
+            </a>
+            <a 
+              href="#" 
+              className="text-pink-600 hover:text-pink-700 transition-colors"
+              aria-label="TikTok"
+            >
+              <TikTokIcon />
+            </a>
+          </div>
         </div>
       </div>
 
-      {/* Desktop Social Media Bar */}
-      <div className="hidden lg:block bg-gradient-to-r from-pink-50 to-pink-100 border-b border-pink-200 py-3">
-        <div className="flex justify-center items-center gap-8 w-full px-4">
-          <a 
-            href="#" 
-            className="text-pink-600 hover:text-pink-700 transition-colors"
-            aria-label="Instagram"
-          >
-            <Instagram className="w-5 h-5" />
-          </a>
-          <a 
-            href="#" 
-            className="text-pink-600 hover:text-pink-700 transition-colors"
-            aria-label="Facebook"
-          >
-            <Facebook className="w-5 h-5" />
-          </a>
-          <a 
-            href="#" 
-            className="text-pink-600 hover:text-pink-700 transition-colors"
-            aria-label="TikTok"
-          >
-            <TikTokIcon />
-          </a>
-          <a 
-            href="#" 
-            className="text-pink-600 hover:text-pink-700 transition-colors"
-            aria-label="WhatsApp"
-          >
-            <AiOutlineWhatsApp className="w-5 h-5" />
-          </a>
+      {/* Desktop Branding & Social Media Bar */}
+      <div className="hidden lg:block">
+        {/* Branding Bar */}
+        <div className="bg-gradient-to-r from-pink-100 to-rose-100 border-b border-pink-200 py-2">
+          <div className="flex justify-center items-center gap-2 px-4">
+            <img 
+              src={mamanLogo} 
+              alt="أكاديمية الأم" 
+              className="w-7 h-7 object-contain"
+            />
+            <span className="text-xs font-medium text-pink-700">
+              تطبيق من تصميم
+            </span>
+            <span className="text-xs font-bold text-pink-600" dir="ltr">
+              @maman_attentionnee
+            </span>
+          </div>
+        </div>
+        
+        {/* Social Media Icons */}
+        <div className="bg-gradient-to-r from-pink-50 to-pink-100 border-b border-pink-200 py-3">
+          <div className="flex justify-center items-center gap-8 w-full px-4">
+            <a 
+              href="#" 
+              className="text-pink-600 hover:text-pink-700 transition-colors"
+              aria-label="Instagram"
+            >
+              <Instagram className="w-5 h-5" />
+            </a>
+            <a 
+              href="#" 
+              className="text-pink-600 hover:text-pink-700 transition-colors"
+              aria-label="Facebook"
+            >
+              <Facebook className="w-5 h-5" />
+            </a>
+            <a 
+              href="#" 
+              className="text-pink-600 hover:text-pink-700 transition-colors"
+              aria-label="TikTok"
+            >
+              <TikTokIcon />
+            </a>
+            <a 
+              href="#" 
+              className="text-pink-600 hover:text-pink-700 transition-colors"
+              aria-label="WhatsApp"
+            >
+              <AiOutlineWhatsApp className="w-5 h-5" />
+            </a>
+          </div>
         </div>
       </div>
 
@@ -128,14 +191,166 @@ const Header = () => {
 
             {/* CTA Button & Mobile Menu */}
             <div className="flex items-center gap-4 lg:flex-none">
-              {/* Mobile Menu Button - Left */}
-              <button
-                className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors order-first"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                aria-label="القائمة الرئيسية"
-              >
-                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
+              {/* Mobile Menu Sidebar */}
+              <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+                <SheetTrigger asChild>
+                  <button
+                    className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors order-first"
+                    aria-label="القائمة الرئيسية"
+                  >
+                    <Menu className="w-6 h-6" />
+                  </button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[320px] p-0 bg-gradient-to-bl from-pink-50 via-rose-50/95 to-white border-l-2 border-pink-200">
+                  <div className="p-4 h-full flex flex-col">
+                    {/* Logo at Top */}
+                    <div className="flex items-center justify-between mb-4 animate-fade-in">
+                      <div className="w-16 h-16 bg-gradient-to-br from-pink-200 to-rose-200 rounded-xl flex items-center justify-center shadow-md">
+                        <img 
+                          src="/lovable-uploads/134a7f12-f652-4af0-b56a-5fef2c8109bb.png" 
+                          alt="أكاديمية الأم" 
+                          className="w-12 h-12 object-contain"
+                        />
+                      </div>
+                      
+                      {/* Close Button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="hover:bg-pink-100 transition-all duration-300 rounded-lg h-8 w-8"
+                      >
+                        <X className="h-4 w-4 text-pink-600" />
+                      </Button>
+                    </div>
+
+                    {/* Navigation */}
+                    <nav className="flex-1 overflow-y-auto">
+                      <div className="flex flex-col space-y-1">
+                        <a 
+                          href="#home" 
+                          className="text-gray-700 hover:text-pink-600 transition-colors font-medium py-2.5 px-3 rounded-lg hover:bg-pink-50 text-right text-sm"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          الرئيسية
+                        </a>
+                        <a 
+                          href="#about" 
+                          className="text-gray-700 hover:text-pink-600 transition-colors font-medium py-2.5 px-3 rounded-lg hover:bg-pink-50 text-right text-sm"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          عن المنصة
+                        </a>
+                        <a 
+                          href="#courses" 
+                          className="text-gray-700 hover:text-pink-600 transition-colors font-medium py-2.5 px-3 rounded-lg hover:bg-pink-50 text-right text-sm"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          الدورات
+                        </a>
+                        <a 
+                          href="#workshops" 
+                          className="text-gray-700 hover:text-pink-600 transition-colors font-medium py-2.5 px-3 rounded-lg hover:bg-pink-50 text-right text-sm"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          ورشات
+                        </a>
+                        <a 
+                          href="#consultation" 
+                          className="text-gray-700 hover:text-pink-600 transition-colors font-medium py-2.5 px-3 rounded-lg hover:bg-pink-50 text-right text-sm"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          الاستشارات
+                        </a>
+                        <a 
+                          href="#testimonials" 
+                          className="text-gray-700 hover:text-pink-600 transition-colors font-medium py-2.5 px-3 rounded-lg hover:bg-pink-50 text-right text-sm"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          آراء العملاء
+                        </a>
+                        <Button 
+                          className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white rounded-full px-4 py-2 w-full mt-2 shadow-md hover:shadow-lg transition-all duration-300 text-sm"
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                            navigate('/auth');
+                          }}
+                        >
+                          ابدئي رحلتك الآن
+                        </Button>
+                      </div>
+                    </nav>
+
+                    {/* Social Media Icons at Bottom */}
+                    <div className="mt-auto pt-3 border-t border-pink-200">
+                      <p className="text-xs text-gray-600 text-right mb-2 font-medium">
+                        تواصلوا معنا
+                      </p>
+                      <div className="flex justify-center gap-2 mb-3">
+                        <button
+                          onClick={openInstagram}
+                          className="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-400 to-rose-400 flex items-center justify-center text-white shadow-sm hover:shadow-md hover:scale-110 transition-all duration-300"
+                          aria-label="Instagram"
+                        >
+                          <Instagram className="w-4 h-4" />
+                        </button>
+                        
+                        <button
+                          onClick={openFacebook}
+                          className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-sm hover:shadow-md hover:scale-110 transition-all duration-300"
+                          aria-label="Facebook"
+                        >
+                          <Facebook className="w-4 h-4" />
+                        </button>
+                        
+                        <button
+                          onClick={() => window.open('https://tiktok.com', '_blank')}
+                          className="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-white shadow-sm hover:shadow-md hover:scale-110 transition-all duration-300"
+                          aria-label="TikTok"
+                        >
+                          <TikTokIcon />
+                        </button>
+                        
+                        <button
+                          onClick={openWhatsApp}
+                          className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white shadow-sm hover:shadow-md hover:scale-110 transition-all duration-300"
+                          aria-label="WhatsApp"
+                        >
+                          <AiOutlineWhatsApp className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Attribution */}
+                      <div className="pt-2 border-t border-pink-200">
+                        <p className="text-[10px] text-gray-500 leading-tight text-center">
+                          <span 
+                            dir={getTextDirection("تم إنشاء هذا التطبيق بواسطة")}
+                            className={getTextAlignmentClasses("تم إنشاء هذا التطبيق بواسطة")}
+                          >
+                            تم إنشاء هذا التطبيق بواسطة
+                          </span>
+                          <br />
+                          <span className="font-medium text-pink-600">
+                            <span 
+                              dir={getTextDirection("Marwa Lamir")}
+                              className={getTextAlignmentClasses("Marwa Lamir")}
+                            >
+                              Marwa Lamir
+                            </span>
+                            {" "}
+                            <span 
+                              dir={getTextDirection("مروى الأمير")}
+                              className={getTextAlignmentClasses("مروى الأمير")}
+                            >
+                              مروى الأمير
+                            </span>
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
 
               <Button 
                 className="btn-hero rounded-full px-6 py-2 hidden sm:flex"
@@ -145,62 +360,6 @@ const Header = () => {
               </Button>
             </div>
           </div>
-
-          {/* Mobile Navigation */}
-          {isMenuOpen && (
-            <nav className="lg:hidden mt-4 pb-4 border-t border-border pt-4">
-              <div className="flex flex-col space-y-4">
-                <a 
-                  href="#home" 
-                  className="text-foreground hover:text-primary transition-colors font-medium py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  الرئيسية
-                </a>
-                <a 
-                  href="#about" 
-                  className="text-foreground hover:text-primary transition-colors font-medium py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  عن المنصة
-                </a>
-                <a 
-                  href="#courses" 
-                  className="text-foreground hover:text-primary transition-colors font-medium py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  الدورات
-                </a>
-                <a 
-                  href="#workshops" 
-                  className="text-foreground hover:text-primary transition-colors font-medium py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  ورشات
-                </a>
-                <a 
-                  href="#consultation" 
-                  className="text-foreground hover:text-primary transition-colors font-medium py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  الاستشارات
-                </a>
-                <a 
-                  href="#testimonials" 
-                  className="text-foreground hover:text-primary transition-colors font-medium py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  آراء العملاء
-                </a>
-                <Button 
-                  className="btn-hero rounded-full px-6 py-2 w-full sm:hidden"
-                  onClick={() => navigate('/auth')}
-                >
-                  ابدئي رحلتك الآن
-                </Button>
-              </div>
-            </nav>
-          )}
         </div>
       </header>
     </>

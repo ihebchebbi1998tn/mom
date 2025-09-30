@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
+import oldLogo from "@/assets/maman-attentionnee-logo.png";
 
 interface LoadingScreenProps {
   onLoadingComplete: () => void;

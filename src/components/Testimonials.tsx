@@ -8,22 +8,16 @@ import { getTextAlignmentClasses, getTextDirection, getContainerDirection } from
 import EnhancedAudioPlayer from "@/components/EnhancedAudioPlayer";
 const Testimonials = () => {
   const testimonials = [{
-    name: "سارة أحمد",
-    role: "أم لطفلين",
-    quote: "دورات مش عاديا ! حبيت نشكرك برشا",
-    rating: 5,
+    name: "أميرة",
+    package: "باقة الأم المثالية",
     audioUrl: "/audio/testimonial1.mp3"
   }, {
-    name: "فاطمة محمد",
-    role: "أم لثلاثة أطفال",
-    quote: "حبيت نقلك محليك محليك ، عن 6 يام مع بعضنا وإن ندعيلك .. تبدلت إن في روحي وولت عند ثقة في روحي",
-    rating: 5,
+    name: "زينب",
+    package: "برنامج تربية الطفل",
     audioUrl: "/audio/testimonial2.mp3"
   }, {
-    name: "مريم علي",
-    role: "أم عاملة",
-    quote: "تحدي روعا علخر ، لاحظت برشة تغاير .. لاحظت إن و لاحظوا راجلي",
-    rating: 5,
+    name: "خديجة",
+    package: "استشارات الأمومة الشاملة",
     audioUrl: "/audio/testimonial3.mp3"
   }];
   const {
@@ -45,8 +39,8 @@ const Testimonials = () => {
       <div className="container mx-auto px-4">
         <div className={`max-w-4xl mx-auto text-center mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-            آراء{" "}
-            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">الأمهات </span>
+            تعرفي على آراء{" "}
+            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">الأمهات</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             استمعي لتجارب الأمهات اللواتي حققن أهدافهن من خلال أكاديمية الأم
@@ -84,19 +78,16 @@ const Testimonials = () => {
                 <Headphones className="w-8 h-8" />
               </div>
 
-              {/* Testimonial Quote */}
-              <p className={`text-foreground/90 leading-relaxed italic mb-4 flex-grow text-base font-semibold ${getTextAlignmentClasses(testimonial.quote)} ${getContainerDirection(testimonial.quote)}`} dir={getTextDirection(testimonial.quote)} style={{
-              unicodeBidi: 'plaintext'
-            }}>
-                "{testimonial.quote}"
-              </p>
+              {/* Mom Name and Package */}
+              <div className="text-right mb-4 flex-grow">
+                <h3 className="text-xl font-bold text-foreground mb-2">{testimonial.name}</h3>
+                <p className="text-primary font-medium">{testimonial.package}</p>
+              </div>
 
               {/* Enhanced Audio Player */}
               <div className="mb-4">
                 <EnhancedAudioPlayer src={testimonial.audioUrl} />
               </div>
-
-              {/* Author Info */}
               
 
               {/* Decorative Elements */}

@@ -10,6 +10,8 @@ import CustomCalendar from "./CustomCalendar";
 import { AiOutlineWhatsApp } from "react-icons/ai";
 import { getTextAlignmentClasses, getTextDirection, getContainerDirection } from "@/utils/textAlignment";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
+import oldLogo from "@/assets/maman-attentionnee-logo.png";
 
 interface AvailabilityRecord {
   id: number;
@@ -114,6 +116,7 @@ interface UserSidebarProps {
 export function UserSidebar({ onSectionSelect, isOpen = false, onToggle }: UserSidebarProps = {}) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const currentPath = location.pathname;
   const isMobile = useIsMobile();
   
@@ -219,12 +222,11 @@ export function UserSidebar({ onSectionSelect, isOpen = false, onToggle }: UserS
   };
 
   const handleSignOut = () => {
-    // Clear any stored user data
-    localStorage.removeItem('user');
-    localStorage.removeItem('userToken');
+    // Use AuthContext logout to clear all user data
+    logout();
     
-    // Navigate to auth page
-    navigate('/auth');
+    // Navigate to landing page
+    navigate('/');
   };
   const handleBookingClick = () => {
     fetchAvailabilities();

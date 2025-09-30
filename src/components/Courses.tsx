@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { BookOpen, Star, Users, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { BookOpen, Star, Users, ArrowLeft } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CoursePack {
   id: number;
@@ -20,8 +20,12 @@ interface CoursePack {
 
 const Courses = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [coursePacks, setCoursePacks] = useState<CoursePack[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const initialCount = isMobile ? 4 : 6;
+  const loadMoreCount = isMobile ? 4 : 6;
 
   useEffect(() => {
     const fetchCoursePacks = async () => {
@@ -44,21 +48,19 @@ const Courses = () => {
 
 
   const { ref: sectionRef, isVisible } = useScrollAnimation();
-  const isMobile = useIsMobile();
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(initialCount);
   
-  const itemsPerPage = isMobile ? 1 : 3;
-  const maxIndex = Math.max(0, coursePacks.length - itemsPerPage);
+  // Update visible count when screen size changes
+  useEffect(() => {
+    setVisibleCount(initialCount);
+  }, [isMobile]);
   
-  const goToPrevious = () => {
-    setCurrentIndex(prev => prev === 0 ? maxIndex : prev - 1);
+  const visibleCourses = coursePacks.slice(0, visibleCount);
+  const hasMore = visibleCount < coursePacks.length;
+  
+  const loadMore = () => {
+    setVisibleCount(prev => Math.min(prev + loadMoreCount, coursePacks.length));
   };
-  
-  const goToNext = () => {
-    setCurrentIndex(prev => prev >= maxIndex ? 0 : prev + 1);
-  };
-  
-  const visibleCourses = coursePacks.slice(currentIndex, currentIndex + itemsPerPage);
 
   return (
     <section id="courses" className="py-20 section-gradient" ref={sectionRef}>
@@ -81,34 +83,14 @@ const Courses = () => {
           </div>
         )}
 
-        {/* Course Packs Display with Side Navigation */}
+        {/* Course Packs Display */}
         {!loading && coursePacks.length > 0 && (
-        <div className="relative mb-16">
-          {/* Left Arrow */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToPrevious}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 rounded-full p-3 h-12 w-12 bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-          
-          {/* Right Arrow */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 rounded-full p-3 h-12 w-12 bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </Button>
-
+        <div className="mb-16">
           {/* Courses Grid */}
-          <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-3'} gap-6 px-8`}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
             {visibleCourses.map((course, index) => (
               <div 
-                key={currentIndex + index} 
+                key={course.id} 
                 className={`group relative transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
                 style={{ 
                   transitionDelay: isVisible ? `${300 + index * 200}ms` : '0ms' 
@@ -180,12 +162,18 @@ const Courses = () => {
           ))}
           </div>
           
-          {/* Page Indicator */}
-          <div className="flex justify-center mt-6">
-            <span className="text-sm text-muted-foreground bg-white/50 backdrop-blur-sm px-3 py-1 rounded-full">
-              <span dir="ltr">{currentIndex + 1} - {Math.min(currentIndex + itemsPerPage, coursePacks.length)}</span> من <span dir="ltr">{coursePacks.length}</span>
-            </span>
-          </div>
+          {/* Load More Button */}
+          {hasMore && (
+            <div className="flex justify-center mt-8">
+              <Button 
+                onClick={loadMore}
+                size="lg"
+                className="btn-hero"
+              >
+                عرض المزيد من الباقات
+              </Button>
+            </div>
+          )}
         </div>
         )}
 
@@ -197,26 +185,6 @@ const Courses = () => {
           </div>
         )}
 
-        {/* Special Course */}
-        <div className={`max-w-4xl mx-auto transition-all duration-1000 delay-700 ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'}`}>
-          <div className="card-elegant p-8 bg-gradient-to-r from-primary/5 to-primary-light/10">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-foreground mb-4">دورة الذكاء العاطفي</h3>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                تطوير الذكاء العاطفي لفهم وإدارة المشاعر بطريقة صحية
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Button size="lg" className="btn-hero">
-                  احجزي مقعدك الآن
-                  <ArrowLeft className="w-5 h-5 mr-2" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );
