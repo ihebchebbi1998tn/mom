@@ -40,79 +40,29 @@ const BlogDetail = () => {
     navigate('/blogs');
   };
 
-  // Mock data - replace with actual API call
-  const mockBlogPosts: BlogPost[] = [
-    {
-      id: 1,
-      title: "كيفية التعامل مع نوبات غضب الطفل بطريقة إيجابية",
-      excerpt: "نصائح عملية وفعالة للتعامل مع نوبات الغضب عند الأطفال وتحويلها إلى فرص تعليمية",
-      content: `
-# كيفية التعامل مع نوبات غضب الطفل بطريقة إيجابية
-
-نوبات الغضب جزء طبيعي من نمو الطفل، خاصة في المراحل المبكرة. إليك بعض الاستراتيجيات الفعالة:
-
-## 1. فهم أسباب نوبات الغضب
-- الإحباط من عدم القدرة على التعبير
-- التعب والجوع
-- الحاجة إلى الانتباه
-- التغيرات في الروتين
-
-## 2. استراتيجيات التعامل
-### قبل النوبة:
-- راقبي العلامات المبكرة
-- تأكدي من حصول الطفل على الراحة والطعام
-- حافظي على روتين ثابت
-
-### أثناء النوبة:
-- ابقي هادئة ومتماسكة
-- لا تحاولي التفاوض أو الجدال
-- قدمي الحب والدعم دون الاستسلام للمطالب
-
-### بعد النوبة:
-- احتضني طفلك وأظهري الحب
-- تحدثي معه عن مشاعره
-- امدحيه عندما يهدأ
-
-## 3. نصائح إضافية
-- كوني قدوة في إدارة المشاعر
-- علمي طفلك كلمات للتعبير عن مشاعره
-- استخدمي تقنيات التهدئة مثل التنفس العميق
-
-تذكري أن الصبر والثبات هما المفتاح للتعامل الناجح مع نوبات الغضب.
-      `,
-      category: "تربية الأطفال",
-      author: "د. سارة أحمد",
-      published_date: "2024-01-15",
-      read_time: "5 دقائق",
-      views: 1250,
-      likes: 89,
-      featured_image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600&h=300&fit=crop",
-      status: 'published'
-    },
-    {
-      id: 2,
-      title: "أهمية اللعب في تنمية شخصية الطفل",
-      excerpt: "كيف يساهم اللعب في تطوير المهارات الاجتماعية والعقلية والجسدية لدى الأطفال",
-      content: "محتوى المقال الكامل عن أهمية اللعب...",
-      category: "التطوير التربوي",
-      author: "أ. فاطمة محمد",
-      published_date: "2024-01-10",
-      read_time: "7 دقائق",
-      views: 980,
-      likes: 67,
-      featured_image: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600&h=300&fit=crop",
-      status: 'published'
-    }
-  ];
-
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const post = mockBlogPosts.find(p => p.id === parseInt(id || '0'));
-      setBlogPost(post || null);
-      setLoading(false);
-    }, 500);
+    if (id) {
+      fetchBlogPost();
+    }
   }, [id]);
+
+  const fetchBlogPost = async () => {
+    try {
+      const response = await fetch(`https://spadadibattaglia.com/mom/api/blogs.php?id=${id}`);
+      const data = await response.json();
+      
+      if (data.success && data.blog) {
+        setBlogPost(data.blog);
+      } else {
+        setBlogPost(null);
+      }
+    } catch (error) {
+      console.error('Error fetching blog post:', error);
+      setBlogPost(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-GB', {
@@ -191,15 +141,15 @@ const BlogDetail = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen w-full bg-gradient-to-br from-pink-50 via-white to-purple-50">
+      <div className="min-h-screen w-full flex">
         <UserSidebar />
         
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen flex-1 bg-gradient-to-br from-pink-50 via-white to-purple-50">
           {/* Header */}
-          <header className="bg-gradient-to-r from-white via-pink-50/30 to-white backdrop-blur-md border-b border-pink-100/50 sticky top-0 z-30 shadow-lg shadow-pink-100/20 w-full md:mr-0 md:pr-[var(--sidebar-width)] transition-all duration-300">
+          <header className="bg-gradient-to-r from-white via-pink-50/30 to-white backdrop-blur-md border-b border-pink-100/50 sticky top-0 z-30 shadow-lg shadow-pink-100/20 w-full">
             <div className="px-3 sm:px-4 md:px-8 py-3 sm:py-4 lg:py-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 lg:hidden">
+              <div className="flex items-center justify-between max-w-7xl mx-auto">
+                <div className="flex items-center gap-3 lg:flex">
                   <img src="/lovable-uploads/134a7f12-f652-4af0-b56a-5fef2c8109bb.png" alt="MomAcademy - أكاديمية الأم" className="h-8 sm:h-10 lg:h-12 w-auto drop-shadow-sm" />
                   <div className="flex-1 min-w-0">
                     <h1 className="text-base sm:text-lg font-semibold text-slate-800 truncate">المدونات</h1>
@@ -216,7 +166,7 @@ const BlogDetail = () => {
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 w-full md:pr-[var(--sidebar-width)] px-4 md:px-8 py-6 lg:py-8 transition-all duration-200">
+          <main className="flex-1 w-full px-4 md:px-8 py-6 lg:py-8 transition-all duration-200">
             <div className="max-w-4xl mx-auto">
               {/* Article Header */}
               <div className="mb-8">
@@ -288,7 +238,7 @@ const BlogDetail = () => {
           </main>
 
           {/* Footer */}
-          <footer className="border-t border-slate-200/60 bg-white/80 backdrop-blur-sm w-full md:pr-[var(--sidebar-width)] transition-all duration-200">
+          <footer className="border-t border-slate-200/60 bg-white/80 backdrop-blur-sm w-full">
             <Footer />
           </footer>
         </div>

@@ -30,56 +30,7 @@ interface Blog {
 }
 
 const BlogsManagement = () => {
-  const [blogs, setBlogs] = useState<Blog[]>([
-    {
-      id: 1,
-      title: "كيفية بناء الثقة بالنفس لدى الأطفال",
-      excerpt: "نصائح عملية لمساعدة الأطفال على تطوير الثقة بالنفس من خلال الأنشطة اليومية والتشجيع الإيجابي.",
-      content: "تعتبر الثقة بالنفس من أهم المهارات التي يمكن للوالدين تعليمها لأطفالهم. في هذا المقال، سنستكشف طرقاً عملية لبناء الثقة لدى الأطفال...",
-      category: "تربية الأطفال",
-      author: "أكاديمية الأم",
-      published_date: "2024-01-15",
-      read_time: "7 دقائق",
-      views: 245,
-      likes: 32,
-      featured_image: "https://images.unsplash.com/photo-1544717297-fa95b6ee9643?w=500",
-      status: "published" as const,
-      created_at: "2024-01-15T10:00:00Z",
-      updated_at: "2024-01-15T10:00:00Z"
-    },
-    {
-      id: 2,
-      title: "تنظيم الوقت للأمهات العاملات",
-      excerpt: "استراتيجيات فعالة للموازنة بين العمل والحياة الأسرية وإدارة الوقت بكفاءة.",
-      content: "التوازن بين العمل والحياة الأسرية تحدٍ كبير تواجهه الأمهات العاملات. في هذا المقال، نقدم نصائح عملية لتنظيم الوقت...",
-      category: "تنظيم الوقت",
-      author: "أكاديمية الأم",
-      published_date: "2024-01-10",
-      read_time: "5 دقائق",
-      views: 189,
-      likes: 28,
-      featured_image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500",
-      status: "published" as const,
-      created_at: "2024-01-10T14:30:00Z",
-      updated_at: "2024-01-10T14:30:00Z"
-    },
-    {
-      id: 3,
-      title: "التغذية الصحية للأطفال",
-      excerpt: "دليل شامل لتقديم وجبات صحية ومتوازنة للأطفال مع وصفات سهلة ومغذية.",
-      content: "التغذية السليمة أساس نمو الطفل الصحي. في هذا المقال، سنتعرف على أفضل الممارسات في تغذية الأطفال...",
-      category: "التغذية والصحة",
-      author: "أكاديمية الأم",
-      published_date: "2024-01-05",
-      read_time: "8 دقائق",
-      views: 312,
-      likes: 45,
-      featured_image: "https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=500",
-      status: "draft" as const,
-      created_at: "2024-01-05T09:15:00Z",
-      updated_at: "2024-01-05T09:15:00Z"
-    }
-  ]);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
@@ -112,38 +63,30 @@ const BlogsManagement = () => {
     fetchBlogs();
   }, []);
 
-  // Remove the API calls since we're using static data for now
-  // const fetchBlogs = async () => {
-  //   try {
-  //     const response = await fetch('https://spadadibattaglia.com/mom/api/blogs.php?status=all');
-  //     const data = await response.json();
-      
-  //     if (data.success) {
-  //       setBlogs(data.blogs);
-  //     } else {
-  //       toast({
-  //         title: "Erreur",
-  //         description: "Échec du chargement des articles",
-  //         variant: "destructive"
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching blogs:', error);
-  //     toast({
-  //       title: "Erreur",
-  //       description: "Échec de connexion au serveur",
-  //       variant: "destructive"
-  //     });
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const fetchBlogs = async () => {
-    // Simulate loading for static data
-    setTimeout(() => {
+    try {
+      const response = await fetch('https://spadadibattaglia.com/mom/api/blogs.php?status=all');
+      const data = await response.json();
+      
+      if (data.success && data.blogs) {
+        setBlogs(data.blogs);
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Échec du chargement des articles",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching blogs:', error);
+      toast({
+        title: "Erreur",
+        description: "Échec de connexion au serveur",
+        variant: "destructive"
+      });
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -158,41 +101,77 @@ const BlogsManagement = () => {
       return;
     }
 
-    // For static demo, just add to the list
-    const newBlog: Blog = {
-      id: blogs.length + 1,
-      ...formData,
-      views: 0,
-      likes: 0,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-
-    if (editingBlog) {
-      setBlogs(blogs.map(blog => blog.id === editingBlog.id ? { ...newBlog, id: editingBlog.id } : blog));
-      toast({
-        title: "Succès",
-        description: "Article mis à jour avec succès",
+    try {
+      const url = editingBlog 
+        ? `https://spadadibattaglia.com/mom/api/blogs.php?id=${editingBlog.id}`
+        : 'https://spadadibattaglia.com/mom/api/blogs.php';
+      
+      const method = editingBlog ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
       });
-    } else {
-      setBlogs([...blogs, newBlog]);
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast({
+          title: "Succès",
+          description: editingBlog ? "Article mis à jour avec succès" : "Article créé avec succès",
+        });
+        fetchBlogs();
+        setIsDialogOpen(false);
+        resetForm();
+      } else {
+        toast({
+          title: "Erreur",
+          description: data.message || "Une erreur est survenue",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error saving blog:', error);
       toast({
-        title: "Succès",
-        description: "Article créé avec succès",
+        title: "Erreur",
+        description: "Échec de l'enregistrement de l'article",
+        variant: "destructive"
       });
     }
-    
-    setIsDialogOpen(false);
-    resetForm();
   };
 
   const handleDelete = async (id: number) => {
-    // For static demo, just remove from the list
-    setBlogs(blogs.filter(blog => blog.id !== id));
-    toast({
-      title: "Succès",
-      description: "Article supprimé avec succès",
-    });
+    try {
+      const response = await fetch(`https://spadadibattaglia.com/mom/api/blogs.php?id=${id}`, {
+        method: 'DELETE'
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast({
+          title: "Succès",
+          description: "Article supprimé avec succès",
+        });
+        fetchBlogs();
+      } else {
+        toast({
+          title: "Erreur",
+          description: data.message || "Échec de la suppression",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting blog:', error);
+      toast({
+        title: "Erreur",
+        description: "Échec de la suppression de l'article",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleEdit = (blog: Blog) => {

@@ -15,7 +15,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { UserSidebar } from "@/components/UserSidebar";
-import EnhancedFloatingWhatsApp from "@/components/EnhancedFloatingWhatsApp";
+
 import Footer from "@/components/Footer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileLanding from "@/components/MobileLanding";
@@ -1605,8 +1605,6 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Enhanced WhatsApp Widget */}
-      <EnhancedFloatingWhatsApp />
 
       {/* Consultation Booking Dialog */}
       <Dialog open={isConsultationOpen} onOpenChange={setIsConsultationOpen}>

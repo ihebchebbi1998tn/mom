@@ -55,73 +55,24 @@ const Blogs = () => {
     }
   };
 
-  // Mock data for blog posts since we don't have an API endpoint yet
-  const mockBlogPosts: BlogPost[] = [
-    {
-      id: 1,
-      title: "كيفية التعامل مع نوبات غضب الطفل بطريقة إيجابية",
-      excerpt: "نصائح عملية وفعالة للتعامل مع نوبات الغضب عند الأطفال وتحويلها إلى فرص تعليمية",
-      content: "محتوى المقال الكامل...",
-      category: "تربية الأطفال",
-      author: "د. سارة أحمد",
-      published_date: "2024-01-15",
-      read_time: "5 دقائق",
-      views: 1250,
-      likes: 89,
-      featured_image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600&h=300&fit=crop",
-      status: 'published'
-    },
-    {
-      id: 2,
-      title: "أهمية اللعب في تنمية شخصية الطفل",
-      excerpt: "كيف يساهم اللعب في تطوير المهارات الاجتماعية والعقلية والجسدية لدى الأطفال",
-      content: "محتوى المقال الكامل...",
-      category: "التطوير التربوي",
-      author: "أ. فاطمة محمد",
-      published_date: "2024-01-10",
-      read_time: "7 دقائق",
-      views: 980,
-      likes: 67,
-      featured_image: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600&h=300&fit=crop",
-      status: 'published'
-    },
-    {
-      id: 3,
-      title: "إدارة الوقت للأم العاملة: استراتيجيات عملية",
-      excerpt: "كيفية تحقيق التوازن بين العمل والأمومة مع نصائح مجربة من خبراء التنمية البشرية",
-      content: "محتوى المقال الكامل...",
-      category: "تنظيم الوقت",
-      author: "د. نورا حسن",
-      published_date: "2024-01-05",
-      read_time: "8 دقائق",
-      views: 1450,
-      likes: 112,
-      featured_image: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&h=300&fit=crop",
-      status: 'published'
-    },
-    {
-      id: 4,
-      title: "تقوية الثقة بالنفس عند الأطفال",
-      excerpt: "طرق عملية لبناء الثقة بالنفس عند الطفل منذ الصغر ومساعدته على تطوير شخصية قوية",
-      content: "محتوى المقال الكامل...",
-      category: "بناء الشخصية",
-      author: "أ. ليلى عبدالله",
-      published_date: "2024-01-01",
-      read_time: "6 دقائق",
-      views: 876,
-      likes: 54,
-      featured_image: "https://images.unsplash.com/photo-1544717297-fa95b6ee9643?w=600&h=300&fit=crop",
-      status: 'published'
-    }
-  ];
-
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setBlogPosts(mockBlogPosts);
-      setLoading(false);
-    }, 1000);
+    fetchBlogs();
   }, []);
+
+  const fetchBlogs = async () => {
+    try {
+      const response = await fetch('https://spadadibattaglia.com/mom/api/blogs.php?status=published');
+      const data = await response.json();
+      
+      if (data.success && data.blogs) {
+        setBlogPosts(data.blogs);
+      }
+    } catch (error) {
+      console.error('Error fetching blogs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-GB', {

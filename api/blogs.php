@@ -10,6 +10,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once 'config.php';
 
+// Initialize database connection
+$database = new Database();
+$db = $database->getConnection();
+
 $method = $_SERVER['REQUEST_METHOD'];
 
 try {

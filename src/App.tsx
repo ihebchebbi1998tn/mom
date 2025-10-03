@@ -14,6 +14,8 @@ import CoursePacks from "./pages/CoursePacks";
 import CourseViewer from "./pages/CourseViewer";
 import Reviews from "./pages/Reviews";
 import Workshops from "./pages/Workshops";
+import WorkshopViewer from "./pages/WorkshopViewer";
+import ChallengeViewer from "./pages/ChallengeViewer";
 import Challenges from "./pages/Challenges";
 import Blogs from "./pages/Blogs";
 import BlogDetail from "./pages/BlogDetail";
@@ -64,9 +66,19 @@ const App = () => (
                 <Workshops />
               </ProtectedRoute>
             } />
+            <Route path="/workshop/:workshopId" element={
+              <ProtectedRoute>
+                <WorkshopViewer />
+              </ProtectedRoute>
+            } />
             <Route path="/challenges" element={
               <ProtectedRoute>
                 <Challenges />
+              </ProtectedRoute>
+            } />
+            <Route path="/challenge/:challengeId" element={
+              <ProtectedRoute>
+                <ChallengeViewer />
               </ProtectedRoute>
             } />
             <Route path="/blogs" element={

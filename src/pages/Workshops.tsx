@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, ArrowLeft, Clock, MessageSquare, MapPin, Menu } from 'lucide-react';
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Calendar, Users, ArrowLeft, Clock, MessageSquare, MapPin, Menu, CheckCircle, AlertCircle, Loader2, Upload, Eye } from 'lucide-react';
 import { useAuth } from "@/contexts/AuthContext";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useNavigate } from "react-router-dom";
 import { UserSidebar } from "@/components/UserSidebar";
 import EnhancedFloatingWhatsApp from "@/components/EnhancedFloatingWhatsApp";
-import Footer from "@/components/Footer";
 import { getTextAlignmentClasses, getTextDirection, getContainerDirection } from "@/utils/textAlignment";
 import { useIsMobile } from "@/hooks/use-mobile";
-import oldLogo from "@/assets/maman-attentionnee-logo.png";
+import { useToast } from "@/hooks/use-toast";
+import ReceiptUpload from "@/components/ReceiptUpload";
 
 interface Workshop {
   id: number;
@@ -28,14 +30,32 @@ interface Workshop {
   status: 'active' | 'inactive' | 'completed' | 'cancelled';
 }
 
+interface WorkshopRequest {
+  id: string;
+  user_id: string;
+  workshop_id: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  admin_notes?: string;
+  created_at: string;
+  admin_response_date?: string;
+  recu_link?: string;
+}
+
 const Workshops = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
+  const [workshopRequests, setWorkshopRequests] = useState<WorkshopRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showReceiptUpload, setShowReceiptUpload] = useState<{[key: number]: number}>({});
+  const [selectedReceiptUrl, setSelectedReceiptUrl] = useState<string>('');
+  const [isViewReceiptModalOpen, setIsViewReceiptModalOpen] = useState(false);
   const { ref, isVisible } = useScrollAnimation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const currentUserId = user?.id || null;
 
   const handleBackToDashboard = () => {
     navigate('/dashboard');
@@ -92,7 +112,102 @@ const Workshops = () => {
 
   useEffect(() => {
     fetchWorkshops();
-  }, []);
+    if (currentUserId) {
+      fetchWorkshopRequests();
+    }
+  }, [currentUserId]);
+
+  const fetchWorkshopRequests = async () => {
+    if (!currentUserId) return;
+    
+    try {
+      const response = await fetch(`https://spadadibattaglia.com/mom/api/workshop_requests.php?user_id=${currentUserId}`);
+      const data = await response.json();
+      if (data.success) {
+        const requests = data.data || [];
+        setWorkshopRequests(requests);
+        
+        // Map workshop IDs to request IDs for pending requests
+        const uploadMap: {[key: number]: number} = {};
+        requests.forEach((request: any) => {
+          if (request.status === 'pending') {
+            uploadMap[request.workshop_id] = request.id;
+          }
+        });
+        setShowReceiptUpload(uploadMap);
+      }
+    } catch (error) {
+      console.error('Error fetching workshop requests:', error);
+    }
+  };
+
+  const getWorkshopRequestStatus = (workshopId: number) => {
+    const request = workshopRequests.find(req => Number(req.workshop_id) === workshopId);
+    return request?.status || null;
+  };
+
+  const getWorkshopRequest = (workshopId: number) => {
+    return workshopRequests.find(req => Number(req.workshop_id) === workshopId);
+  };
+
+  const handleWorkshopRequest = async (workshopId: number) => {
+    setActionLoading(String(workshopId));
+    try {
+      const uid = Number(currentUserId);
+      const wid = Number(workshopId);
+      
+      if (!uid || !wid) {
+        throw new Error('Invalid user_id or workshop_id');
+      }
+
+      const formData = new FormData();
+      formData.append('user_id', String(uid));
+      formData.append('workshop_id', String(wid));
+
+      const response = await fetch('https://spadadibattaglia.com/mom/api/workshop_requests.php', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const data = await response.json();
+
+      if (data.success) {
+        toast({ title: 'تم إرسال طلب التسجيل', description: 'سيتم مراجعة طلبك من قبل الإدارة قريباً' });
+        
+        // Show receipt upload option
+        setShowReceiptUpload(prev => ({
+          ...prev,
+          [workshopId]: data.data.id
+        }));
+        
+        fetchWorkshopRequests();
+      } else {
+        throw new Error(data.message || 'Failed to create request');
+      }
+    } catch (error: any) {
+      console.error('Workshop request error:', error);
+      toast({
+        title: 'خطأ في الاتصال',
+        description: error?.message || 'تعذر الاتصال بالخادم',
+        variant: 'destructive',
+      });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReceiptUploadComplete = (imageUrl: string) => {
+    fetchWorkshopRequests();
+  };
+
+  const handleViewReceipt = (receiptUrl: string) => {
+    setSelectedReceiptUrl(receiptUrl);
+    setIsViewReceiptModalOpen(true);
+  };
+
+  const handleAccessWorkshop = (workshopId: number) => {
+    navigate(`/workshop/${workshopId}`);
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ar-EG', {
@@ -231,17 +346,92 @@ const Workshops = () => {
                         </div>
                       )}
 
-                      {/* CTA Button */}
-                      <Button 
-                        className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 w-full" 
-                        onClick={() => {
-                          const message = encodeURIComponent(`أريد التسجيل في ${workshop.title}`);
-                          window.open(`https://wa.me/21652451892?text=${message}`, '_blank');
-                        }}
-                      >
-                        احجزي مقعدك الآن
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                      </Button>
+                      {/* Status Badge and Actions */}
+                      {(() => {
+                        const requestStatus = getWorkshopRequestStatus(workshop.id);
+                        const request = getWorkshopRequest(workshop.id);
+                        const hasUploadedReceipt = request && request.recu_link;
+
+                        if (requestStatus === 'accepted') {
+                          return (
+                            <div className="space-y-2">
+                              <Badge className="w-full bg-green-100 text-green-700 hover:bg-green-100 justify-center py-2">
+                                <CheckCircle className="w-4 h-4 ml-2" />
+                                مقبول - يمكنك الوصول للمحتوى
+                              </Badge>
+                              <Button 
+                                className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 w-full"
+                                onClick={() => handleAccessWorkshop(workshop.id)}
+                              >
+                                الدخول إلى الورشة
+                                <ArrowLeft className="w-4 h-4 mr-2" />
+                              </Button>
+                            </div>
+                          );
+                        }
+
+                        if (requestStatus === 'pending') {
+                          return (
+                            <div className="space-y-2">
+                              <Badge className="w-full bg-yellow-100 text-yellow-700 hover:bg-yellow-100 justify-center py-2">
+                                <AlertCircle className="w-4 h-4 ml-2" />
+                                قيد المراجعة
+                              </Badge>
+                              
+                              {/* Receipt Upload Zone - Show directly when no receipt */}
+                              {!hasUploadedReceipt && showReceiptUpload[workshop.id] && (
+                                <ReceiptUpload 
+                                  requestId={showReceiptUpload[workshop.id]}
+                                  onUploadComplete={handleReceiptUploadComplete}
+                                  apiEndpoint="workshop_requests"
+                                />
+                              )}
+                              
+                              {/* View Uploaded Receipt Button */}
+                              {hasUploadedReceipt && (
+                                <Button 
+                                  variant="outline"
+                                  className="w-full"
+                                  onClick={() => handleViewReceipt(request!.recu_link)}
+                                >
+                                  <Eye className="w-4 h-4 ml-2" />
+                                  عرض الإيصال المرفوع
+                                </Button>
+                              )}
+                            </div>
+                          );
+                        }
+
+                        if (requestStatus === 'rejected') {
+                          return (
+                            <Badge className="w-full bg-red-100 text-red-700 hover:bg-red-100 justify-center py-2">
+                              <AlertCircle className="w-4 h-4 ml-2" />
+                              مرفوض - {request?.admin_notes || 'يرجى التواصل مع الإدارة'}
+                            </Badge>
+                          );
+                        }
+
+                        // No request yet
+                        return (
+                          <Button 
+                            className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 w-full"
+                            onClick={() => handleWorkshopRequest(workshop.id)}
+                            disabled={actionLoading === String(workshop.id)}
+                          >
+                            {actionLoading === String(workshop.id) ? (
+                              <>
+                                <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                                جاري الإرسال...
+                              </>
+                            ) : (
+                              <>
+                                اطلبي الورشة الآن
+                                <ArrowLeft className="w-4 h-4 mr-2" />
+                              </>
+                            )}
+                          </Button>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
                 ))}
@@ -290,6 +480,23 @@ const Workshops = () => {
       
       {/* Floating WhatsApp */}
       <EnhancedFloatingWhatsApp />
+
+      {/* View Receipt Modal */}
+      <Dialog open={isViewReceiptModalOpen} onOpenChange={setIsViewReceiptModalOpen}>
+        <DialogContent className="w-[95vw] max-w-2xl mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-right">إيصال الدفع</DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-center p-4">
+            <img 
+              src={selectedReceiptUrl} 
+              alt="Receipt" 
+              className="max-w-full h-auto rounded-lg shadow-lg"
+              style={{ maxHeight: '70vh' }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
