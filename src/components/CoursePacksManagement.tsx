@@ -29,6 +29,8 @@ interface SubPack {
   pack_id: number;
   title: string;
   description?: string;
+  banner_image_url?: string;
+  intro_video_url?: string;
   order_index: number;
   status: string;
 }

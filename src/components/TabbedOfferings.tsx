@@ -28,7 +28,7 @@ interface SubPack {
   video_count: number;
   total_duration: string;
   price: number;
-  image_url: string | null;
+  banner_image_url: string | null;
   status: string;
   order_index: number;
 }
@@ -190,7 +190,6 @@ const TabbedOfferings = () => {
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             loading="lazy"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                         </div>
 
                         {/* Content Section */}
@@ -274,12 +273,11 @@ const TabbedOfferings = () => {
                         {/* Image Section - Less height */}
                         <div className="relative h-48 overflow-hidden">
                           <img 
-                            src={subPack.image_url || "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=200&fit=crop&crop=center"} 
+                            src={subPack.banner_image_url || "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=200&fit=crop&crop=center"} 
                             alt={subPack.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             loading="lazy"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                         </div>
 
                         {/* Content Section */}

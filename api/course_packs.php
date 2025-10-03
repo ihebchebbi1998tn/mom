@@ -30,8 +30,14 @@ switch ($method) {
                 $pack = $stmt->fetch();
                 
                 if ($pack) {
-                    // Get sub packs
-                    $stmt = $db->prepare("SELECT * FROM mom_sub_packs WHERE pack_id = ? ORDER BY order_index ASC");
+                    // Get sub packs through junction table
+                    $stmt = $db->prepare("
+                        SELECT sp.*, l.order_index
+                        FROM mom_sub_packs sp
+                        JOIN mom_pack_sub_pack_links l ON sp.id = l.sub_pack_id
+                        WHERE l.pack_id = ?
+                        ORDER BY l.order_index ASC
+                    ");
                     $stmt->execute([$id]);
                     $pack['sub_packs'] = $stmt->fetchAll();
                     

@@ -194,7 +194,6 @@ const PackDetail = () => {
                     alt={pack.title}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                   
                   {/* Students Count */}
                   <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2">
@@ -312,43 +311,48 @@ const PackDetail = () => {
               {pack.sub_packs && pack.sub_packs.length > 0 && (
                 <div className="space-y-6">
                   <h3 className="text-2xl font-bold text-foreground text-center">الأقسام التفصيلية</h3>
-                  <div className="grid gap-6">
-                    {pack.sub_packs.map((subPack, index) => (
-                      <Card key={subPack.id} className="overflow-hidden hover:shadow-xl transition-shadow">
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {pack.sub_packs.map((subPack) => (
+                      <Card key={subPack.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                         {/* Sub-Pack Banner */}
-                        {subPack.banner_image_url && (
-                          <div className="aspect-[21/9] relative">
+                        <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-primary/10 to-primary-light/5">
+                          {subPack.banner_image_url ? (
                             <img 
                               src={subPack.banner_image_url}
                               alt={subPack.title}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
-                              <h4 className="text-2xl font-bold text-white">{subPack.title}</h4>
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <BookOpen className="w-16 h-16 text-primary/30" />
                             </div>
-                          </div>
-                        )}
-                        
-                        <div className="p-6 space-y-4">
-                          {!subPack.banner_image_url && (
-                            <h4 className="text-xl font-bold text-foreground">{subPack.title}</h4>
                           )}
+                          
+                          {/* Play button overlay for intro video */}
+                          {subPack.intro_video_url && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
+                              <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <PlayCircle className="w-10 h-10 text-primary" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="p-5 space-y-3">
+                          <h4 className="text-lg font-bold text-foreground line-clamp-2 min-h-[3.5rem]">
+                            {subPack.title}
+                          </h4>
                           
                           {subPack.description && (
-                            <p className="text-muted-foreground leading-relaxed">{subPack.description}</p>
+                            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                              {subPack.description}
+                            </p>
                           )}
                           
-                          {/* Sub-Pack Intro Video */}
-                          {subPack.intro_video_url && (
-                            <div className="aspect-video rounded-lg overflow-hidden">
-                              <video 
-                                src={subPack.intro_video_url}
-                                controls
-                                className="w-full h-full object-cover"
-                                poster={subPack.banner_image_url || undefined}
-                              />
-                            </div>
-                          )}
+                          <div className="flex items-center gap-2 text-xs text-primary pt-2">
+                            <CheckCircle className="w-4 h-4" />
+                            <span>مشمول في الباك</span>
+                          </div>
                         </div>
                       </Card>
                     ))}

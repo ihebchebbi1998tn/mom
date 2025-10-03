@@ -435,7 +435,6 @@ const CoursePacks = () => {
                 >
                   {/* Image */}
                   <div className="relative h-56 overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10"></div>
                     <img 
                       src={pack.image_url || 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop&crop=center'} 
                       alt={pack.title}

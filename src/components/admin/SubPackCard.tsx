@@ -10,6 +10,8 @@ interface SubPack {
   pack_id: number;
   title: string;
   description?: string;
+  banner_image_url?: string;
+  intro_video_url?: string;
   order_index: number;
   status: string;
 }
@@ -34,20 +36,18 @@ const SubPackCard = ({ subPack, videoCount, index, onSelect, onEdit, onDelete, i
       onClick={() => onSelect(subPack)}
     >
       <div className="relative h-32 overflow-hidden">
-        {/* Background Image */}
-        {packImage && (
+        {/* Background Image - Use banner_image_url if available, otherwise packImage */}
+        {(subPack.banner_image_url || packImage) ? (
           <>
             <img 
-              src={packImage} 
-              alt="Pack background" 
+              src={subPack.banner_image_url || packImage} 
+              alt={subPack.title} 
               className="absolute inset-0 w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-br from-secondary/80 to-primary/80"></div>
           </>
-        )}
-        
-        {/* Fallback gradient if no image */}
-        {!packImage && (
+        ) : (
+          /* Fallback gradient if no image */
           <div className="absolute inset-0 bg-gradient-to-br from-secondary to-primary"></div>
         )}
         
