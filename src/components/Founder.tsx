@@ -1,6 +1,6 @@
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { Award, Heart, Users, GraduationCap } from "lucide-react";
-import founderImage from "@/assets/hero-mother-daughter-floral.png";
+import founderImage from "@/assets/founder-marwa.png";
 
 const Founder = () => {
   const { ref: sectionRef, isVisible } = useScrollAnimation();
@@ -96,7 +96,7 @@ const Founder = () => {
                     <Users className="w-5 h-5 text-white" />
                   </div>
                   <p className="text-lg text-foreground leading-relaxed flex-1 pt-1">
-                    ساعدت ألاف الأمهات من جميع انحاء العالم للوصول للتوازن النفسي و الأسري و لتربية أطفال سويين نفسياً
+                    ساعدت ألاف الأمهات من جميع انحاء العالم للوصول للتوازن النفسي و&nbsp;الأسري و&nbsp;لتربية أطفال سويين نفسياً
                   </p>
                 </div>
               </div>

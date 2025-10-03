@@ -6,9 +6,10 @@ import { Textarea } from "@/components/ui/textarea";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import EnhancedFloatingWhatsApp from "@/components/EnhancedFloatingWhatsApp";
+import ModernVideoModal from "@/components/ModernVideoModal";
 import { 
   ArrowLeft, 
-  Star, 
+  Star,
   Users, 
   Clock, 
   BookOpen, 
@@ -16,7 +17,8 @@ import {
   Heart,
   MessageSquare,
   Calendar,
-  Award
+  Award,
+  PlayCircle
 } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
@@ -29,7 +31,20 @@ interface CoursePack {
   students: number;
   rating: number;
   image_url: string | null;
+  intro_video_url: string | null;
   description: string;
+  status: string;
+  sub_packs?: SubPack[];
+}
+
+interface SubPack {
+  id: number;
+  pack_id: number;
+  title: string;
+  description: string | null;
+  banner_image_url: string | null;
+  intro_video_url: string | null;
+  order_index: number;
   status: string;
 }
 
@@ -47,6 +62,8 @@ const PackDetail = () => {
   const navigate = useNavigate();
   const [pack, setPack] = useState<CoursePack | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [selectedVideoUrl, setSelectedVideoUrl] = useState<string | null>(null);
   const [newReview, setNewReview] = useState("");
   const [userRating, setUserRating] = useState(0);
   const { ref: sectionRef, isVisible } = useScrollAnimation();
@@ -93,12 +110,11 @@ const PackDetail = () => {
 
   const fetchPackDetails = async () => {
     try {
-      const response = await fetch('https://spadadibattaglia.com/mom/api/course_packs.php');
+      const response = await fetch(`https://spadadibattaglia.com/mom/api/course_packs.php?id=${id}`);
       const data = await response.json();
       
       if (data.success && data.data) {
-        const foundPack = data.data.find((p: CoursePack) => p.id === parseInt(id || ''));
-        setPack(foundPack || null);
+        setPack(data.data);
       }
     } catch (error) {
       console.error('Error fetching pack details:', error);
@@ -180,12 +196,6 @@ const PackDetail = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                   
-                  {/* Rating Badge */}
-                  <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2">
-                    <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                    <span className="font-bold text-foreground" dir="ltr">{pack.rating}</span>
-                  </div>
-                  
                   {/* Students Count */}
                   <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2">
                     <Users className="w-5 h-5 text-primary" />
@@ -193,6 +203,23 @@ const PackDetail = () => {
                     <span className="text-sm text-muted-foreground">طالبة</span>
                   </div>
                 </div>
+                
+                {/* Watch Introduction Button */}
+                {pack.intro_video_url && (
+                  <div className="mt-4">
+                    <Button 
+                      onClick={() => {
+                        setSelectedVideoUrl(pack.intro_video_url);
+                        setIsVideoModalOpen(true);
+                      }}
+                      className="btn-hero w-full"
+                      size="lg"
+                    >
+                      <PlayCircle className="w-5 h-5 ml-2" />
+                      شاهد المقدمة
+                    </Button>
+                  </div>
+                )}
               </div>
 
               {/* Pack Info */}
@@ -239,16 +266,36 @@ const PackDetail = () => {
           </div>
         </section>
 
-        {/* Course Modules */}
+        {/* Pack Intro Video */}
+        {pack.intro_video_url && (
+          <section className="py-12 bg-background">
+            <div className="container mx-auto px-4">
+              <div className="max-w-4xl mx-auto">
+                <h2 className="text-3xl font-bold text-foreground text-center mb-8">فيديو تعريفي بالباك</h2>
+                <div className="aspect-video rounded-2xl overflow-hidden shadow-2xl">
+                  <video 
+                    src={pack.intro_video_url}
+                    controls
+                    className="w-full h-full object-cover"
+                    poster={pack.image_url || undefined}
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Course Modules & Sub-Packs */}
         <section className="py-16">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-foreground text-center mb-12">محتوى الدورة</h2>
+            <h2 className="text-3xl font-bold text-foreground text-center mb-12">محتوى الباك</h2>
             
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto space-y-8">
+              {/* Modules Overview */}
               <Card className="p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <BookOpen className="w-6 h-6 text-primary" />
-                  <h3 className="text-xl font-bold text-foreground">المواضيع المشمولة</h3>
+                  <h3 className="text-xl font-bold text-foreground">الدورات المشمولة</h3>
                 </div>
                 
                 <div className="grid gap-4">
@@ -260,68 +307,54 @@ const PackDetail = () => {
                   ))}
                 </div>
               </Card>
-            </div>
-          </div>
-        </section>
 
-        {/* Reviews Section */}
-        <section className="py-16 bg-gradient-to-br from-primary/5 to-primary-light/10">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold text-foreground text-center mb-12">آراء المشاركات</h2>
-              
-              {/* Reviews Grid */}
-              <div className="grid md:grid-cols-2 gap-6 mb-12">
-                {staticReviews.map((review, index) => (
-                  <Card key={review.id} className={`p-6 transition-all duration-1000 hover:shadow-lg ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-                    style={{ transitionDelay: `${index * 150}ms` }}>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-semibold text-foreground">{review.name}</h4>
-                        <span className="text-sm text-muted-foreground" dir="ltr">{review.date}</span>
-                      </div>
-                      <div>
-                        {renderStars(review.rating)}
-                      </div>
-                      <p className="text-muted-foreground leading-relaxed">{review.comment}</p>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-
-              {/* Add Review Form */}
-              <Card className="p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <MessageSquare className="w-6 h-6 text-primary" />
-                  <h3 className="text-xl font-bold text-foreground">شاركي تجربتك</h3>
-                </div>
-                
+              {/* Sub-Packs Section */}
+              {pack.sub_packs && pack.sub_packs.length > 0 && (
                 <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">تقييمك للدورة</label>
-                    {renderStars(userRating, true, setUserRating)}
+                  <h3 className="text-2xl font-bold text-foreground text-center">الأقسام التفصيلية</h3>
+                  <div className="grid gap-6">
+                    {pack.sub_packs.map((subPack, index) => (
+                      <Card key={subPack.id} className="overflow-hidden hover:shadow-xl transition-shadow">
+                        {/* Sub-Pack Banner */}
+                        {subPack.banner_image_url && (
+                          <div className="aspect-[21/9] relative">
+                            <img 
+                              src={subPack.banner_image_url}
+                              alt={subPack.title}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+                              <h4 className="text-2xl font-bold text-white">{subPack.title}</h4>
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="p-6 space-y-4">
+                          {!subPack.banner_image_url && (
+                            <h4 className="text-xl font-bold text-foreground">{subPack.title}</h4>
+                          )}
+                          
+                          {subPack.description && (
+                            <p className="text-muted-foreground leading-relaxed">{subPack.description}</p>
+                          )}
+                          
+                          {/* Sub-Pack Intro Video */}
+                          {subPack.intro_video_url && (
+                            <div className="aspect-video rounded-lg overflow-hidden">
+                              <video 
+                                src={subPack.intro_video_url}
+                                controls
+                                className="w-full h-full object-cover"
+                                poster={subPack.banner_image_url || undefined}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </Card>
+                    ))}
                   </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">تعليقك</label>
-                    <Textarea 
-                      placeholder="شاركينا رأيك في الدورة وكيف استفدت منها..."
-                      value={newReview}
-                      onChange={(e) => setNewReview(e.target.value)}
-                      className="min-h-[100px] resize-none"
-                    />
-                  </div>
-                  
-                  <Button 
-                    onClick={handleSubmitReview}
-                    disabled={!newReview.trim() || userRating === 0}
-                    className="btn-hero"
-                  >
-                    <Heart className="w-4 h-4 ml-2" />
-                    إرسال التقييم
-                  </Button>
                 </div>
-              </Card>
+              )}
             </div>
           </div>
         </section>
@@ -329,6 +362,19 @@ const PackDetail = () => {
 
       <Footer />
       <EnhancedFloatingWhatsApp />
+      
+      {/* Video Modal */}
+      {selectedVideoUrl && (
+        <ModernVideoModal
+          isOpen={isVideoModalOpen}
+          onClose={() => {
+            setIsVideoModalOpen(false);
+            setSelectedVideoUrl(null);
+          }}
+          videoUrl={selectedVideoUrl}
+          title={pack?.title || "مقدمة الدورة"}
+        />
+      )}
     </div>
   );
 };

@@ -43,7 +43,7 @@ const About = () => {
           {/* Content Side */}
           <div className="order-2 lg:order-1 text-center lg:text-right">
             <div className="relative inline-block mb-8">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6 relative">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-6 relative">
                 تعرفي على{" "}
                 <span className="text-pink-500 relative">
                   أكاديمية الأم
@@ -54,12 +54,12 @@ const About = () => {
               <div className="absolute -top-4 -right-8 text-primary/40 text-2xl">✨</div>
               <div className="absolute -bottom-4 -left-6 text-secondary/40 text-xl">💖</div>
             </div>
-            <h3 className="text-xl md:text-2xl text-pink-500 font-semibold mb-6">
-              لتساعدك على الإستمتاع بحياتك و أمومتك
+            <h3 className="text-xl md:text-2xl text-pink-500 font-semibold mb-6 text-right" style={{ wordSpacing: 'normal', whiteSpace: 'normal' }}>
+              نساعدك على الإستمتاع بحياتك&nbsp;و&nbsp;أمومتك
             </h3>
             <div className="text-right space-y-4 text-lg text-muted-foreground leading-relaxed">
               <p className="mb-4 text-pink-600 font-medium">
-                شعارنا : أم متوازنة.. بالتالي طفل؛زوج؛أسرة متوازنة
+                هدفنا:"أسرة متوازنة.. طفل متوازن"
               </p>
               <p className="mb-4">
                 أكاديمية الأم هي منصة تدريبية إلكترونية ساعدت ألاف الأمهات للوصول لأفضل نسخة منهم.. ولتربية أطفال مسؤولين.. واثقين.. ناجحين..وخاصة سويين نفسياً ❤️

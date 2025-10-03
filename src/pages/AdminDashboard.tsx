@@ -165,23 +165,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-accent admin-dashboard" dir="ltr">
-      {/* Branding Bar */}
-      <div className="bg-gradient-to-r from-pink-100 to-rose-100 border-b border-pink-200 py-2 sticky top-0 z-50">
-        <div className="flex justify-center items-center gap-2 px-4">
-          <img 
-            src="/lovable-uploads/134a7f12-f652-4af0-b56a-5fef2c8109bb.png" 
-            alt="أكاديمية الأم" 
-            className="w-6 h-6 object-contain"
-          />
-          <span className="text-xs font-medium text-pink-700">
-            تطبيق من تصميم
-          </span>
-          <span className="text-xs font-bold text-pink-600" dir="ltr">
-            @maman_attentionnee
-          </span>
-        </div>
-      </div>
-
       {/* Header */}
       <div className="bg-white/95 backdrop-blur-md border-b border-border sticky top-0 z-40 shadow-sm">
         <div className="container mx-auto px-4 py-4">

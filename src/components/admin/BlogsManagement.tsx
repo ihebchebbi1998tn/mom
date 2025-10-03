@@ -1,16 +1,22 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { PlusCircle, Edit, Trash2, Eye, Heart, Calendar, FileText, Image, Save, X, Upload } from "lucide-react";
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle, 
+  AlertDialogTrigger 
+} from "@/components/ui/alert-dialog";
+import { PlusCircle, Edit, Trash2, Eye, Heart, Calendar, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import ImageUpload from "@/components/ImageUpload";
+import { getTextDirection, getTextAlignmentClasses } from "@/utils/textAlignment";
 
 interface Blog {
   id: number;
@@ -30,34 +36,10 @@ interface Blog {
 }
 
 const BlogsManagement = () => {
+  const navigate = useNavigate();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
   const { toast } = useToast();
-
-  const [formData, setFormData] = useState({
-    title: '',
-    excerpt: '',
-    content: '',
-    category: '',
-    author: 'أكاديمية الأم',
-    published_date: new Date().toISOString().split('T')[0],
-    read_time: '5 دقائق',
-    featured_image: '',
-    status: 'draft' as 'published' | 'draft'
-  });
-
-  const categories = [
-    'تربية الأطفال',
-    'التطوير التربوي', 
-    'تنظيم الوقت',
-    'بناء الشخصية',
-    'الصحة النفسية',
-    'التغذية والصحة',
-    'الأنشطة التعليمية',
-    'العلاقات الأسرية'
-  ];
 
   useEffect(() => {
     fetchBlogs();
@@ -86,60 +68,6 @@ const BlogsManagement = () => {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.title || !formData.excerpt || !formData.content || !formData.category) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs requis",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      const url = editingBlog 
-        ? `https://spadadibattaglia.com/mom/api/blogs.php?id=${editingBlog.id}`
-        : 'https://spadadibattaglia.com/mom/api/blogs.php';
-      
-      const method = editingBlog ? 'PUT' : 'POST';
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        toast({
-          title: "Succès",
-          description: editingBlog ? "Article mis à jour avec succès" : "Article créé avec succès",
-        });
-        fetchBlogs();
-        setIsDialogOpen(false);
-        resetForm();
-      } else {
-        toast({
-          title: "Erreur",
-          description: data.message || "Une erreur est survenue",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Error saving blog:', error);
-      toast({
-        title: "Erreur",
-        description: "Échec de l'enregistrement de l'article",
-        variant: "destructive"
-      });
     }
   };
 
@@ -174,37 +102,6 @@ const BlogsManagement = () => {
     }
   };
 
-  const handleEdit = (blog: Blog) => {
-    setEditingBlog(blog);
-    setFormData({
-      title: blog.title,
-      excerpt: blog.excerpt,
-      content: blog.content,
-      category: blog.category,
-      author: blog.author,
-      published_date: blog.published_date,
-      read_time: blog.read_time,
-      featured_image: blog.featured_image || '',
-      status: blog.status
-    });
-    setIsDialogOpen(true);
-  };
-
-  const resetForm = () => {
-    setEditingBlog(null);
-    setFormData({
-      title: '',
-      excerpt: '',
-      content: '',
-      category: '',
-      author: 'أكاديمية الأم',
-      published_date: new Date().toISOString().split('T')[0],
-      read_time: '5 دقائق',
-      featured_image: '',
-      status: 'draft'
-    });
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-GB', {
       year: 'numeric',
@@ -213,20 +110,10 @@ const BlogsManagement = () => {
     });
   };
 
-  const getTextDirection = (text: string) => {
-    // Check if text contains Arabic characters
-    const arabicRegex = /[\u0600-\u06FF\u0750-\u077F]/;
-    return arabicRegex.test(text) ? 'rtl' : 'ltr';
-  };
-
-  const getTextAlignment = (text: string) => {
-    return getTextDirection(text) === 'rtl' ? 'text-right' : 'text-left';
-  };
-
   const getStatusBadge = (status: string) => {
     return status === 'published' 
-      ? <Badge className="bg-green-500">Publié</Badge>
-      : <Badge variant="secondary">Brouillon</Badge>;
+      ? <Badge className="bg-green-500" dir="ltr">Publié</Badge>
+      : <Badge variant="secondary" dir="ltr">Brouillon</Badge>;
   };
 
   const getCategoryColor = (category: string) => {
@@ -254,158 +141,15 @@ const BlogsManagement = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
+        <div dir="ltr" className="text-left">
           <h2 className="text-2xl font-bold">Gestion des Articles</h2>
           <p className="text-muted-foreground">Créer et modifier les articles et blogs</p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <PlusCircle className="w-4 h-4 mr-2" />
-              Ajouter un Nouvel Article
-            </Button>
-          </DialogTrigger>
-          
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="ltr">
-            <DialogHeader>
-              <DialogTitle>
-                {editingBlog ? 'Modifier l\'Article' : 'Ajouter un Nouvel Article'}
-              </DialogTitle>
-            </DialogHeader>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Titre de l'Article *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    placeholder="أدخل عنوان المقال"
-                    required
-                    dir="auto"
-                    className="text-right"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="category">Catégorie *</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر التصنيف" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="excerpt">Résumé *</Label>
-                <Textarea
-                  id="excerpt"
-                  value={formData.excerpt}
-                  onChange={(e) => setFormData({...formData, excerpt: e.target.value})}
-                  placeholder="ملخص مختصر للمقال"
-                  rows={2}
-                  required
-                  dir="auto"
-                  className="text-right"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="content">Contenu de l'Article *</Label>
-                <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => setFormData({...formData, content: e.target.value})}
-                  placeholder="محتوى المقال الكامل (يمكن استخدام Markdown)"
-                  rows={10}
-                  required
-                  dir="auto"
-                  className="text-right"
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="author">Auteur</Label>
-                  <Input
-                    id="author"
-                    value={formData.author}
-                    onChange={(e) => setFormData({...formData, author: e.target.value})}
-                    placeholder="اسم الكاتب"
-                    dir="auto"
-                    className="text-right"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="published_date">Date de Publication</Label>
-                  <Input
-                    id="published_date"
-                    type="date"
-                    value={formData.published_date}
-                    onChange={(e) => setFormData({...formData, published_date: e.target.value})}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="read_time">Temps de Lecture</Label>
-                  <Input
-                    id="read_time"
-                    value={formData.read_time}
-                    onChange={(e) => setFormData({...formData, read_time: e.target.value})}
-                    placeholder="5 دقائق"
-                    dir="auto"
-                    className="text-right"
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="featured_image">Image de l'Article</Label>
-                  <ImageUpload
-                    onUploadComplete={(url) => setFormData({...formData, featured_image: url})}
-                    currentImage={formData.featured_image}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="status">Statut de Publication</Label>
-                  <Select value={formData.status} onValueChange={(value: 'published' | 'draft') => setFormData({...formData, status: value})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Brouillon</SelectItem>
-                      <SelectItem value="published">Publié</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  <X className="w-4 h-4 mr-2" />
-                  Annuler
-                </Button>
-                <Button type="submit">
-                  <Save className="w-4 h-4 mr-2" />
-                  {editingBlog ? 'Mettre à Jour' : 'Créer l\'Article'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={() => navigate('/admin/blog/new')} dir="ltr">
+          <PlusCircle className="w-4 h-4 mr-2" />
+          <span className="text-left">Ajouter un Nouvel Article</span>
+        </Button>
       </div>
 
       {/* Blogs List */}
@@ -414,8 +158,8 @@ const BlogsManagement = () => {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-8">
               <FileText className="w-16 h-16 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Aucun Article</h3>
-              <p className="text-muted-foreground text-center mb-4">
+              <h3 className="text-lg font-semibold mb-2 text-left" dir="ltr">Aucun Article</h3>
+              <p className="text-muted-foreground text-center mb-4 text-left" dir="ltr">
                 Aucun article n'a été créé pour le moment. Commencez par ajouter un nouvel article.
               </p>
             </CardContent>
@@ -426,10 +170,12 @@ const BlogsManagement = () => {
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 space-y-3">
-                    <div className="flex items-center gap-3 flex-wrap">
+                    <div 
+                      className="flex items-center gap-3 flex-wrap"
+                      dir={getTextDirection(blog.title)}
+                    >
                       <h3 
-                        className={`text-lg font-semibold ${getTextAlignment(blog.title)}`}
-                        dir={getTextDirection(blog.title)}
+                        className={`text-lg font-semibold ${getTextAlignmentClasses(blog.title)}`}
                       >
                         {blog.title}
                       </h3>
@@ -440,7 +186,7 @@ const BlogsManagement = () => {
                     </div>
                     
                     <p 
-                      className={`text-muted-foreground text-sm line-clamp-2 ${getTextAlignment(blog.excerpt)}`}
+                      className={`text-muted-foreground text-sm line-clamp-2 ${getTextAlignmentClasses(blog.excerpt)}`}
                       dir={getTextDirection(blog.excerpt)}
                     >
                       {blog.excerpt}
@@ -463,7 +209,7 @@ const BlogsManagement = () => {
                         <FileText className="w-4 h-4" />
                         <span 
                           dir={getTextDirection(blog.read_time)}
-                          className={getTextAlignment(blog.read_time)}
+                          className={getTextAlignmentClasses(blog.read_time)}
                         >
                           {blog.read_time}
                         </span>
@@ -471,7 +217,7 @@ const BlogsManagement = () => {
                     </div>
                     
                     <div 
-                      className={`text-xs text-muted-foreground ${getTextAlignment(`بواسطة: ${blog.author}`)}`}
+                      className={`text-xs text-muted-foreground ${getTextAlignmentClasses(`بواسطة: ${blog.author}`)}`}
                       dir={getTextDirection(`بواسطة: ${blog.author}`)}
                     >
                       بواسطة: {blog.author}
@@ -482,10 +228,11 @@ const BlogsManagement = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleEdit(blog)}
+                      onClick={() => navigate(`/admin/blog/edit/${blog.id}`)}
+                      dir="ltr"
                     >
                       <Edit className="w-4 h-4 mr-1" />
-                      Modifier
+                      <span className="text-left">Modifier</span>
                     </Button>
                     
                     <AlertDialog>
@@ -496,16 +243,17 @@ const BlogsManagement = () => {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Supprimer l'Article</AlertDialogTitle>
-                          <AlertDialogDescription>
+                          <AlertDialogTitle className="text-left" dir="ltr">Supprimer l'Article</AlertDialogTitle>
+                          <AlertDialogDescription className="text-left" dir="ltr">
                             Êtes-vous sûr de vouloir supprimer cet article? Cette action ne peut pas être annulée.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Annuler</AlertDialogCancel>
+                          <AlertDialogCancel dir="ltr">Annuler</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleDelete(blog.id)}
                             className="bg-red-600 hover:bg-red-700"
+                            dir="ltr"
                           >
                             Supprimer
                           </AlertDialogAction>

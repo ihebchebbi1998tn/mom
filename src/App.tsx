@@ -19,7 +19,9 @@ import ChallengeViewer from "./pages/ChallengeViewer";
 import Challenges from "./pages/Challenges";
 import Blogs from "./pages/Blogs";
 import BlogDetail from "./pages/BlogDetail";
+import BlogEditor from "./pages/BlogEditor";
 import PackDetail from "./pages/PackDetail";
+import CourseDetail from "./pages/CourseDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +58,7 @@ const App = () => (
                 <CourseViewer />
               </ProtectedRoute>
             } />
+            <Route path="/course/:packageId" element={<CourseDetail />} />
             <Route path="/reviews" element={
               <ProtectedRoute>
                 <Reviews />
@@ -91,6 +94,8 @@ const App = () => (
                 <BlogDetail />
               </ProtectedRoute>
             } />
+            <Route path="/admin/blog/new" element={<BlogEditor />} />
+            <Route path="/admin/blog/edit/:id" element={<BlogEditor />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -110,11 +110,13 @@ function createSubPack($db) {
     }
     
     try {
-        $stmt = $db->prepare("INSERT INTO mom_sub_packs (pack_id, title, description, order_index, status) VALUES (?, ?, ?, ?, ?)");
+        $stmt = $db->prepare("INSERT INTO mom_sub_packs (pack_id, title, description, banner_image_url, intro_video_url, order_index, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $input['pack_id'],
             $input['title'],
             $input['description'] ?? null,
+            $input['banner_image_url'] ?? null,
+            $input['intro_video_url'] ?? null,
             $input['order_index'] ?? 0,
             $input['status'] ?? 'active'
         ]);
@@ -150,6 +152,14 @@ function updateSubPack($db) {
         if (isset($input['description'])) {
             $fields[] = "description = ?";
             $values[] = $input['description'];
+        }
+        if (isset($input['banner_image_url'])) {
+            $fields[] = "banner_image_url = ?";
+            $values[] = $input['banner_image_url'];
+        }
+        if (isset($input['intro_video_url'])) {
+            $fields[] = "intro_video_url = ?";
+            $values[] = $input['intro_video_url'];
         }
         if (isset($input['order_index'])) {
             $fields[] = "order_index = ?";

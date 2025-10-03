@@ -61,6 +61,7 @@ switch ($method) {
         $students = $input['students'] ?? '0+';
         $rating = $input['rating'] ?? 5.0;
         $image_url = $input['image_url'] ?? null;
+        $intro_video_url = $input['intro_video_url'] ?? null;
         $description = $input['description'] ?? '';
         $status = $input['status'] ?? 'active';
 
@@ -75,8 +76,8 @@ switch ($method) {
                 $modules = implode(',', $modules);
             }
             
-            $stmt = $db->prepare("INSERT INTO mom_packs (title, modules, price, duration, students, rating, image_url, description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$title, $modules, $price, $duration, $students, $rating, $image_url, $description, $status]);
+            $stmt = $db->prepare("INSERT INTO mom_packs (title, modules, price, duration, students, rating, image_url, intro_video_url, description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$title, $modules, $price, $duration, $students, $rating, $image_url, $intro_video_url, $description, $status]);
 
             $packId = $db->lastInsertId();
             
@@ -92,6 +93,7 @@ switch ($method) {
                     'students' => $students,
                     'rating' => $rating,
                     'image_url' => $image_url,
+                    'intro_video_url' => $intro_video_url,
                     'description' => $description,
                     'status' => $status
                 ]
@@ -112,6 +114,7 @@ switch ($method) {
         $students = $input['students'] ?? '0+';
         $rating = $input['rating'] ?? 5.0;
         $image_url = $input['image_url'] ?? null;
+        $intro_video_url = $input['intro_video_url'] ?? null;
         $description = $input['description'] ?? '';
         $status = $input['status'] ?? 'active';
 
@@ -126,8 +129,8 @@ switch ($method) {
                 $modules = implode(',', $modules);
             }
             
-            $stmt = $db->prepare("UPDATE mom_packs SET title = ?, modules = ?, price = ?, duration = ?, students = ?, rating = ?, image_url = ?, description = ?, status = ? WHERE id = ?");
-            $stmt->execute([$title, $modules, $price, $duration, $students, $rating, $image_url, $description, $status, $id]);
+            $stmt = $db->prepare("UPDATE mom_packs SET title = ?, modules = ?, price = ?, duration = ?, students = ?, rating = ?, image_url = ?, intro_video_url = ?, description = ?, status = ? WHERE id = ?");
+            $stmt->execute([$title, $modules, $price, $duration, $students, $rating, $image_url, $intro_video_url, $description, $status, $id]);
 
             if ($stmt->rowCount() > 0) {
                 echo json_encode(['success' => true, 'message' => 'Course pack updated successfully'], JSON_UNESCAPED_UNICODE);

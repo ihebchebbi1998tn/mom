@@ -17,6 +17,7 @@ interface CoursePack {
   students: string;
   rating: number;
   image_url?: string;
+  intro_video_url?: string;
   description?: string;
   status: string;
   created_at: string;
@@ -42,6 +43,7 @@ const CreatePackModal = ({ isOpen, onClose, onSuccess, editingPack }: CreatePack
     students: editingPack?.students || "0+",
     rating: editingPack?.rating || 5.0,
     image_url: editingPack?.image_url || "",
+    intro_video_url: editingPack?.intro_video_url || "",
     description: editingPack?.description || "",
     status: editingPack?.status || "active"
   });
@@ -57,6 +59,7 @@ const CreatePackModal = ({ isOpen, onClose, onSuccess, editingPack }: CreatePack
         students: editingPack.students || "0+",
         rating: editingPack.rating || 5.0,
         image_url: editingPack.image_url || "",
+        intro_video_url: editingPack.intro_video_url || "",
         description: editingPack.description || "",
         status: editingPack.status || "active"
       });
@@ -70,6 +73,7 @@ const CreatePackModal = ({ isOpen, onClose, onSuccess, editingPack }: CreatePack
         students: "0+",
         rating: 5.0,
         image_url: "",
+        intro_video_url: "",
         description: "",
         status: "active"
       });
@@ -129,6 +133,7 @@ const CreatePackModal = ({ isOpen, onClose, onSuccess, editingPack }: CreatePack
       students: "0+",
       rating: 5.0,
       image_url: "",
+      intro_video_url: "",
       description: "",
       status: "active"
     });
@@ -244,6 +249,19 @@ const CreatePackModal = ({ isOpen, onClose, onSuccess, editingPack }: CreatePack
               placeholder="https://example.com/image.jpg"
               className="mt-2"
             />
+          </div>
+
+          <div>
+            <Label htmlFor="intro_video_url">Vidéo d'introduction du pack</Label>
+            <Input
+              id="intro_video_url"
+              value={packForm.intro_video_url}
+              onChange={(e) => setPackForm({...packForm, intro_video_url: e.target.value})}
+              placeholder="https://example.com/video.mp4"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              URL de la vidéo d'introduction qui sera affichée sur la page détail du pack
+            </p>
           </div>
           
           <div className="flex justify-end gap-2">

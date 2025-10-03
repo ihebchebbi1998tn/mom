@@ -227,11 +227,11 @@ const BlogDetail = () => {
               {/* Article Content */}
               <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardContent className="p-8">
-                  <div className="prose prose-slate max-w-none text-right" dir="rtl">
-                    <div className="whitespace-pre-line leading-relaxed text-slate-700">
-                      {blogPost.content}
-                    </div>
-                  </div>
+                  <div 
+                    className="prose prose-slate prose-lg max-w-none text-right [&_ol]:text-right [&_ul]:text-right [&_li]:text-right [&_p]:text-right [&_h1]:text-right [&_h2]:text-right [&_h3]:text-right" 
+                    dir="rtl"
+                    dangerouslySetInnerHTML={{ __html: blogPost.content }}
+                  />
                 </CardContent>
               </Card>
             </div>

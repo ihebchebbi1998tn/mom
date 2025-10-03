@@ -12,6 +12,8 @@ interface SubPack {
   pack_id: number;
   title: string;
   description?: string;
+  banner_image_url?: string;
+  intro_video_url?: string;
   order_index: number;
   status: string;
 }
@@ -31,6 +33,8 @@ const CreateSubPackModal = ({ isOpen, onClose, onSuccess, packId, editingSubPack
   const [subPackForm, setSubPackForm] = useState({
     title: editingSubPack?.title || "",
     description: editingSubPack?.description || "",
+    banner_image_url: editingSubPack?.banner_image_url || "",
+    intro_video_url: editingSubPack?.intro_video_url || "",
     order_index: editingSubPack?.order_index || 0,
     status: editingSubPack?.status || "active"
   });
@@ -41,6 +45,8 @@ const CreateSubPackModal = ({ isOpen, onClose, onSuccess, packId, editingSubPack
       setSubPackForm({
         title: editingSubPack.title || "",
         description: editingSubPack.description || "",
+        banner_image_url: editingSubPack.banner_image_url || "",
+        intro_video_url: editingSubPack.intro_video_url || "",
         order_index: editingSubPack.order_index || 0,
         status: editingSubPack.status || "active"
       });
@@ -49,6 +55,8 @@ const CreateSubPackModal = ({ isOpen, onClose, onSuccess, packId, editingSubPack
       setSubPackForm({
         title: "",
         description: "",
+        banner_image_url: "",
+        intro_video_url: "",
         order_index: 0,
         status: "active"
       });
@@ -103,6 +111,8 @@ const CreateSubPackModal = ({ isOpen, onClose, onSuccess, packId, editingSubPack
     setSubPackForm({
       title: "",
       description: "",
+      banner_image_url: "",
+      intro_video_url: "",
       order_index: 0,
       status: "active"
     });
@@ -148,6 +158,26 @@ const CreateSubPackModal = ({ isOpen, onClose, onSuccess, packId, editingSubPack
                 dir={getTextDirection(subPackForm.description)}
                 style={{ unicodeBidi: 'plaintext' }}
               />
+          </div>
+          
+          <div>
+            <Label htmlFor="banner_image_url">URL de l'image bannière</Label>
+            <Input
+              id="banner_image_url"
+              value={subPackForm.banner_image_url}
+              onChange={(e) => setSubPackForm({...subPackForm, banner_image_url: e.target.value})}
+              placeholder="https://example.com/banner.jpg"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="intro_video_url">URL de la vidéo d'introduction</Label>
+            <Input
+              id="intro_video_url"
+              value={subPackForm.intro_video_url}
+              onChange={(e) => setSubPackForm({...subPackForm, intro_video_url: e.target.value})}
+              placeholder="https://example.com/video.mp4"
+            />
           </div>
           
           <div>

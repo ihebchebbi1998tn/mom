@@ -18,6 +18,38 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
+  const scrollToOfferings = (tab: string) => {
+    const offeringsSection = document.getElementById('offerings');
+    if (offeringsSection) {
+      offeringsSection.scrollIntoView({ behavior: 'smooth' });
+      // Wait for scroll to complete, then trigger tab change
+      setTimeout(() => {
+        const tabTrigger = document.querySelector(`[value="${tab}"]`) as HTMLElement;
+        if (tabTrigger) {
+          tabTrigger.click();
+        }
+      }, 500);
+    }
+  };
+
+  const handleNavClick = (href: string, e?: React.MouseEvent) => {
+    if (href === '#courses') {
+      e?.preventDefault();
+      scrollToOfferings('courses');
+      setIsMenuOpen(false);
+    } else if (href === '#workshops') {
+      e?.preventDefault();
+      scrollToOfferings('workshops');
+      setIsMenuOpen(false);
+    } else if (href === '#packs') {
+      e?.preventDefault();
+      scrollToOfferings('packs');
+      setIsMenuOpen(false);
+    } else {
+      setIsMenuOpen(false);
+    }
+  };
+
   const TikTokIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
       <path d="M19.321 5.562a5.124 5.124 0 01-.443-.258 6.228 6.228 0 01-1.137-.966c-.849-.849-1.304-1.95-1.255-3.044C16.503 1.103 16.743.928 17 .928h2.928c.257 0 .497.175.514.366.049 1.094-.406 2.195-1.255 3.044a6.228 6.228 0 01-1.137.966c-.146.106-.3.206-.443.258zM22.071 0H17c-.825 0-1.495.67-1.495 1.495v.433c0 .825.67 1.495 1.495 1.495h5.071c.825 0 1.495-.67 1.495-1.495V1.495C23.566.67 22.896 0 22.071 0z"/>
@@ -175,10 +207,18 @@ const Header = () => {
               <a href="#about" className="text-foreground hover:text-primary transition-colors font-medium">
                 عن المنصة
               </a>
-              <a href="#courses" className="text-foreground hover:text-primary transition-colors font-medium">
+              <a 
+                href="#courses" 
+                className="text-foreground hover:text-primary transition-colors font-medium"
+                onClick={(e) => handleNavClick('#courses', e)}
+              >
                 الدورات
               </a>
-              <a href="#workshops" className="text-foreground hover:text-primary transition-colors font-medium">
+              <a 
+                href="#workshops" 
+                className="text-foreground hover:text-primary transition-colors font-medium"
+                onClick={(e) => handleNavClick('#workshops', e)}
+              >
                 ورشات
               </a>
               <a href="#consultation" className="text-foreground hover:text-primary transition-colors font-medium">
@@ -244,14 +284,14 @@ const Header = () => {
                         <a 
                           href="#courses" 
                           className="text-gray-700 hover:text-pink-600 transition-colors font-medium py-2.5 px-3 rounded-lg hover:bg-pink-50 text-right text-sm"
-                          onClick={() => setIsMenuOpen(false)}
+                          onClick={(e) => handleNavClick('#courses', e)}
                         >
                           الدورات
                         </a>
                         <a 
                           href="#workshops" 
                           className="text-gray-700 hover:text-pink-600 transition-colors font-medium py-2.5 px-3 rounded-lg hover:bg-pink-50 text-right text-sm"
-                          onClick={() => setIsMenuOpen(false)}
+                          onClick={(e) => handleNavClick('#workshops', e)}
                         >
                           ورشات
                         </a>
@@ -304,7 +344,7 @@ const Header = () => {
                         </button>
                         
                         <button
-                          onClick={() => window.open('https://tiktok.com', '_blank')}
+                          onClick={() => window.open('https://www.tiktok.com/@maman_attentionnee', '_blank')}
                           className="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-white shadow-sm hover:shadow-md hover:scale-110 transition-all duration-300"
                           aria-label="TikTok"
                         >

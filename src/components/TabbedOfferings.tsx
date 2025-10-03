@@ -1,0 +1,422 @@
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { BookOpen, Star, Users, ArrowLeft, Calendar, Clock, MessageSquare, CheckCircle } from "lucide-react";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { getTextAlignmentClasses, getTextDirection, getContainerDirection } from "@/utils/textAlignment";
+
+interface CoursePack {
+  id: number;
+  title: string;
+  modules: string;
+  price: string;
+  duration: string;
+  students: string;
+  rating: number;
+  image_url: string | null;
+  description: string;
+  status: string;
+}
+
+interface SubPack {
+  id: number;
+  pack_id: number;
+  title: string;
+  description: string;
+  video_count: number;
+  total_duration: string;
+  price: number;
+  image_url: string | null;
+  status: string;
+  order_index: number;
+}
+
+interface Workshop {
+  id: number;
+  title: string;
+  description: string;
+  duration: string;
+  type: string;
+  next_date: string;
+  enrolled_count: number;
+  max_participants: number;
+  location: string;
+  highlights: string[];
+  price: number;
+  image_url?: string;
+  status: 'active' | 'inactive' | 'completed' | 'cancelled';
+}
+
+const TabbedOfferings = () => {
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const { ref: sectionRef, isVisible } = useScrollAnimation();
+  
+  const [activeTab, setActiveTab] = useState("packs");
+  const [coursePacks, setCoursePacks] = useState<CoursePack[]>([]);
+  const [subPacks, setSubPacks] = useState<SubPack[]>([]);
+  const [workshops, setWorkshops] = useState<Workshop[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [visiblePacksCount, setVisiblePacksCount] = useState(isMobile ? 4 : 6);
+  const [visibleSubPacksCount, setVisibleSubPacksCount] = useState(isMobile ? 4 : 6);
+
+  const loadMoreCount = isMobile ? 4 : 6;
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    setVisiblePacksCount(isMobile ? 4 : 6);
+  }, [isMobile]);
+
+  const fetchData = async () => {
+    try {
+      const [packsResponse, subPacksResponse, workshopsResponse] = await Promise.all([
+        fetch('https://spadadibattaglia.com/mom/api/course_packs.php'),
+        fetch('https://spadadibattaglia.com/mom/api/sub_packs.php'),
+        fetch('https://spadadibattaglia.com/mom/api/workshops.php')
+      ]);
+
+      const packsData = await packsResponse.json();
+      const subPacksData = await subPacksResponse.json();
+      const workshopsData = await workshopsResponse.json();
+
+      if (packsData.success && packsData.data) {
+        setCoursePacks(packsData.data.filter((pack: CoursePack) => pack.status === 'active'));
+      }
+
+      if (subPacksData.success && subPacksData.data) {
+        setSubPacks(subPacksData.data.filter((subPack: SubPack) => subPack.status === 'active'));
+      }
+
+      if (workshopsData.success && workshopsData.workshops) {
+        setWorkshops(workshopsData.workshops.filter((workshop: Workshop) => workshop.status === 'active'));
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const visiblePacks = coursePacks.slice(0, visiblePacksCount);
+  const hasMorePacks = visiblePacksCount < coursePacks.length;
+
+  const visibleSubPacks = subPacks.slice(0, visibleSubPacksCount);
+  const hasMoreSubPacks = visibleSubPacksCount < subPacks.length;
+
+  const loadMorePacks = () => {
+    setVisiblePacksCount(prev => Math.min(prev + loadMoreCount, coursePacks.length));
+  };
+
+  const loadMoreSubPacks = () => {
+    setVisibleSubPacksCount(prev => Math.min(prev + loadMoreCount, subPacks.length));
+  };
+
+  return (
+    <section id="offerings" className="py-20 section-gradient" ref={sectionRef}>
+      <div className="container mx-auto px-4">
+        {/* Section Header */}
+        <div className={`text-center mb-12 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <p className="text-yellow-500 text-lg font-semibold mb-2">تعلمي الآن</p>
+          <h2 className="text-3xl lg:text-5xl font-bold text-foreground mb-4">
+            عن نفسك وعن طفلك
+          </h2>
+        </div>
+
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
+          <div className="flex justify-center mb-12">
+            <TabsList className="bg-gray-100 p-1 rounded-full inline-flex gap-1">
+              <TabsTrigger 
+                value="packs" 
+                className="rounded-full px-8 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300"
+              >
+                الباقات
+              </TabsTrigger>
+              <TabsTrigger 
+                value="courses" 
+                className="rounded-full px-8 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300"
+              >
+                الدورات
+              </TabsTrigger>
+              <TabsTrigger 
+                value="workshops" 
+                className="rounded-full px-8 py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300"
+              >
+                الورشات
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          {/* Packs Content */}
+          <TabsContent value="packs">
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                <p className="text-muted-foreground mt-4">جاري تحميل الباقات...</p>
+              </div>
+            ) : coursePacks.length === 0 ? (
+              <div className="text-center py-12">
+                <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">لا توجد باقات متاحة حالياً</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+                  {visiblePacks.map((pack, index) => (
+                    <div 
+                      key={pack.id} 
+                      className={`group relative transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                      style={{ transitionDelay: isVisible ? `${300 + index * 200}ms` : '0ms' }}
+                    >
+                      <div className="bg-card rounded-xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col h-full border border-border/50">
+                        {/* Image Section - Less height */}
+                        <div className="relative h-48 overflow-hidden">
+                          <img 
+                            src={pack.image_url || "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=200&fit=crop&crop=center"} 
+                            alt={pack.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                        </div>
+
+                        {/* Content Section */}
+                        <div className="p-5 flex-1 flex flex-col">
+                          {/* Title */}
+                          <h3 className="text-xl font-bold text-foreground mb-3 flex items-center justify-between gap-2">
+                            <span>{pack.title}</span>
+                            <span className="text-primary" dir="ltr">Pack</span>
+                          </h3>
+                          
+                          {/* Description - if available */}
+                          {pack.description && (
+                            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                              {pack.description}
+                            </p>
+                          )}
+
+                          {/* Modules/Content */}
+                          <div className="space-y-2 mb-4 flex-1">
+                            {pack.modules && pack.modules.split(',').slice(0, 3).map((module, idx) => (
+                              <div key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
+                                <CheckCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                                <span className="line-clamp-1">{module.trim()}</span>
+                              </div>
+                            ))}
+                            {pack.modules && pack.modules.split(',').length > 3 && (
+                              <div className="text-sm text-primary font-medium">
+                                <span dir="ltr">+{pack.modules.split(',').length - 3}</span> مواضيع أخرى
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Button */}
+                          <Button 
+                            size="sm" 
+                            className="btn-hero w-full hover:shadow-[0_0_30px_rgba(233,30,99,0.5)] hover:scale-105 transition-all duration-300 relative overflow-hidden before:absolute before:top-0 before:left-[-100%] before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:animate-shimmer before:skew-x-12" 
+                            onClick={() => navigate(`/pack/${pack.id}`)}
+                          >
+                            للمزيد من التفاصيل
+                            <ArrowLeft className="w-4 h-4 mr-2" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {hasMorePacks && (
+                  <div className="flex justify-center mt-8">
+                    <Button onClick={loadMorePacks} size="lg" className="btn-hero">
+                      عرض المزيد من الباقات
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </TabsContent>
+
+          {/* Courses Content - Showing SubPacks */}
+          <TabsContent value="courses">
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                <p className="text-muted-foreground mt-4">جاري تحميل الدورات...</p>
+              </div>
+            ) : subPacks.length === 0 ? (
+              <div className="text-center py-12">
+                <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">لا توجد دورات متاحة حالياً</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+                  {visibleSubPacks.map((subPack, index) => (
+                    <div 
+                      key={subPack.id} 
+                      className={`group relative transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                      style={{ transitionDelay: isVisible ? `${300 + index * 200}ms` : '0ms' }}
+                    >
+                      <div className="bg-card rounded-xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col h-full border border-border/50">
+                        {/* Image Section - Less height */}
+                        <div className="relative h-48 overflow-hidden">
+                          <img 
+                            src={subPack.image_url || "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=200&fit=crop&crop=center"} 
+                            alt={subPack.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                        </div>
+
+                        {/* Content Section */}
+                        <div className="p-5 flex-1 flex flex-col">
+                          {/* Title */}
+                          <h3 className="text-xl font-bold text-foreground mb-3">{subPack.title}</h3>
+                          
+                          {/* Description */}
+                          <p className="text-sm text-muted-foreground mb-4 line-clamp-3 flex-1">
+                            {subPack.description}
+                          </p>
+
+                          {/* Button */}
+                          <Button 
+                            size="sm" 
+                            className="btn-hero w-full hover:shadow-[0_0_30px_rgba(233,30,99,0.5)] hover:scale-105 transition-all duration-300 relative overflow-hidden before:absolute before:top-0 before:left-[-100%] before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:animate-shimmer before:skew-x-12" 
+                            onClick={() => navigate(`/course/${subPack.id}`)}
+                          >
+                            للمزيد من التفاصيل
+                            <ArrowLeft className="w-4 h-4 mr-2" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {hasMoreSubPacks && (
+                  <div className="flex justify-center mt-8">
+                    <Button onClick={loadMoreSubPacks} size="lg" className="btn-hero">
+                      عرض المزيد من الدورات
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </TabsContent>
+
+          {/* Workshops Content */}
+          <TabsContent value="workshops">
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                <p className="text-muted-foreground mt-4">جاري تحميل الورشات...</p>
+              </div>
+            ) : workshops.length === 0 ? (
+              <div className="text-center py-12">
+                <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">لا توجد ورشات متاحة حالياً</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+                  {workshops.map((workshop, index) => (
+                    <div 
+                      key={workshop.id} 
+                      className={`card-elegant p-6 flex flex-col h-full transition-all duration-1000 hover:scale-105 hover:shadow-xl ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                      style={{ transitionDelay: isVisible ? `${300 + index * 150}ms` : '0ms' }}
+                    >
+                      <div className="mb-4">
+                        <h3 
+                          className={`text-xl font-bold text-foreground mb-2 ${getTextAlignmentClasses(workshop.title)} ${getContainerDirection(workshop.title)}`} 
+                          dir={getTextDirection(workshop.title)}
+                          style={{ unicodeBidi: 'plaintext' }}
+                        >
+                          {workshop.title}
+                        </h3>
+                      </div>
+
+                      <p 
+                        className={`text-muted-foreground mb-4 leading-relaxed flex-grow ${getTextAlignmentClasses(workshop.description)} ${getContainerDirection(workshop.description)}`} 
+                        dir={getTextDirection(workshop.description)}
+                        style={{ unicodeBidi: 'plaintext' }}
+                      >
+                        {workshop.description}
+                      </p>
+
+                      <div className="space-y-3 mb-6">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Clock className="w-4 h-4 text-primary flex-shrink-0" />
+                          <span>{workshop.duration}</span>
+                        </div>
+                      </div>
+
+                      {workshop.highlights && workshop.highlights.length > 0 && (
+                        <div className="mb-4">
+                          <h4 className="text-sm font-semibold text-foreground mb-2">نقاط القوة:</h4>
+                          <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                            {workshop.highlights.map((highlight, idx) => (
+                              <li key={idx}>{highlight}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      <Button 
+                        className="btn-hero w-full mt-auto" 
+                        onClick={() => {
+                          const message = encodeURIComponent(`أريد التسجيل في ${workshop.title}`);
+                          window.open(`https://wa.me/21652451892?text=${message}`, '_blank');
+                        }}
+                      >
+                        احجزي مقعدك الآن
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className={`text-center mt-16 transition-all duration-1000 delay-700 ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'}`}>
+                  <div className="card-elegant p-8 max-w-2xl mx-auto bg-gradient-to-r from-primary/5 to-primary-light/10">
+                    <h3 className="text-2xl font-bold text-foreground mb-4">
+                      لديك فكرة لورشة جديدة؟
+                    </h3>
+                    <p className="text-muted-foreground mb-6">
+                      نحن نستمع لاحتياجاتكم ونطور ورش جديدة باستمرار. شاركينا أفكارك واقتراحاتك
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      className="btn-outline" 
+                      onClick={() => {
+                        const message = encodeURIComponent("لدي اقتراح لورشة جديدة أود مناقشتها معكم");
+                        window.open(`https://wa.me/21652451892?text=${message}`, '_blank');
+                      }}
+                    >
+                      <MessageSquare className="w-4 h-4 ml-2" />
+                      اقترحي ورشة جديدة
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+    </section>
+  );
+};
+
+export default TabbedOfferings;
