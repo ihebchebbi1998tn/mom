@@ -27,10 +27,11 @@ interface PackCardProps {
   onSelect: (pack: CoursePack) => void;
   onEdit: (pack: CoursePack) => void;
   onDelete: (packId: number) => void;
+  onLinkSubPacks?: () => void;
   isSelected?: boolean;
 }
 
-const PackCard = ({ pack, subPackCount, totalVideos, acceptedUsers, onSelect, onEdit, onDelete, isSelected }: PackCardProps) => {
+const PackCard = ({ pack, subPackCount, totalVideos, acceptedUsers, onSelect, onEdit, onDelete, onLinkSubPacks, isSelected }: PackCardProps) => {
   return (
     <Card 
       className={`card-elegant overflow-hidden group hover:scale-[1.02] transition-all duration-300 cursor-pointer ${
@@ -154,6 +155,19 @@ const PackCard = ({ pack, subPackCount, totalVideos, acceptedUsers, onSelect, on
             Voir le contenu
             <PlayCircle className="w-4 h-4 mr-2" />
           </Button>
+          {onLinkSubPacks && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onLinkSubPacks();
+              }}
+              title="Lier des chapitres"
+            >
+              <Package className="w-4 h-4" />
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"

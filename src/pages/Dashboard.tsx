@@ -21,6 +21,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import MobileLanding from "@/components/MobileLanding";
 import ModernVideoModal from "@/components/ModernVideoModal";
 import ReceiptUpload from "@/components/ReceiptUpload";
+import VideoThumbnail from "@/components/VideoThumbnail";
 import { getTextAlignmentClasses, getTextDirection, getContainerDirection, hasArabicCharacters, getNameDirection } from "@/utils/textAlignment";
 import mamanattentionLogo from "@/assets/mamanattention.png";
 import oldLogo from "@/assets/maman-attentionnee-logo.png";
@@ -64,6 +65,7 @@ interface SubPack {
   pack_id: string;
   title: string;
   description?: string;
+  banner_image_url?: string;
   order_index: number;
   status: string;
   videos?: Video[];
@@ -817,7 +819,7 @@ const Dashboard = () => {
 
   // Helper function to handle API calls
   const apiCall = async (endpoint: string, options: RequestInit = {}) => {
-    const apiUrl = `/api/${endpoint}`;
+    const apiUrl = `https://spadadibattaglia.com/mom/api/${endpoint}`;
     
     try {
       const response = await fetch(apiUrl, {
@@ -1121,22 +1123,6 @@ const Dashboard = () => {
                               </p>
                             )}
                             
-                            {/* Enhanced Stats */}
-                            <div className="flex items-center justify-between text-sm text-slate-500 mb-6 p-3 bg-slate-50 rounded-lg">
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4 text-blue-500" />
-                                <span className="font-medium">{pack.duration}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Users className="w-4 h-4 text-green-500" />
-                                <span className="font-medium">{pack.students}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <BookOpen className="w-4 h-4 text-purple-500" />
-                                <span className="font-medium">{packSubPacksList.length} فصل</span>
-                              </div>
-                            </div>
-
                             {/* Enhanced Modules Preview */}
                             <div className="space-y-3 mb-6">
                               <div className="text-sm font-semibold text-slate-900 flex items-center gap-2">
@@ -1144,7 +1130,7 @@ const Dashboard = () => {
                                 محتوى الباقة:
                               </div>
                               <div className="space-y-2">
-                                {packSubPacksList.slice(0, 3).map((subPack, idx) => (
+                                {packSubPacksList.map((subPack, idx) => (
                                   <div key={idx} className="flex items-center gap-3 p-2 bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg">
                                     <div className="w-6 h-6 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
                                       {idx + 1}
@@ -1152,11 +1138,6 @@ const Dashboard = () => {
                                     <span className="text-slate-700 text-sm font-medium">{subPack.title}</span>
                                   </div>
                                 ))}
-                                {packSubPacksList.length > 3 && (
-                                  <div className="text-sm text-slate-500 text-center py-2">
-                                    +{packSubPacksList.length - 3} فصول إضافية
-                                  </div>
-                                )}
                                 {packSubPacksList.length === 0 && (
                                   <div className="text-slate-400 text-sm text-center py-4 italic">
                                     سيتم إضافة المحتوى قريباً
@@ -1202,22 +1183,37 @@ const Dashboard = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
                     {subPacks.map((subPack, index) => (
                       <Card key={subPack.id} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer bg-white" onClick={() => handleSubPackClick(subPack)}>
-                        <div className="bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600 p-8 text-white relative overflow-hidden">
-                          <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-4 translate-x-4"></div>
-                          <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-4 -translate-x-4"></div>
-                          
-                          <div className="relative z-10">
-                            <div className="flex items-center justify-between mb-6">
-                              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30">
-                                <span className="font-bold text-xl">{index + 1}</span>
-                              </div>
-                              <Eye className="w-6 h-6 opacity-75 group-hover:opacity-100 transition-opacity" />
+                        {/* Sub-Pack Banner Image */}
+                        {subPack.banner_image_url ? (
+                          <div className="relative h-48 overflow-hidden">
+                            <img 
+                              src={subPack.banner_image_url}
+                              alt={subPack.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                            <div className="absolute top-4 left-4 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg">
+                              <span className="font-bold text-lg text-pink-600">{index + 1}</span>
                             </div>
-                            <h3 className="text-xl lg:text-2xl font-bold leading-tight">{subPack.title}</h3>
                           </div>
-                        </div>
+                        ) : (
+                          <div className="bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600 p-8 text-white relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-4 translate-x-4"></div>
+                            <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-4 -translate-x-4"></div>
+                            
+                            <div className="relative z-10">
+                              <div className="flex items-center justify-between mb-6">
+                                <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30">
+                                  <span className="font-bold text-xl">{index + 1}</span>
+                                </div>
+                                <Eye className="w-6 h-6 opacity-75 group-hover:opacity-100 transition-opacity" />
+                              </div>
+                              <h3 className="text-xl lg:text-2xl font-bold leading-tight">{subPack.title}</h3>
+                            </div>
+                          </div>
+                        )}
                         
                         <div className="p-6 lg:p-8">
+                          <h3 className="text-xl font-bold text-slate-900 mb-3">{subPack.title}</h3>
                           {subPack.description && (
                             <p className="text-slate-600 text-sm leading-relaxed mb-6">
                               {subPack.description}
@@ -1254,25 +1250,16 @@ const Dashboard = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {videos.map((video, index) => (
                       <Card key={video.id} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 bg-white">
-                        <div className="relative overflow-hidden">
-                          {video.thumbnail_url ? (
-                            <img 
-                              src={video.thumbnail_url} 
-                              alt={video.title} 
-                              className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
-                          ) : (
-                            <div className="w-full h-48 bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                              <PlayCircle className="w-16 h-16 text-white" />
-                            </div>
-                          )}
-                          
-                          {/* Play Button Overlay */}
-                          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center">
-                            <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                              <PlayCircle className="w-8 h-8 text-pink-600" />
-                            </div>
-                          </div>
+                        <div 
+                          className="relative overflow-hidden bg-white cursor-pointer"
+                          onClick={() => handleVideoClick(video)}
+                        >
+                          <VideoThumbnail
+                            videoUrl={video.video_url}
+                            thumbnailUrl={video.thumbnail_url}
+                            alt={video.title}
+                            className="w-full h-80 object-contain group-hover:scale-105 transition-transform duration-500"
+                          />
                           
                           {/* Video Number Badge */}
                           <div className="absolute top-4 left-4 w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg">
@@ -1287,17 +1274,11 @@ const Dashboard = () => {
                         </div>
                         
                         <div className="p-6">
-                          <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-pink-600 transition-colors">
+                          <h3 className="text-lg font-bold text-slate-900 mb-4 group-hover:text-pink-600 transition-colors">
                             {video.title}
                           </h3>
                           
-                          {video.description && (
-                            <p className="text-slate-600 text-sm leading-relaxed mb-4 line-clamp-2">
-                              {video.description}
-                            </p>
-                          )}
-                          
-                          <Button 
+                          <Button
                             onClick={() => handleVideoClick(video)}
                             className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg"
                           >
@@ -1346,38 +1327,68 @@ const Dashboard = () => {
                           )}
                           onClick={() => !isLocked && !isPending && handleCourseClick(course)}
                         >
-                          <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 p-8 text-white relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-4 translate-x-4"></div>
-                            <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-4 -translate-x-4"></div>
-                            
-                            {isLocked && !isPending && (
-                              <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-20">
-                                <div className="text-center">
-                                  <ShoppingCart className="w-12 h-12 mx-auto mb-2" />
-                                  <p className="text-sm font-semibold">مغلق</p>
+                          {/* Course Banner Image */}
+                          {course.banner_image_url ? (
+                            <div className="relative h-48 overflow-hidden">
+                              <img 
+                                src={course.banner_image_url}
+                                alt={course.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              />
+                              {isLocked && !isPending && (
+                                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-20">
+                                  <div className="text-center text-white">
+                                    <ShoppingCart className="w-12 h-12 mx-auto mb-2" />
+                                    <p className="text-sm font-semibold">مغلق</p>
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                            
-                            <div className="relative z-10">
-                              <div className="flex items-center justify-between mb-4">
-                                <div className="text-xs font-medium bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
-                                  {course.packTitle || 'دورة تدريبية'}
-                                </div>
-                                {!isLocked && !isPending && <Eye className="w-5 h-5 opacity-75 group-hover:opacity-100 transition-opacity" />}
-                              </div>
-                              <h3 className="text-xl lg:text-2xl font-bold leading-tight mb-2">
-                                {course.title}
-                              </h3>
-                              {course.description && (
-                                <p className="text-sm text-white/80 line-clamp-2">
-                                  {course.description}
-                                </p>
                               )}
+                              <div className="absolute top-4 left-4 text-xs font-medium bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-slate-800">
+                                {course.packTitle || 'دورة تدريبية'}
+                              </div>
                             </div>
-                          </div>
+                          ) : (
+                            <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 p-8 text-white relative overflow-hidden">
+                              <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-4 translate-x-4"></div>
+                              <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-4 -translate-x-4"></div>
+                              
+                              {isLocked && !isPending && (
+                                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-20">
+                                  <div className="text-center">
+                                    <ShoppingCart className="w-12 h-12 mx-auto mb-2" />
+                                    <p className="text-sm font-semibold">مغلق</p>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              <div className="relative z-10">
+                                <div className="flex items-center justify-between mb-4">
+                                  <div className="text-xs font-medium bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                                    {course.packTitle || 'دورة تدريبية'}
+                                  </div>
+                                  {!isLocked && !isPending && <Eye className="w-5 h-5 opacity-75 group-hover:opacity-100 transition-opacity" />}
+                                </div>
+                                <h3 className="text-xl lg:text-2xl font-bold leading-tight mb-2">
+                                  {course.title}
+                                </h3>
+                                {course.description && (
+                                  <p className="text-sm text-white/80 line-clamp-2">
+                                    {course.description}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          )}
                           
                           <div className="p-6 space-y-3">
+                            <h3 className="text-xl font-bold text-slate-900 mb-2">
+                              {course.title}
+                            </h3>
+                            {course.description && (
+                              <p className="text-slate-600 text-sm leading-relaxed mb-4 line-clamp-2">
+                                {course.description}
+                              </p>
+                            )}
                             {isPending ? (
                               <>
                                 <Button variant="outline" className="w-full rounded-full border-yellow-500 text-yellow-600 hover:bg-yellow-50" disabled>

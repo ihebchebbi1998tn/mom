@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Volume2, VolumeX, Maximize, X, RotateCcw } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Maximize, X, RotateCcw, Loader2 } from "lucide-react";
 
 interface ModernVideoModalProps {
   isOpen: boolean;
@@ -20,6 +20,8 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
   const [showControls, setShowControls] = useState(true);
   const [volume, setVolume] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadProgress, setLoadProgress] = useState(0);
 
   let hideControlsTimeout: NodeJS.Timeout;
 
@@ -38,12 +40,47 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
     const handleEnded = () => setIsPlaying(false);
+    
+    const handleWaiting = () => setIsLoading(true);
+    const handleCanPlay = () => {
+      setIsLoading(false);
+      console.log('[Video] Can play - enough data loaded');
+    };
+    const handleLoadStart = () => {
+      setIsLoading(true);
+      console.log('[Video] Loading started:', videoUrl);
+    };
+    const handleLoadedData = () => {
+      setIsLoading(false);
+      console.log('[Video] First frame loaded');
+    };
+    
+    const handleProgress = () => {
+      if (video.buffered.length > 0) {
+        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+        const duration = video.duration;
+        if (duration > 0) {
+          setLoadProgress((bufferedEnd / duration) * 100);
+        }
+      }
+    };
+    
+    const handleError = (e: Event) => {
+      console.error('[Video] Error loading:', e);
+      setIsLoading(false);
+    };
 
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
     video.addEventListener('timeupdate', handleTimeUpdate);
     video.addEventListener('play', handlePlay);
     video.addEventListener('pause', handlePause);
     video.addEventListener('ended', handleEnded);
+    video.addEventListener('waiting', handleWaiting);
+    video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('loadstart', handleLoadStart);
+    video.addEventListener('loadeddata', handleLoadedData);
+    video.addEventListener('progress', handleProgress);
+    video.addEventListener('error', handleError);
 
     return () => {
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
@@ -51,6 +88,12 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
       video.removeEventListener('ended', handleEnded);
+      video.removeEventListener('waiting', handleWaiting);
+      video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('loadstart', handleLoadStart);
+      video.removeEventListener('loadeddata', handleLoadedData);
+      video.removeEventListener('progress', handleProgress);
+      video.removeEventListener('error', handleError);
     };
   }, [videoUrl]);
 
@@ -59,6 +102,8 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
       setIsPlaying(false);
       setCurrentTime(0);
       setShowControls(true);
+      setIsLoading(true);
+      setLoadProgress(0);
       
       // Auto-play video when modal opens
       setTimeout(() => {
@@ -192,27 +237,58 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
             <X className="w-5 h-5" />
           </Button>
 
-          {/* Video Title */}
-          <div className={`absolute top-4 left-4 z-40 bg-black/50 text-white px-4 py-2 rounded-lg backdrop-blur-sm transition-opacity duration-300 ${
+          {/* Video Title and URL */}
+          <div className={`absolute top-4 left-4 z-40 bg-black/70 text-white px-4 py-2 rounded-lg backdrop-blur-sm transition-opacity duration-300 ${
             showControls ? 'opacity-100' : 'opacity-0'
           }`}>
             <h3 className="font-semibold text-sm md:text-base" dir="rtl">{title}</h3>
           </div>
 
+          {/* Loading Indicator - Only show initially */}
+          {isLoading && duration === 0 && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center z-30 bg-black/50">
+              <Loader2 className="w-12 h-12 text-pink-500 animate-spin mb-4" />
+              <p className="text-white text-sm mb-2">جاري تحميل الفيديو...</p>
+              {loadProgress > 0 && (
+                <div className="w-64 bg-gray-700 rounded-full h-2 overflow-hidden">
+                  <div 
+                    className="bg-pink-500 h-full transition-all duration-300"
+                    style={{ width: `${loadProgress}%` }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Buffering Indicator - Show during playback if buffering */}
+          {isLoading && duration > 0 && isPlaying && (
+            <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
+              <div className="bg-black/70 rounded-full p-4">
+                <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
+              </div>
+            </div>
+          )}
+
           {/* Video Element */}
            <video
              ref={videoRef}
-             src={videoUrl}
              poster={poster}
              className="w-full h-auto max-h-[calc(85vh-8rem)] object-contain"
-             preload="metadata"
+             preload="auto"
              playsInline
              disablePictureInPicture
              controlsList="nodownload nofullscreen"
              onContextMenu={(e) => e.preventDefault()}
              onClick={togglePlay}
              crossOrigin="anonymous"
-           />
+             autoPlay
+           >
+             <source src={videoUrl} type={videoUrl.toLowerCase().endsWith('.mov') ? 'video/quicktime' : 'video/mp4'} />
+             <source src={videoUrl} type="video/mp4" />
+             <source src={videoUrl} type="video/quicktime" />
+             <source src={videoUrl} type="video/webm" />
+             متصفحك لا يدعم تشغيل الفيديو
+           </video>
 
           {/* Play Button Overlay - Only show when NOT playing */}
           {!isPlaying && duration > 0 && (

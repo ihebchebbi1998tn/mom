@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { BookOpen, Star, Users, ArrowLeft, Calendar, Clock, MessageSquare, CheckCircle } from "lucide-react";
+import { BookOpen, Star, Users, ArrowLeft, Calendar, Clock, MessageSquare, CheckCircle, PlayCircle } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -16,6 +16,7 @@ interface CoursePack {
   students: string;
   rating: number;
   image_url: string | null;
+  intro_video_url: string | null;
   description: string;
   status: string;
 }
@@ -61,6 +62,11 @@ const TabbedOfferings = () => {
   const [loading, setLoading] = useState(true);
   const [visiblePacksCount, setVisiblePacksCount] = useState(isMobile ? 4 : 6);
   const [visibleSubPacksCount, setVisibleSubPacksCount] = useState(isMobile ? 4 : 6);
+  const [hoveredPack, setHoveredPack] = useState<number | null>(null);
+  const [playingVideo, setPlayingVideo] = useState<number | null>(null);
+  const [visiblePackInView, setVisiblePackInView] = useState<number | null>(null);
+  const packRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+  const videoRefs = useRef<{ [key: number]: HTMLVideoElement | null }>({});
 
   const loadMoreCount = isMobile ? 4 : 6;
 
@@ -71,6 +77,49 @@ const TabbedOfferings = () => {
   useEffect(() => {
     setVisiblePacksCount(isMobile ? 4 : 6);
   }, [isMobile]);
+
+  // Desktop: hover behavior
+  useEffect(() => {
+    if (!isMobile && hoveredPack !== null) {
+      const timer = setTimeout(() => {
+        setPlayingVideo(hoveredPack);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    } else if (!isMobile) {
+      setPlayingVideo(null);
+    }
+  }, [hoveredPack, isMobile]);
+
+  // Mobile: play video for pack in viewport after 3 seconds
+  useEffect(() => {
+    if (isMobile && visiblePackInView !== null) {
+      const timer = setTimeout(() => {
+        setPlayingVideo(visiblePackInView);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    } else if (isMobile && visiblePackInView === null) {
+      setPlayingVideo(null);
+    }
+  }, [isMobile, visiblePackInView]);
+
+  // Control video playback programmatically
+  useEffect(() => {
+    Object.keys(videoRefs.current).forEach((key) => {
+      const packId = parseInt(key);
+      const videoElement = videoRefs.current[packId];
+      
+      if (videoElement) {
+        if (playingVideo === packId) {
+          videoElement.play().catch(err => console.log('Video play error:', err));
+        } else {
+          videoElement.pause();
+          videoElement.currentTime = 0;
+        }
+      }
+    });
+  }, [playingVideo]);
 
   const fetchData = async () => {
     try {
@@ -116,6 +165,38 @@ const TabbedOfferings = () => {
   const visibleSubPacks = subPacks.slice(0, visibleSubPacksCount);
   const hasMoreSubPacks = visibleSubPacksCount < subPacks.length;
 
+  // Intersection observer for mobile viewport detection
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const observers: IntersectionObserver[] = [];
+
+    visiblePacks.forEach((pack) => {
+      const element = packRefs.current[pack.id];
+      if (!element) return;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+              setVisiblePackInView(pack.id);
+            } else if (visiblePackInView === pack.id) {
+              setVisiblePackInView(null);
+            }
+          });
+        },
+        { threshold: 0.5 }
+      );
+
+      observer.observe(element);
+      observers.push(observer);
+    });
+
+    return () => {
+      observers.forEach(observer => observer.disconnect());
+    };
+  }, [isMobile, visiblePacks, visiblePackInView]);
+
   const loadMorePacks = () => {
     setVisiblePacksCount(prev => Math.min(prev + loadMoreCount, coursePacks.length));
   };
@@ -129,7 +210,7 @@ const TabbedOfferings = () => {
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className={`text-center mb-12 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          <p className="text-yellow-500 text-lg font-semibold mb-2">تعلمي الآن</p>
+          <p className="text-yellow-300 text-xl font-semibold mb-2">تعلمي الآن</p>
           <h2 className="text-3xl lg:text-5xl font-bold text-foreground mb-4">
             عن نفسك وعن طفلك
           </h2>
@@ -177,19 +258,56 @@ const TabbedOfferings = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
                   {visiblePacks.map((pack, index) => (
                     <div 
-                      key={pack.id} 
+                      key={pack.id}
+                      ref={(el) => packRefs.current[pack.id] = el}
                       className={`group relative transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
                       style={{ transitionDelay: isVisible ? `${300 + index * 200}ms` : '0ms' }}
+                      onMouseEnter={() => !isMobile && setHoveredPack(pack.id)}
+                      onMouseLeave={() => !isMobile && setHoveredPack(null)}
                     >
                       <div className="bg-card rounded-xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col h-full border border-border/50">
-                        {/* Image Section - Less height */}
-                        <div className="relative h-48 overflow-hidden">
-                          <img 
-                            src={pack.image_url || "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=200&fit=crop&crop=center"} 
-                            alt={pack.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            loading="lazy"
-                          />
+                        {/* Image/Video Section */}
+                        <div className="relative h-48 overflow-hidden perspective-1000">
+                          <div 
+                            className={`relative w-full h-full transition-all duration-700 transform-style-3d ${
+                              playingVideo === pack.id && pack.intro_video_url 
+                                ? 'rotate-y-180' 
+                                : ''
+                            }`}
+                          >
+                            {/* Front - Image */}
+                            <div className="absolute inset-0 backface-hidden">
+                              <img 
+                                src={pack.image_url || "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=200&fit=crop&crop=center"} 
+                                alt={pack.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                loading="lazy"
+                              />
+                              {/* Hover Indicator - Desktop Only */}
+                              {!isMobile && pack.intro_video_url && (
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                  <div className="flex items-center justify-center gap-2 text-white">
+                                    <PlayCircle className="w-5 h-5 animate-pulse" />
+                                    <span className="text-sm font-medium">مرر لمشاهدة الفيديو</span>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Back - Video */}
+                            {pack.intro_video_url && (
+                              <div className="absolute inset-0 backface-hidden rotate-y-180">
+                                <video 
+                                  ref={(el) => videoRefs.current[pack.id] = el}
+                                  src={pack.intro_video_url}
+                                  className="w-full h-full object-cover"
+                                  muted={false}
+                                  loop
+                                  playsInline
+                                />
+                              </div>
+                            )}
+                          </div>
                         </div>
 
                         {/* Content Section */}
@@ -199,6 +317,21 @@ const TabbedOfferings = () => {
                             <span>{pack.title}</span>
                             <span className="text-primary" dir="ltr">Pack</span>
                           </h3>
+                          
+                          {/* Video Badge - Desktop Only */}
+                          {!isMobile && pack.intro_video_url && (
+                            <div 
+                              className="mb-3 flex items-center gap-2 text-primary text-sm bg-primary/10 rounded-lg px-3 py-2 border border-primary/20 cursor-pointer hover:bg-primary/20 hover:scale-105 transition-all duration-300"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPlayingVideo(pack.id);
+                              }}
+                              onMouseEnter={() => setPlayingVideo(pack.id)}
+                            >
+                              <PlayCircle className="w-4 h-4" />
+                              <span className="font-medium">شاهد الفيديو</span>
+                            </div>
+                          )}
                           
                           {/* Description - if available */}
                           {pack.description && (
@@ -286,7 +419,7 @@ const TabbedOfferings = () => {
                           <h3 className="text-xl font-bold text-foreground mb-3">{subPack.title}</h3>
                           
                           {/* Description */}
-                          <p className="text-sm text-muted-foreground mb-4 line-clamp-3 flex-1">
+                          <p className="text-sm text-muted-foreground mb-4 flex-1">
                             {subPack.description}
                           </p>
 

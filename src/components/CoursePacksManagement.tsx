@@ -9,6 +9,7 @@ import VideoCard from "./admin/VideoCard";
 import CreatePackModal from "./admin/CreatePackModal";
 import CreateSubPackModal from "./admin/CreateSubPackModal";
 import CreateVideoModal from "./admin/CreateVideoModal";
+import PackSubPackLinksModal from "./admin/PackSubPackLinksModal";
 
 interface CoursePack {
   id: number;
@@ -69,6 +70,8 @@ const CoursePacksManagement = () => {
   const [isCreatePackOpen, setIsCreatePackOpen] = useState(false);
   const [isCreateSubPackOpen, setIsCreateSubPackOpen] = useState(false);
   const [isCreateVideoOpen, setIsCreateVideoOpen] = useState(false);
+  const [isLinksModalOpen, setIsLinksModalOpen] = useState(false);
+  const [linkingPack, setLinkingPack] = useState<CoursePack | null>(null);
   
   // Edit states
   const [editingPack, setEditingPack] = useState<CoursePack | null>(null);
@@ -81,7 +84,7 @@ const CoursePacksManagement = () => {
     fetchCoursePacks();
   }, []);
 
-  // Fetch sub-packs and videos for all packs to show correct counts
+  // Fetch sub-packs and videos for all packs to show correct counts using junction table
   useEffect(() => {
     const fetchAllSubPacksAndVideos = async () => {
       if (coursePacks.length === 0) return;
@@ -91,8 +94,8 @@ const CoursePacksManagement = () => {
       
       for (const pack of coursePacks) {
         try {
-          // Fetch sub-packs for this pack
-          const subPacksResponse = await fetch(`https://spadadibattaglia.com/mom/api/sub_packs.php?pack_id=${pack.id}`);
+          // Fetch sub-packs for this pack from junction table
+          const subPacksResponse = await fetch(`https://spadadibattaglia.com/mom/api/pack_sub_pack_links.php?pack_id=${pack.id}`);
           const subPacksResult = await subPacksResponse.json();
           
           if (subPacksResult.success) {
@@ -172,7 +175,8 @@ const CoursePacksManagement = () => {
   const fetchSubPacks = async (packId: number) => {
     try {
       setLoading(true);
-      const response = await fetch(`https://spadadibattaglia.com/mom/api/sub_packs.php?pack_id=${packId}`);
+      // Use junction table API
+      const response = await fetch(`https://spadadibattaglia.com/mom/api/pack_sub_pack_links.php?pack_id=${packId}`);
       const data = await response.json();
       if (data.success) {
         setSubPacks(data.data || []);
@@ -212,7 +216,8 @@ const CoursePacksManagement = () => {
     const load = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`https://spadadibattaglia.com/mom/api/sub_packs.php?pack_id=${pack.id}`);
+        // Use junction table API
+        const response = await fetch(`https://spadadibattaglia.com/mom/api/pack_sub_pack_links.php?pack_id=${pack.id}`);
         if (!response.ok) {
           throw new Error(`Server error ${response.status}`);
         }
@@ -392,6 +397,15 @@ const CoursePacksManagement = () => {
     }
   };
 
+  const handleOpenLinksModal = (pack: CoursePack) => {
+    setLinkingPack(pack);
+    setIsLinksModalOpen(true);
+  };
+
+  const handleLinksSuccess = () => {
+    fetchCoursePacks();
+  };
+
   // Helper functions
   const getTotalVideosForPack = (packId: number) => {
     const subPackList = packSubPacks[packId] || [];
@@ -534,6 +548,7 @@ const CoursePacksManagement = () => {
                 onSelect={handlePackSelect}
                 onEdit={handleEditPack}
                 onDelete={handleDeletePack}
+                onLinkSubPacks={() => handleOpenLinksModal(pack)}
               />
             ))
           )}
@@ -617,6 +632,14 @@ const CoursePacksManagement = () => {
         onSuccess={handleVideoSuccess}
         subPackId={selectedSubPack?.id || 0}
         editingVideo={editingVideo}
+      />
+
+      <PackSubPackLinksModal
+        isOpen={isLinksModalOpen}
+        onClose={() => setIsLinksModalOpen(false)}
+        onSuccess={handleLinksSuccess}
+        packId={linkingPack?.id || 0}
+        packTitle={linkingPack?.title || ''}
       />
     </div>
   );

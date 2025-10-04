@@ -40,6 +40,14 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [selectedCountryCode, setSelectedCountryCode] = useState("+216");
+  const [phoneError, setPhoneError] = useState("");
+  const [formValid, setFormValid] = useState(false);
+  const [signupFormData, setSignupFormData] = useState({
+    name: "",
+    email: "",
+    phoneNumber: "",
+    password: ""
+  });
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -51,6 +59,32 @@ const Auth = () => {
       }
     }
   }, [isAuthenticated, user, navigate]);
+
+  // Validate form in real-time
+  useEffect(() => {
+    const isValid = 
+      signupFormData.name.trim().length >= 2 &&
+      signupFormData.email.trim().length > 0 &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupFormData.email) &&
+      signupFormData.phoneNumber.length >= 6 &&
+      /^\d+$/.test(signupFormData.phoneNumber) &&
+      signupFormData.password.length >= 6;
+    
+    setFormValid(isValid);
+  }, [signupFormData]);
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSignupFormData(prev => ({ ...prev, phoneNumber: value }));
+    
+    if (value.length > 0 && value.length < 6) {
+      setPhoneError("رقم الهاتف قصير جداً");
+    } else if (value.length > 0 && !/^\d+$/.test(value)) {
+      setPhoneError("رقم الهاتف يجب أن يحتوي على أرقام فقط");
+    } else {
+      setPhoneError("");
+    }
+  };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -300,6 +334,8 @@ const Auth = () => {
                   placeholder="أدخلي اسمك الكامل"
                   className="mt-1 text-left"
                   dir="ltr"
+                  value={signupFormData.name}
+                  onChange={(e) => setSignupFormData(prev => ({ ...prev, name: e.target.value }))}
                   required
                 />
               </div>
@@ -313,6 +349,8 @@ const Auth = () => {
                   placeholder="أدخلي بريدك الإلكتروني"
                   className="mt-1 text-left"
                   dir="ltr"
+                  value={signupFormData.email}
+                  onChange={(e) => setSignupFormData(prev => ({ ...prev, email: e.target.value }))}
                   required
                 />
               </div>
@@ -327,8 +365,10 @@ const Auth = () => {
                           name="phoneNumber"
                           type="tel" 
                           placeholder="ادخلي رقم الهاتف"
-                          className="pl-10 text-left"
+                          className={`pl-10 text-left ${phoneError ? 'border-red-500' : ''}`}
                           dir="ltr"
+                          value={signupFormData.phoneNumber}
+                          onChange={handlePhoneChange}
                           required
                         />
                       </div>
@@ -348,6 +388,9 @@ const Auth = () => {
                         </SelectContent>
                       </Select>
                     </div>
+                    {phoneError && (
+                      <p className="text-red-500 text-sm mt-1">{phoneError}</p>
+                    )}
               </div>
               
               <div>
@@ -360,6 +403,8 @@ const Auth = () => {
                     placeholder="اختاري كلمة مرور قوية"
                     className="mt-1 text-left pr-10"
                     dir="ltr"
+                    value={signupFormData.password}
+                    onChange={(e) => setSignupFormData(prev => ({ ...prev, password: e.target.value }))}
                     required
                   />
                   <button
@@ -372,7 +417,7 @@ const Auth = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="btn-secondary w-full rounded-full py-3 mt-6" disabled={isLoading}>
+              <Button type="submit" className="btn-secondary w-full rounded-full py-3 mt-6" disabled={isLoading || !formValid}>
                 {isLoading ? "جاري إنشاء الحساب..." : "سجلي الآن مجاناً"}
                 <ArrowRight className="w-5 h-5 mr-2" />
               </Button>
@@ -474,6 +519,8 @@ const Auth = () => {
                       placeholder="أدخلي اسمك الكامل"
                       className="mt-1 text-left"
                       dir="ltr"
+                      value={signupFormData.name}
+                      onChange={(e) => setSignupFormData(prev => ({ ...prev, name: e.target.value }))}
                       required
                     />
                   </div>
@@ -487,6 +534,8 @@ const Auth = () => {
                       placeholder="أدخلي بريدك الإلكتروني"
                       className="mt-1 text-left"
                       dir="ltr"
+                      value={signupFormData.email}
+                      onChange={(e) => setSignupFormData(prev => ({ ...prev, email: e.target.value }))}
                       required
                     />
                   </div>
@@ -501,8 +550,10 @@ const Auth = () => {
                             name="phoneNumber"
                             type="tel" 
                             placeholder="ادخلي رقم الهاتف"
-                            className="pl-10 text-left"
+                            className={`pl-10 text-left ${phoneError ? 'border-red-500' : ''}`}
                             dir="ltr"
+                            value={signupFormData.phoneNumber}
+                            onChange={handlePhoneChange}
                             required
                           />
                         </div>
@@ -522,6 +573,9 @@ const Auth = () => {
                           </SelectContent>
                         </Select>
                       </div>
+                      {phoneError && (
+                        <p className="text-red-500 text-sm mt-1">{phoneError}</p>
+                      )}
                   </div>
                   
                   <div>
@@ -534,6 +588,8 @@ const Auth = () => {
                         placeholder="اختاري كلمة مرور قوية"
                         className="mt-1 text-left pr-10"
                         dir="ltr"
+                        value={signupFormData.password}
+                        onChange={(e) => setSignupFormData(prev => ({ ...prev, password: e.target.value }))}
                         required
                       />
                       <button
@@ -546,7 +602,7 @@ const Auth = () => {
                     </div>
                   </div>
 
-                  <Button type="submit" className="btn-secondary w-full rounded-full py-3 mt-6" disabled={isLoading}>
+                  <Button type="submit" className="btn-secondary w-full rounded-full py-3 mt-6" disabled={isLoading || !formValid}>
                     {isLoading ? "جاري إنشاء الحساب..." : "سجلي الآن مجاناً"}
                     <ArrowRight className="w-5 h-5 mr-2" />
                   </Button>
