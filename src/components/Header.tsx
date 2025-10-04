@@ -86,7 +86,7 @@ const Header = () => {
               تطبيق من تصميم
             </span>
             <span className="text-xs font-bold text-pink-600" dir="ltr">
-              @maman_attentionnee
+              maman_attentionnee
             </span>
           </div>
         </div>
@@ -133,7 +133,7 @@ const Header = () => {
               تطبيق من تصميم
             </span>
             <span className="text-xs font-bold text-pink-600" dir="ltr">
-              @maman_attentionnee
+              maman_attentionnee
             </span>
           </div>
         </div>

@@ -20,8 +20,8 @@ const About = () => {
     },
     {
       icon: Trophy,
-      title: "شهادات معتمدة",
-      description: "شهادات إتمام معتمدة ومعترف بها"
+      title: "متابعة شخصية",
+      description: "متابعة مستمرة مع كل أم لضمان تحقيق النتائج"
     },
     {
       icon: Users2,

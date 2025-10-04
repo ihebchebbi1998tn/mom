@@ -89,9 +89,15 @@ const LoadingScreen = ({ onLoadingComplete }: LoadingScreenProps) => {
         </div>
 
         {/* App Name */}
-        <h1 className="text-2xl font-bold text-gray-800 mb-4 animate-pulse">
+        <h1 className="text-2xl font-bold text-gray-800 mb-2 animate-pulse">
           أكاديمية الأم
         </h1>
+
+        {/* Designer Credit */}
+        <div className="text-center mb-4">
+          <p className="text-sm text-gray-600">تطبيق من تصميم</p>
+          <p className="text-base font-semibold text-pink-600" dir="ltr">maman_attentionnee</p>
+        </div>
 
         {/* Progress Bar */}
         <div className="w-64 h-2 bg-pink-100 rounded-full overflow-hidden mb-4">
