@@ -110,11 +110,25 @@ const PackDetail = () => {
 
   const fetchPackDetails = async () => {
     try {
-      const response = await fetch(`https://spadadibattaglia.com/mom/api/course_packs.php?id=${id}`);
-      const data = await response.json();
+      // Fetch pack details
+      const packResponse = await fetch(`https://spadadibattaglia.com/mom/api/course_packs.php?id=${id}`);
+      const packData = await packResponse.json();
       
-      if (data.success && data.data) {
-        setPack(data.data);
+      if (packData.success && packData.data) {
+        // Fetch linked sub-packs
+        try {
+          const subPacksResponse = await fetch(`https://spadadibattaglia.com/mom/api/pack_sub_pack_links.php?pack_id=${id}`);
+          const subPacksData = await subPacksResponse.json();
+          
+          if (subPacksData.success && subPacksData.data) {
+            packData.data.sub_packs = subPacksData.data;
+          }
+        } catch (subPackError) {
+          console.error('Error fetching linked sub-packs:', subPackError);
+          // Continue without sub-packs if API fails
+        }
+        
+        setPack(packData.data);
       }
     } catch (error) {
       console.error('Error fetching pack details:', error);

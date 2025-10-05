@@ -52,12 +52,12 @@ const WorkshopViewer = () => {
         return;
       }
 
-      // Fetch videos
-      const videosResponse = await fetch(`https://spadadibattaglia.com/mom/api/workshop_videos.php?workshop_id=${workshopId}&user_access=true`);
+      // Fetch videos by workshop_id (where sub_pack_id is null)
+      const videosResponse = await fetch(`https://spadadibattaglia.com/mom/api/videos.php?workshop_id=${workshopId}`);
       const videosData = await videosResponse.json();
       
       if (videosData.success) {
-        setVideos(videosData.data || []);
+        setVideos(videosData.videos || []);
       }
     } catch (error) {
       console.error('Error:', error);

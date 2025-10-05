@@ -206,8 +206,8 @@ const Consultation = () => {
                     <ArrowLeft className="w-5 h-5 mr-2" />
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="w-[95vw] max-w-sm sm:max-w-md mx-auto my-4 max-h-[90vh] overflow-y-auto">
-                  <DialogHeader className="pb-4">
+                <DialogContent className="w-full sm:w-[95vw] max-w-sm sm:max-w-md mx-auto my-0 sm:my-4 h-[100dvh] sm:h-auto sm:max-h-[90vh] overflow-y-auto rounded-none sm:rounded-lg">
+                  <DialogHeader className="pb-4 pt-8">
                     <DialogTitle className="text-right text-lg sm:text-xl">حجز موعد استشارة</DialogTitle>
                   </DialogHeader>
                   

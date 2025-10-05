@@ -171,11 +171,14 @@ const BlogDetail = () => {
               {/* Article Header */}
               <div className="mb-8">
                 {blogPost.featured_image && (
-                  <div className="aspect-video overflow-hidden rounded-xl mb-6">
+                  <div className="aspect-video overflow-hidden rounded-xl mb-6 bg-gradient-to-br from-pink-100 to-purple-100">
                     <img 
                       src={blogPost.featured_image} 
                       alt={blogPost.title}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=450&fit=crop';
+                      }}
                     />
                   </div>
                 )}

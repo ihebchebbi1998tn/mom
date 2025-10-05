@@ -335,9 +335,11 @@ export function UserSidebar({ onSectionSelect, isOpen = false, onToggle }: UserS
       <div className={`
         ${isMobile ? 'fixed' : 'relative'} 
         ${isMobile && !isOpen ? 'translate-x-full' : 'translate-x-0'}
-        w-80 bg-gradient-to-b from-white to-slate-50/80 shadow-xl border-l border-slate-200/50 
-        flex flex-col ${isMobile ? 'h-screen' : 'h-[calc(100vh-80px)]'} transition-transform duration-300 ease-in-out z-40
-        ${isMobile ? 'right-0 top-0' : ''}
+        w-80 bg-gradient-to-b from-white to-slate-50/80 shadow-xl 
+        ${isMobile ? 'border-l' : 'border-r'} border-slate-200/50 
+        flex flex-col ${isMobile ? 'h-screen' : 'h-[calc(100vh-80px)]'} transition-transform duration-300 ease-in-out
+        ${isMobile ? 'right-0 top-0 z-40' : 'z-10'}
+        flex-shrink-0
       `}>
         {/* Professional Sidebar Header */}
         <div className="border-b border-slate-200/50 p-4 bg-gradient-to-r from-blue-50 to-purple-50/50 flex-shrink-0">

@@ -77,14 +77,10 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-white/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="border-t border-white/20 pt-8 flex justify-center items-center">
           <p className="text-white/80 text-sm">
             © 2024 أكاديمية الأم. جميع الحقوق محفوظة.
           </p>
-          <div className="flex items-center gap-6 text-sm">
-            <a href="#" className="text-white/80 hover:text-white transition-colors">سياسة الخصوصية</a>
-            <a href="#" className="text-white/80 hover:text-white transition-colors">شروط الاستخدام</a>
-          </div>
         </div>
       </div>
     </footer>

@@ -250,10 +250,19 @@ const Reviews = () => {
         </div>
       </header>
 
-      {/* Main Layout - Content + Sidebar Side by Side */}
-      <div className="flex h-[calc(100vh-80px)]">
-        {/* Content Area - Left Side */}
-        <main className="flex-1 px-4 md:px-8 py-6 lg:py-8 transition-all duration-200 overflow-x-hidden overflow-y-auto">
+      {/* Main Layout - Sidebar + Content Side by Side (Desktop Only) */}
+      <div className="flex h-[calc(100vh-80px)] w-full">
+        {/* Sidebar - Left Side (Desktop Only) */}
+        {!isMobile && (
+          <UserSidebar 
+            onSectionSelect={handleSectionSelect}
+            isOpen={true}
+            onToggle={() => {}}
+          />
+        )}
+
+        {/* Content Area - Takes remaining space */}
+        <main className="flex-1 px-4 md:px-8 py-6 lg:py-8 transition-all duration-200 overflow-y-auto overflow-x-hidden">
           {/* Header Section */}
           <div ref={ref} className={`text-center mb-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <div className="flex items-center justify-center gap-3 mb-4">
@@ -356,12 +365,14 @@ const Reviews = () => {
           )}
         </main>
 
-        {/* Sidebar - Right Side */}
-        <UserSidebar 
-          onSectionSelect={handleSectionSelect}
-          isOpen={isMobile ? isSidebarOpen : true}
-          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-        />
+        {/* Mobile Sidebar - Overlay */}
+        {isMobile && (
+          <UserSidebar 
+            onSectionSelect={handleSectionSelect}
+            isOpen={isSidebarOpen}
+            onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+          />
+        )}
       </div>
       
       {/* Floating WhatsApp */}

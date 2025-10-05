@@ -264,13 +264,13 @@ const BlogsManagement = () => {
                 </div>
                 
                 {blog.featured_image && (
-                  <div className="mt-4">
+                  <div className="mt-4 bg-gradient-to-br from-pink-50 to-purple-50 rounded-lg overflow-hidden">
                     <img 
                       src={blog.featured_image} 
                       alt={blog.title}
-                      className="w-full h-32 object-cover rounded-lg"
+                      className="w-full h-32 object-cover"
                       onError={(e) => {
-                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=600&h=200&fit=crop';
                       }}
                     />
                   </div>

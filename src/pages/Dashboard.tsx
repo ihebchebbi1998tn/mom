@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { BookOpen, Clock, Users, Star, ArrowLeft, ShoppingCart, CheckCircle, Loader2, Eye, PlayCircle, TrendingUp, Award, Target, Calendar, CalendarIcon, MessageSquare, Phone, LogOut, MapPin, Menu } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -139,6 +139,13 @@ const Dashboard = () => {
   const [clientName, setClientName] = useState("");
   const [availabilities, setAvailabilities] = useState<AvailabilityRecord[]>([]);
 
+  // Auto-fill client name when modal opens
+  useEffect(() => {
+    if (isConsultationOpen && user?.name) {
+      setClientName(user.name);
+    }
+  }, [isConsultationOpen, user]);
+
   // Video modal state
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<{url: string, title: string, poster?: string} | null>(null);
@@ -167,7 +174,7 @@ const Dashboard = () => {
       const subPacksData: { [packId: string]: SubPack[]; } = {};
       for (const pack of coursePacks) {
         try {
-          const response = await fetch(`https://spadadibattaglia.com/mom/api/sub_packs.php?pack_id=${pack.id}`);
+          const response = await fetch(`https://spadadibattaglia.com/mom/api/pack_sub_pack_links.php?pack_id=${pack.id}`);
           const data = await response.json();
           if (data.success) {
             subPacksData[pack.id] = data.data;
@@ -279,17 +286,15 @@ const Dashboard = () => {
     }
   };
   const handleVideoClick = (video: Video) => {
-    if (video.video_url.toLowerCase().endsWith('.mp4')) {
-      setSelectedVideo({
-        url: video.video_url,
-        title: video.title,
-        poster: video.thumbnail_url
-      });
-      setIsVideoModalOpen(true);
-    } else {
-      window.open(video.video_url, '_blank');
-    }
+    // Always play in modal for better UX
+    setSelectedVideo({
+      url: video.video_url,
+      title: video.title,
+      poster: video.thumbnail_url
+    });
+    setIsVideoModalOpen(true);
   };
+
 
   const handleCloseVideoModal = () => {
     setIsVideoModalOpen(false);
@@ -298,7 +303,7 @@ const Dashboard = () => {
   const fetchSubPacks = async (packId: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`https://spadadibattaglia.com/mom/api/sub_packs.php?pack_id=${packId}`);
+      const response = await fetch(`https://spadadibattaglia.com/mom/api/pack_sub_pack_links.php?pack_id=${packId}`);
       const data = await response.json();
       if (data.success) {
         setSubPacks(data.data);
@@ -353,7 +358,7 @@ const Dashboard = () => {
       // Fetch subpacks for ALL packs, not just accepted ones
       for (const pack of coursePacks) {
         try {
-          const response = await fetch(`https://spadadibattaglia.com/mom/api/sub_packs.php?pack_id=${pack.id}`);
+          const response = await fetch(`https://spadadibattaglia.com/mom/api/pack_sub_pack_links.php?pack_id=${pack.id}`);
           const data = await response.json();
           if (data.success && data.data) {
             // Add pack information to each subpack
@@ -959,29 +964,14 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
-      {/* Branding Bar */}
-      <div className="bg-gradient-to-r from-pink-100 to-rose-100 border-b border-pink-200 py-2 z-40">
-        <div className="flex justify-center items-center gap-2 px-4">
-          <img 
-            src={mamanattentionLogo} 
-            alt="أكاديمية الأم" 
-            className="w-6 h-6 object-contain"
-          />
-          <span className="text-xs font-medium text-pink-700">
-            تطبيق من تصميم
-          </span>
-          <span className="text-xs font-bold text-pink-600" dir="ltr">
-            @maman_attentionnee
-          </span>
-        </div>
-      </div>
-
       {/* Header - Full Width */}
       <header className="bg-gradient-to-r from-white via-pink-50/30 to-white backdrop-blur-md border-b border-pink-100/50 z-30 shadow-lg shadow-pink-100/20 w-full transition-all duration-300">
         <div className="px-3 sm:px-4 md:px-8 py-3 sm:py-4 lg:py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src="/lovable-uploads/134a7f12-f652-4af0-b56a-5fef2c8109bb.png" alt="MomAcademy - أكاديمية الأم" className="h-8 sm:h-10 lg:h-12 w-auto drop-shadow-sm" />
+              <Link to="/" className="cursor-pointer">
+                <img src="/lovable-uploads/134a7f12-f652-4af0-b56a-5fef2c8109bb.png" alt="MomAcademy - أكاديمية الأم" className="h-8 sm:h-10 lg:h-12 w-auto drop-shadow-sm hover:opacity-80 transition-opacity" />
+              </Link>
               <div className="flex-1 min-w-0">
                 <h1 
                   className="text-base sm:text-lg font-semibold text-slate-800 truncate"
@@ -1033,10 +1023,19 @@ const Dashboard = () => {
         </div>
       </header>
 
-      {/* Main Layout - Content + Sidebar Side by Side */}
-      <div className="flex h-[calc(100vh-80px)]">
-        {/* Content Area - Left Side */}
-        <main className="flex-1 px-4 md:px-8 lg:px-12 py-6 lg:py-8 transition-all duration-200 overflow-x-hidden">
+      {/* Main Layout - Sidebar + Content Side by Side (Desktop Only) */}
+      <div className="flex h-[calc(100vh-80px)] w-full">
+        {/* Sidebar - Left Side (Desktop Only) */}
+        {!isMobile && (
+          <UserSidebar 
+            onSectionSelect={handleSectionSelect}
+            isOpen={true}
+            onToggle={() => {}}
+          />
+        )}
+
+        {/* Content Area - Takes remaining space */}
+        <main className="flex-1 px-4 md:px-8 lg:px-12 py-6 lg:py-8 transition-all duration-200 overflow-y-auto overflow-x-hidden">
           {/* Mobile Landing Screen OR Desktop Content */}
           {isMobile && showMobileLanding ? (
             <MobileLanding onSectionSelect={handleSectionSelect} />
@@ -1107,14 +1106,10 @@ const Dashboard = () => {
                           </div>
                           
                           <div className="p-6 lg:p-8">
-                            <div className="flex items-start justify-between mb-4">
+                            <div className="mb-4">
                               <h3 className="text-xl lg:text-2xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
                                 {pack.title}
                               </h3>
-                              <div className="flex items-center gap-1 px-2 py-1 bg-yellow-50 rounded-full">
-                                <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                                <span className="text-sm font-semibold text-yellow-700">{pack.rating}</span>
-                              </div>
                             </div>
                             
                             {pack.description && (
@@ -1274,9 +1269,9 @@ const Dashboard = () => {
                         </div>
                         
                         <div className="p-6">
-                          <h3 className="text-lg font-bold text-slate-900 mb-4 group-hover:text-pink-600 transition-colors">
+                          {/* <h3 className="text-lg font-bold text-slate-900 mb-4 group-hover:text-pink-600 transition-colors">
                             {video.title}
-                          </h3>
+                          </h3> */}
                           
                           <Button
                             onClick={() => handleVideoClick(video)}
@@ -1336,11 +1331,9 @@ const Dashboard = () => {
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                               />
                               {isLocked && !isPending && (
-                                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-20">
-                                  <div className="text-center text-white">
-                                    <ShoppingCart className="w-12 h-12 mx-auto mb-2" />
-                                    <p className="text-sm font-semibold">مغلق</p>
-                                  </div>
+                                <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg z-20">
+                                  <ShoppingCart className="w-4 h-4" />
+                                  <span className="text-xs font-semibold">مغلق</span>
                                 </div>
                               )}
                               <div className="absolute top-4 left-4 text-xs font-medium bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-slate-800">
@@ -1353,11 +1346,9 @@ const Dashboard = () => {
                               <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-4 -translate-x-4"></div>
                               
                               {isLocked && !isPending && (
-                                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-20">
-                                  <div className="text-center">
-                                    <ShoppingCart className="w-12 h-12 mx-auto mb-2" />
-                                    <p className="text-sm font-semibold">مغلق</p>
-                                  </div>
+                                <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg z-20">
+                                  <ShoppingCart className="w-4 h-4" />
+                                  <span className="text-xs font-semibold">مغلق</span>
                                 </div>
                               )}
                               
@@ -1608,18 +1599,20 @@ const Dashboard = () => {
           </Dialog>
         </main>
 
-        {/* Sidebar - Right Side */}
-        <UserSidebar 
-          onSectionSelect={handleSectionSelect}
-          isOpen={isMobile ? isSidebarOpen : true}
-          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-        />
+        {/* Mobile Sidebar - Overlay */}
+        {isMobile && (
+          <UserSidebar 
+            onSectionSelect={handleSectionSelect}
+            isOpen={isSidebarOpen}
+            onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+          />
+        )}
       </div>
 
 
       {/* Consultation Booking Dialog */}
       <Dialog open={isConsultationOpen} onOpenChange={setIsConsultationOpen}>
-        <DialogContent className="w-[95vw] max-w-sm sm:max-w-md mx-auto my-4 max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-full h-full sm:w-[95vw] sm:h-auto sm:max-w-md mx-auto sm:my-4 sm:max-h-[90vh] overflow-y-auto rounded-none sm:rounded-lg p-4 sm:p-6">
           <DialogHeader className="pb-4">
             <DialogTitle className="text-right text-lg sm:text-xl">حجز موعد استشارة</DialogTitle>
           </DialogHeader>

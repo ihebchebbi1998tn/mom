@@ -280,7 +280,7 @@ const TabbedOfferings = () => {
                               <img 
                                 src={pack.image_url || "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=200&fit=crop&crop=center"} 
                                 alt={pack.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                                 loading="lazy"
                               />
                               {/* Hover Indicator - Desktop Only */}
@@ -300,7 +300,7 @@ const TabbedOfferings = () => {
                                 <video 
                                   ref={(el) => videoRefs.current[pack.id] = el}
                                   src={pack.intro_video_url}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-contain"
                                   muted={false}
                                   loop
                                   playsInline

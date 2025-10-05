@@ -35,6 +35,8 @@ try {
         case 'GET':
             if (isset($_GET['sub_pack_id'])) {
                 getVideosBySubPackId($_GET['sub_pack_id'], $db);
+            } elseif (isset($_GET['workshop_id'])) {
+                getVideosByWorkshopId($_GET['workshop_id'], $db);
             } elseif (isset($_GET['id'])) {
                 getVideo($_GET['id'], $db);
             } else {
@@ -64,11 +66,15 @@ try {
 
 function getAllVideos($db) {
     try {
-        $stmt = $db->prepare("SELECT v.*, sp.title as sub_pack_title, p.title as pack_title 
+        $stmt = $db->prepare("SELECT v.*, 
+                              sp.title as sub_pack_title, 
+                              p.title as pack_title,
+                              w.title as workshop_title
                               FROM mom_sub_pack_videos v 
                               LEFT JOIN mom_sub_packs sp ON v.sub_pack_id = sp.id 
                               LEFT JOIN mom_packs p ON sp.pack_id = p.id 
-                              ORDER BY v.sub_pack_id, v.order_index");
+                              LEFT JOIN mom_workshops w ON v.workshop_id = w.id
+                              ORDER BY COALESCE(v.sub_pack_id, 0), COALESCE(v.workshop_id, 0), v.order_index");
         $stmt->execute();
         $videos = $stmt->fetchAll();
         
@@ -99,22 +105,48 @@ function getVideosBySubPackId($subPackId, $db) {
             // For user access, filter by availability if column exists
             if ($columnExists) {
                 $stmt = $db->prepare("SELECT * FROM mom_sub_pack_videos 
-                                     WHERE sub_pack_id = ? 
+                                     WHERE sub_pack_id = ? AND workshop_id IS NULL
                                      AND status = 'active' 
                                      AND (available_at IS NULL OR available_at <= NOW()) 
-                                     ORDER BY created_at ASC");
+                                     ORDER BY order_index ASC, created_at ASC");
             } else {
                 $stmt = $db->prepare("SELECT * FROM mom_sub_pack_videos 
-                                     WHERE sub_pack_id = ? 
+                                     WHERE sub_pack_id = ? AND workshop_id IS NULL
                                      AND status = 'active' 
-                                     ORDER BY created_at ASC");
+                                     ORDER BY order_index ASC, created_at ASC");
             }
         } else {
             // For admin access, show all videos
-            $stmt = $db->prepare("SELECT * FROM mom_sub_pack_videos WHERE sub_pack_id = ? ORDER BY created_at ASC");
+            $stmt = $db->prepare("SELECT * FROM mom_sub_pack_videos WHERE sub_pack_id = ? AND workshop_id IS NULL ORDER BY order_index ASC, created_at ASC");
         }
         
         $stmt->execute([$subPackId]);
+        $videos = $stmt->fetchAll();
+        
+        echo json_encode([
+            'success' => true,
+            'data' => $videos
+        ], JSON_UNESCAPED_UNICODE);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    }
+}
+
+function getVideosByWorkshopId($workshopId, $db) {
+    $userAccess = isset($_GET['user_access']) && $_GET['user_access'] === 'true';
+    
+    try {
+        if ($userAccess) {
+            $stmt = $db->prepare("SELECT * FROM mom_sub_pack_videos 
+                                 WHERE workshop_id = ? AND sub_pack_id IS NULL
+                                 AND status = 'active' 
+                                 ORDER BY order_index ASC, created_at ASC");
+        } else {
+            // For admin access, show all videos
+            $stmt = $db->prepare("SELECT * FROM mom_sub_pack_videos WHERE workshop_id = ? AND sub_pack_id IS NULL ORDER BY order_index ASC, created_at ASC");
+        }
+        
+        $stmt->execute([$workshopId]);
         $videos = $stmt->fetchAll();
         
         echo json_encode([
@@ -140,10 +172,14 @@ function getVideo($id, $db) {
             $columnExists = false;
         }
         
-        $baseQuery = "SELECT v.*, sp.title as sub_pack_title, p.title as pack_title 
+        $baseQuery = "SELECT v.*, 
+                     sp.title as sub_pack_title, 
+                     p.title as pack_title,
+                     w.title as workshop_title
                      FROM mom_sub_pack_videos v 
                      LEFT JOIN mom_sub_packs sp ON v.sub_pack_id = sp.id 
                      LEFT JOIN mom_packs p ON sp.pack_id = p.id 
+                     LEFT JOIN mom_workshops w ON v.workshop_id = w.id
                      WHERE v.id = ?";
         
         if ($userAccess) {
@@ -172,8 +208,22 @@ function getVideo($id, $db) {
 }
 
 function uploadVideo($db) {
-    if (!isset($_FILES['video']) || !isset($_POST['sub_pack_id']) || !isset($_POST['title'])) {
+    if (!isset($_FILES['video']) || !isset($_POST['title'])) {
         echo json_encode(['success' => false, 'message' => 'Missing required fields'], JSON_UNESCAPED_UNICODE);
+        return;
+    }
+    
+    // Validate that either sub_pack_id or workshop_id is provided, but not both
+    $hasSubPack = isset($_POST['sub_pack_id']) && !empty($_POST['sub_pack_id']);
+    $hasWorkshop = isset($_POST['workshop_id']) && !empty($_POST['workshop_id']);
+    
+    if (!$hasSubPack && !$hasWorkshop) {
+        echo json_encode(['success' => false, 'message' => 'Either sub_pack_id or workshop_id must be provided'], JSON_UNESCAPED_UNICODE);
+        return;
+    }
+    
+    if ($hasSubPack && $hasWorkshop) {
+        echo json_encode(['success' => false, 'message' => 'Cannot provide both sub_pack_id and workshop_id'], JSON_UNESCAPED_UNICODE);
         return;
     }
     
@@ -269,9 +319,10 @@ function uploadVideo($db) {
             $videoUrl = 'https://spadadibattaglia.com/mom/api/uploads/videos/' . $filename;
             
             // Save to database
-            $stmt = $db->prepare("INSERT INTO mom_sub_pack_videos (sub_pack_id, title, description, video_url, thumbnail_url, duration, order_index, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $db->prepare("INSERT INTO mom_sub_pack_videos (sub_pack_id, workshop_id, title, description, video_url, thumbnail_url, duration, order_index, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
-                $_POST['sub_pack_id'],
+                $_POST['sub_pack_id'] ?? null,
+                $_POST['workshop_id'] ?? null,
                 $_POST['title'],
                 $_POST['description'] ?? null,
                 $videoUrl,
@@ -306,8 +357,22 @@ function uploadVideo($db) {
 function createVideo($db) {
     $input = json_decode(file_get_contents('php://input'), true);
     
-    if (!$input || !isset($input['sub_pack_id']) || !isset($input['title']) || !isset($input['video_url'])) {
+    if (!$input || !isset($input['title']) || !isset($input['video_url'])) {
         echo json_encode(['success' => false, 'message' => 'Missing required fields'], JSON_UNESCAPED_UNICODE);
+        return;
+    }
+    
+    // Validate that either sub_pack_id or workshop_id is provided, but not both
+    $hasSubPack = isset($input['sub_pack_id']) && !empty($input['sub_pack_id']);
+    $hasWorkshop = isset($input['workshop_id']) && !empty($input['workshop_id']);
+    
+    if (!$hasSubPack && !$hasWorkshop) {
+        echo json_encode(['success' => false, 'message' => 'Either sub_pack_id or workshop_id must be provided'], JSON_UNESCAPED_UNICODE);
+        return;
+    }
+    
+    if ($hasSubPack && $hasWorkshop) {
+        echo json_encode(['success' => false, 'message' => 'Cannot provide both sub_pack_id and workshop_id'], JSON_UNESCAPED_UNICODE);
         return;
     }
     
@@ -323,9 +388,10 @@ function createVideo($db) {
         }
         
         if ($columnExists) {
-            $stmt = $db->prepare("INSERT INTO mom_sub_pack_videos (sub_pack_id, title, description, video_url, thumbnail_url, duration, available_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $db->prepare("INSERT INTO mom_sub_pack_videos (sub_pack_id, workshop_id, title, description, video_url, thumbnail_url, duration, available_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
-                $input['sub_pack_id'],
+                $input['sub_pack_id'] ?? null,
+                $input['workshop_id'] ?? null,
                 $input['title'],
                 $input['description'] ?? null,
                 $input['video_url'],
@@ -335,9 +401,10 @@ function createVideo($db) {
                 $input['status'] ?? 'active'
             ]);
         } else {
-            $stmt = $db->prepare("INSERT INTO mom_sub_pack_videos (sub_pack_id, title, description, video_url, thumbnail_url, duration, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $db->prepare("INSERT INTO mom_sub_pack_videos (sub_pack_id, workshop_id, title, description, video_url, thumbnail_url, duration, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
-                $input['sub_pack_id'],
+                $input['sub_pack_id'] ?? null,
+                $input['workshop_id'] ?? null,
                 $input['title'],
                 $input['description'] ?? null,
                 $input['video_url'],
@@ -398,6 +465,14 @@ function updateVideo($db) {
         if (isset($input['status'])) {
             $fields[] = "status = ?";
             $values[] = $input['status'];
+        }
+        if (isset($input['sub_pack_id'])) {
+            $fields[] = "sub_pack_id = ?";
+            $values[] = $input['sub_pack_id'];
+        }
+        if (isset($input['workshop_id'])) {
+            $fields[] = "workshop_id = ?";
+            $values[] = $input['workshop_id'];
         }
         
         if (empty($fields)) {

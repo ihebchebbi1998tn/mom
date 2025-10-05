@@ -279,8 +279,18 @@ const Challenges = () => {
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-80px)]">
-        <main className="flex-1 px-4 md:px-8 py-6 lg:py-8 overflow-y-auto">
+      <div className="flex h-[calc(100vh-80px)] w-full">
+        {/* Sidebar - Left Side (Desktop Only) */}
+        {!isMobile && (
+          <UserSidebar 
+            onSectionSelect={handleSectionSelect}
+            isOpen={true}
+            onToggle={() => {}}
+          />
+        )}
+
+        {/* Content Area - Takes remaining space */}
+        <main className="flex-1 px-4 md:px-8 py-6 lg:py-8 overflow-y-auto overflow-x-hidden">
           <div ref={ref} className={`text-center mb-12 transition-all duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
             <div className="flex items-center justify-center gap-3 mb-4">
               <Target className="w-8 h-8 text-primary" />
@@ -433,11 +443,14 @@ const Challenges = () => {
           </div>
         </main>
 
-        <UserSidebar 
-          onSectionSelect={handleSectionSelect}
-          isOpen={isMobile ? isSidebarOpen : true}
-          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-        />
+        {/* Mobile Sidebar - Overlay */}
+        {isMobile && (
+          <UserSidebar 
+            onSectionSelect={handleSectionSelect}
+            isOpen={isSidebarOpen}
+            onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+          />
+        )}
       </div>
       
       <EnhancedFloatingWhatsApp />

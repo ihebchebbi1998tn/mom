@@ -105,13 +105,13 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
       setIsLoading(true);
       setLoadProgress(0);
       
-      // Auto-play video when modal opens
-      setTimeout(() => {
-        const video = videoRef.current;
-        if (video) {
-          video.play().catch(console.error);
-        }
-      }, 500);
+      // Instant auto-play when modal opens
+      const video = videoRef.current;
+      if (video) {
+        // Load and play immediately
+        video.load();
+        video.play().catch(console.error);
+      }
     }
   }, [isOpen, videoUrl]);
 
@@ -124,7 +124,11 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  const togglePlay = () => {
+  const togglePlay = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     const video = videoRef.current;
     if (!video) return;
     
@@ -165,8 +169,16 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
     if (!video) return;
     
     const time = parseFloat(e.target.value);
-    if (!isNaN(time)) {
+    if (!isNaN(time) && time >= 0 && time <= video.duration) {
       video.currentTime = time;
+      setCurrentTime(time);
+    }
+  };
+
+  const handleSeekInput = (e: React.FormEvent<HTMLInputElement>) => {
+    const time = parseFloat((e.target as HTMLInputElement).value);
+    if (!isNaN(time)) {
+      setCurrentTime(time);
     }
   };
 
@@ -244,37 +256,12 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
             <h3 className="font-semibold text-sm md:text-base" dir="rtl">{title}</h3>
           </div>
 
-          {/* Loading Indicator - Only show initially */}
-          {isLoading && duration === 0 && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center z-30 bg-black/50">
-              <Loader2 className="w-12 h-12 text-pink-500 animate-spin mb-4" />
-              <p className="text-white text-sm mb-2">جاري تحميل الفيديو...</p>
-              {loadProgress > 0 && (
-                <div className="w-64 bg-gray-700 rounded-full h-2 overflow-hidden">
-                  <div 
-                    className="bg-pink-500 h-full transition-all duration-300"
-                    style={{ width: `${loadProgress}%` }}
-                  />
-                </div>
-              )}
-            </div>
-          )}
-          
-          {/* Buffering Indicator - Show during playback if buffering */}
-          {isLoading && duration > 0 && isPlaying && (
-            <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
-              <div className="bg-black/70 rounded-full p-4">
-                <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
-              </div>
-            </div>
-          )}
-
           {/* Video Element */}
            <video
              ref={videoRef}
              poster={poster}
              className="w-full h-auto max-h-[calc(85vh-8rem)] object-contain"
-             preload="auto"
+             preload="metadata"
              playsInline
              disablePictureInPicture
              controlsList="nodownload nofullscreen"
@@ -282,6 +269,7 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
              onClick={togglePlay}
              crossOrigin="anonymous"
              autoPlay
+             muted={false}
            >
              <source src={videoUrl} type={videoUrl.toLowerCase().endsWith('.mov') ? 'video/quicktime' : 'video/mp4'} />
              <source src={videoUrl} type="video/mp4" />
@@ -313,15 +301,53 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
               <input
                 type="range"
                 min={0}
-                max={duration}
+                max={duration || 0}
+                step={0.1}
                 value={currentTime}
                 onChange={handleSeek}
-                className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+                onInput={handleSeekInput}
+                className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
                 style={{
-                  background: `linear-gradient(to right, #ec4899 0%, #ec4899 ${(currentTime / duration) * 100}%, rgba(255,255,255,0.2) ${(currentTime / duration) * 100}%, rgba(255,255,255,0.2) 100%)`
+                  background: `linear-gradient(to right, #ec4899 0%, #ec4899 ${duration > 0 ? (currentTime / duration) * 100 : 0}%, rgba(255,255,255,0.2) ${duration > 0 ? (currentTime / duration) * 100 : 0}%, rgba(255,255,255,0.2) 100%)`
                 }}
               />
-              <div className="flex justify-between text-white text-sm mt-2">
+              <style dangerouslySetInnerHTML={{__html: `
+                input[type="range"]::-webkit-slider-thumb {
+                  appearance: none;
+                  width: 16px;
+                  height: 16px;
+                  border-radius: 50%;
+                  background: #ec4899;
+                  cursor: grab;
+                  box-shadow: 0 2px 6px rgba(236, 72, 153, 0.5);
+                  transition: transform 0.1s ease;
+                }
+                input[type="range"]::-webkit-slider-thumb:hover {
+                  transform: scale(1.2);
+                }
+                input[type="range"]::-webkit-slider-thumb:active {
+                  cursor: grabbing;
+                  transform: scale(1.1);
+                }
+                input[type="range"]::-moz-range-thumb {
+                  width: 16px;
+                  height: 16px;
+                  border-radius: 50%;
+                  background: #ec4899;
+                  cursor: grab;
+                  border: none;
+                  box-shadow: 0 2px 6px rgba(236, 72, 153, 0.5);
+                  transition: transform 0.1s ease;
+                }
+                input[type="range"]::-moz-range-thumb:hover {
+                  transform: scale(1.2);
+                }
+                input[type="range"]::-moz-range-thumb:active {
+                  cursor: grabbing;
+                  transform: scale(1.1);
+                }
+              `}} />
+              <div className="flex justify-between text-white text-sm mt-2" dir="ltr">
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
               </div>
@@ -333,11 +359,7 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    togglePlay();
-                  }}
+                  onClick={togglePlay}
                   className="text-white hover:bg-white/20 rounded-full w-12 h-12 p-0 z-50"
                 >
                   {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}

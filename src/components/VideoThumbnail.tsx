@@ -15,6 +15,24 @@ const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className }: VideoThumbna
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  // Cache key for localStorage
+  const getCacheKey = (url: string) => `video-thumb-${btoa(url).substring(0, 50)}`;
+
+  // Check cache on mount
+  useEffect(() => {
+    if (!videoUrl) return;
+    
+    try {
+      const cacheKey = getCacheKey(videoUrl);
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        setGeneratedThumbnail(cached);
+      }
+    } catch (error) {
+      console.error('Error reading thumbnail cache:', error);
+    }
+  }, [videoUrl]);
+
   // Lazy load: only generate thumbnail when in viewport
   useEffect(() => {
     if (!containerRef.current) return;
@@ -34,8 +52,8 @@ const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className }: VideoThumbna
   }, []);
 
   useEffect(() => {
-    // Only generate from video if no thumbnail URL and component is in view
-    if (thumbnailUrl || !videoUrl || !isInView) return;
+    // Skip if already have cached thumbnail or not in view
+    if (!videoUrl || !isInView || generatedThumbnail) return;
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -51,6 +69,14 @@ const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className }: VideoThumbna
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
           const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
           setGeneratedThumbnail(dataUrl);
+          
+          // Cache the thumbnail
+          try {
+            const cacheKey = getCacheKey(videoUrl);
+            localStorage.setItem(cacheKey, dataUrl);
+          } catch (cacheError) {
+            console.warn('Could not cache thumbnail:', cacheError);
+          }
         }
       } catch (error) {
         console.error('Error generating thumbnail:', error);
@@ -58,8 +84,8 @@ const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className }: VideoThumbna
     };
 
     const handleLoadedData = () => {
-      const seekTime = Math.min(1, video.duration * 0.1);
-      video.currentTime = seekTime;
+      // Seek to first frame (0.1 seconds to ensure we get a valid frame)
+      video.currentTime = 0.1;
     };
 
     const handleSeeked = () => {
@@ -73,19 +99,20 @@ const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className }: VideoThumbna
       video.removeEventListener('loadeddata', handleLoadedData);
       video.removeEventListener('seeked', handleSeeked);
     };
-  }, [videoUrl, thumbnailUrl, isInView]);
+  }, [videoUrl, thumbnailUrl, isInView, generatedThumbnail]);
 
-  // Prioritize thumbnailUrl, then generated, then placeholder
-  const displayThumbnail = thumbnailUrl || generatedThumbnail;
+  // Always use generated thumbnail from video first frame
+  const displayThumbnail = generatedThumbnail;
 
   return (
-    <div ref={containerRef} className="w-full h-full">
+    <div ref={containerRef} className="w-full h-full pointer-events-none">
       {displayThumbnail ? (
         <img 
           src={displayThumbnail} 
           alt={alt} 
           className={className}
           loading="lazy"
+          draggable={false}
         />
       ) : (
         <div className={`${className} bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center animate-pulse`}>
@@ -93,8 +120,8 @@ const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className }: VideoThumbna
         </div>
       )}
 
-      {/* Hidden video and canvas for thumbnail generation - only if no thumbnail URL */}
-      {!thumbnailUrl && videoUrl && isInView && (
+      {/* Hidden video and canvas for thumbnail generation from first frame */}
+      {videoUrl && isInView && !generatedThumbnail && (
         <>
           <video
             ref={videoRef}

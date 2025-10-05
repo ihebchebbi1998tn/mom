@@ -94,6 +94,11 @@ const PackSubPackLinksModal = ({
       // Get current links from server
       const currentLinksResponse = await fetch(`https://spadadibattaglia.com/mom/api/pack_sub_pack_links.php?pack_id=${packId}`);
       const currentLinksData = await currentLinksResponse.json();
+      
+      if (!currentLinksResponse.ok) {
+        throw new Error(`API returned ${currentLinksResponse.status}: ${currentLinksData.message || 'Server error'}`);
+      }
+      
       const currentLinkedIds = new Set<number>(
         currentLinksData.success ? currentLinksData.data.map((sp: any) => Number(sp.id)) : []
       );
@@ -104,7 +109,7 @@ const PackSubPackLinksModal = ({
 
       // Add new links
       for (const subPackId of toAdd) {
-        await fetch('https://spadadibattaglia.com/mom/api/pack_sub_pack_links.php', {
+        const response = await fetch('https://spadadibattaglia.com/mom/api/pack_sub_pack_links.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -113,11 +118,16 @@ const PackSubPackLinksModal = ({
             order_index: 0
           })
         });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`Failed to add link: ${errorData.message || 'Server error'}`);
+        }
       }
 
       // Remove old links
       for (const subPackId of toRemove) {
-        await fetch('https://spadadibattaglia.com/mom/api/pack_sub_pack_links.php', {
+        const response = await fetch('https://spadadibattaglia.com/mom/api/pack_sub_pack_links.php', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -125,6 +135,11 @@ const PackSubPackLinksModal = ({
             sub_pack_id: subPackId
           })
         });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`Failed to remove link: ${errorData.message || 'Server error'}`);
+        }
       }
 
       toast({
@@ -135,9 +150,10 @@ const PackSubPackLinksModal = ({
       onSuccess();
       onClose();
     } catch (error) {
+      console.error('Error saving links:', error);
       toast({
         title: "Erreur de sauvegarde",
-        description: "Impossible de mettre à jour les liens",
+        description: error instanceof Error ? error.message : "Impossible de mettre à jour les liens. Vérifiez que la base de données est accessible.",
         variant: "destructive"
       });
     } finally {
@@ -147,7 +163,7 @@ const PackSubPackLinksModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] sm:w-full sm:max-w-2xl max-h-[85vh] sm:max-h-[80vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>
             <span 

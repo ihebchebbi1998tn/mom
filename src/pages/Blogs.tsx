@@ -141,10 +141,19 @@ const Blogs = () => {
         </div>
       </header>
 
-      {/* Main Layout - Content + Sidebar Side by Side */}
-      <div className="flex h-[calc(100vh-80px)]">
-        {/* Content Area - Left Side */}
-        <main className="flex-1 px-4 md:px-8 py-6 lg:py-8 transition-all duration-200 overflow-x-hidden overflow-y-auto">
+      {/* Main Layout - Sidebar + Content Side by Side (Desktop Only) */}
+      <div className="flex h-[calc(100vh-80px)] w-full">
+        {/* Sidebar - Left Side (Desktop Only) */}
+        {!isMobile && (
+          <UserSidebar 
+            onSectionSelect={handleSectionSelect}
+            isOpen={true}
+            onToggle={() => {}}
+          />
+        )}
+
+        {/* Content Area - Takes remaining space */}
+        <main className="flex-1 px-4 md:px-8 py-6 lg:py-8 transition-all duration-200 overflow-y-auto overflow-x-hidden">
             {/* Header Section */}
             <div ref={ref} className={`text-center mb-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               <div className="mb-4">
@@ -166,11 +175,14 @@ const Blogs = () => {
                   >
                     {/* Featured Image */}
                     {post.featured_image && (
-                      <div className="aspect-video overflow-hidden">
+                      <div className="aspect-video overflow-hidden bg-gradient-to-br from-pink-100 to-purple-100">
                         <img 
                           src={post.featured_image} 
                           alt={post.title}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=450&fit=crop';
+                          }}
                         />
                       </div>
                     )}
@@ -248,37 +260,16 @@ const Blogs = () => {
               </div>
             )}
 
-            {/* Newsletter Subscription */}
-            <div className={`text-center mt-16 transition-all duration-1000 delay-700 ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'}`}>
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg p-8 max-w-2xl mx-auto">
-                <CardContent className="p-0">
-                  <h3 className="text-2xl font-bold text-primary mb-4">
-                    اشتركي في النشرة البريدية
-                  </h3>
-                  <p className="text-muted-foreground mb-6">
-                    احصلي على أحدث المقالات والنصائح التربوية مباشرة في بريدك الإلكتروني
-                  </p>
-                  <Button 
-                    className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600" 
-                    onClick={() => {
-                      const message = encodeURIComponent("أريد الاشتراك في النشرة البريدية لتلقي أحدث المقالات");
-                      window.open(`https://wa.me/21652451892?text=${message}`, '_blank');
-                    }}
-                  >
-                    <FileText className="w-4 h-4 ml-2" />
-                    اشتركي الآن
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
         </main>
 
-        {/* Sidebar - Right Side */}
-        <UserSidebar 
-          onSectionSelect={handleSectionSelect}
-          isOpen={isMobile ? isSidebarOpen : true}
-          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-        />
+        {/* Mobile Sidebar - Overlay */}
+        {isMobile && (
+          <UserSidebar 
+            onSectionSelect={handleSectionSelect}
+            isOpen={isSidebarOpen}
+            onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+          />
+        )}
       </div>
       
       {/* Floating WhatsApp */}

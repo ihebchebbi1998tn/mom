@@ -266,10 +266,19 @@ const Workshops = () => {
         </div>
       </header>
 
-      {/* Main Layout - Content + Sidebar Side by Side */}
-      <div className="flex h-[calc(100vh-80px)]">
-        {/* Content Area - Left Side */}
-        <main className="flex-1 px-4 md:px-8 py-6 lg:py-8 transition-all duration-200 overflow-x-hidden overflow-y-auto">
+      {/* Main Layout - Sidebar + Content Side by Side (Desktop Only) */}
+      <div className="flex h-[calc(100vh-80px)] w-full">
+        {/* Sidebar - Left Side (Desktop Only) */}
+        {!isMobile && (
+          <UserSidebar 
+            onSectionSelect={handleSectionSelect}
+            isOpen={true}
+            onToggle={() => {}}
+          />
+        )}
+
+        {/* Content Area - Takes remaining space */}
+        <main className="flex-1 px-4 md:px-8 py-6 lg:py-8 transition-all duration-200 overflow-y-auto overflow-x-hidden">
             {/* Header Section */}
             <div ref={ref} className={`text-center mb-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               <div className="mb-4">
@@ -292,10 +301,7 @@ const Workshops = () => {
                     <CardContent className="p-6">
                       {/* Workshop Header */}
                       <div className="mb-4">
-                        <span className="inline-block px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full mb-3">
-                          {workshop.type}
-                        </span>
-                        <h3 
+                        <h3
                           className={`text-xl font-bold text-primary mb-2 ${getTextAlignmentClasses(workshop.title)} ${getContainerDirection(workshop.title)}`}
                           dir={getTextDirection(workshop.title)}
                           style={{ unicodeBidi: 'plaintext' }}
@@ -320,19 +326,9 @@ const Workshops = () => {
                           <span>{workshop.duration}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
-                          <span>الدفعة القادمة: {formatDate(workshop.next_date)}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
                           <Users className="w-4 h-4 text-primary flex-shrink-0" />
                           <span>مسجل: {workshop.enrolled_count}/{workshop.max_participants}</span>
                         </div>
-                        {workshop.location && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
-                            <span>{workshop.location}</span>
-                          </div>
-                        )}
                       </div>
 
                       {/* Highlights */}
@@ -470,12 +466,14 @@ const Workshops = () => {
             </div>
         </main>
 
-        {/* Sidebar - Right Side */}
-        <UserSidebar 
-          onSectionSelect={handleSectionSelect}
-          isOpen={isMobile ? isSidebarOpen : true}
-          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-        />
+        {/* Mobile Sidebar - Overlay */}
+        {isMobile && (
+          <UserSidebar 
+            onSectionSelect={handleSectionSelect}
+            isOpen={isSidebarOpen}
+            onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+          />
+        )}
       </div>
       
       {/* Floating WhatsApp */}
