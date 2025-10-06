@@ -265,7 +265,11 @@ const TabbedOfferings = () => {
                       onMouseEnter={() => !isMobile && setHoveredPack(pack.id)}
                       onMouseLeave={() => !isMobile && setHoveredPack(null)}
                     >
-                      <div className="bg-card rounded-xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col h-full border border-border/50">
+                      <div className={`bg-card rounded-xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-col h-full ${
+                        pack.title.includes('الذهني') 
+                          ? 'border-2 border-yellow-400 relative before:absolute before:inset-0 before:rounded-xl before:p-[2px] before:bg-gradient-to-r before:from-yellow-300 before:via-amber-400 before:to-yellow-300 before:-z-10 before:animate-shimmer after:absolute after:inset-0 after:rounded-xl after:shadow-[0_0_20px_rgba(251,191,36,0.5)] after:-z-10 after:animate-pulse'
+                          : 'border border-border/50'
+                      }`}>
                         {/* Image/Video Section */}
                         <div className="relative h-48 overflow-hidden perspective-1000">
                           <div 
@@ -358,7 +362,11 @@ const TabbedOfferings = () => {
                           {/* Button */}
                           <Button 
                             size="sm" 
-                            className="btn-hero w-full hover:shadow-[0_0_30px_rgba(233,30,99,0.5)] hover:scale-105 transition-all duration-300 relative overflow-hidden before:absolute before:top-0 before:left-[-100%] before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:animate-shimmer before:skew-x-12" 
+                            className={`w-full hover:scale-105 transition-all duration-300 relative overflow-hidden ${
+                              pack.title.includes('الذهني')
+                                ? 'bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-400 text-white font-bold hover:shadow-[0_0_30px_rgba(251,191,36,0.7)] border-2 border-yellow-300 before:absolute before:top-0 before:left-[-100%] before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/40 before:to-transparent before:animate-shimmer before:skew-x-12'
+                                : 'btn-hero hover:shadow-[0_0_30px_rgba(233,30,99,0.5)] before:absolute before:top-0 before:left-[-100%] before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:animate-shimmer before:skew-x-12'
+                            }`}
                             onClick={() => navigate(`/pack/${pack.id}`)}
                           >
                             للمزيد من التفاصيل

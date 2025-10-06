@@ -1,3 +1,6 @@
+-- Refactored challenge_videos.php to use unified mom_sub_pack_videos table
+-- This API now retrieves challenge videos from the mom_sub_pack_videos table
+-- where challenge_id is not null
 <?php
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
@@ -23,9 +26,11 @@ try {
             if (isset($_GET['challenge_id'])) {
                 $query = "
                     SELECT v.*, c.title as challenge_title 
-                    FROM mom_challenge_videos v
+                    FROM mom_sub_pack_videos v
                     JOIN mom_challenges c ON v.challenge_id = c.id
-                    WHERE v.challenge_id = ?
+                    WHERE v.challenge_id = ? 
+                    AND v.sub_pack_id IS NULL 
+                    AND v.workshop_id IS NULL
                 ";
                 
                 if (isset($_GET['user_access']) && $_GET['user_access'] === 'true') {
@@ -39,16 +44,18 @@ try {
             } elseif (isset($_GET['id'])) {
                 $stmt = $db->prepare("
                     SELECT v.*, c.title as challenge_title 
-                    FROM mom_challenge_videos v
+                    FROM mom_sub_pack_videos v
                     JOIN mom_challenges c ON v.challenge_id = c.id
-                    WHERE v.id = ?
+                    WHERE v.id = ? 
+                    AND v.challenge_id IS NOT NULL
                 ");
                 $stmt->execute([$_GET['id']]);
             } else {
                 $stmt = $db->query("
                     SELECT v.*, c.title as challenge_title 
-                    FROM mom_challenge_videos v
+                    FROM mom_sub_pack_videos v
                     JOIN mom_challenges c ON v.challenge_id = c.id
+                    WHERE v.challenge_id IS NOT NULL
                     ORDER BY v.created_at DESC
                 ");
             }
@@ -59,7 +66,7 @@ try {
 
         case 'POST':
             $stmt = $db->prepare("
-                INSERT INTO mom_challenge_videos (challenge_id, title, description, video_url, thumbnail_url, duration, order_index, status) 
+                INSERT INTO mom_sub_pack_videos (challenge_id, title, description, video_url, thumbnail_url, duration, order_index, status) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ");
             
@@ -100,7 +107,7 @@ try {
             
             $values[] = $input['id'];
             
-            $stmt = $db->prepare("UPDATE mom_challenge_videos SET " . implode(', ', $fields) . " WHERE id = ?");
+            $stmt = $db->prepare("UPDATE mom_sub_pack_videos SET " . implode(', ', $fields) . " WHERE id = ? AND challenge_id IS NOT NULL");
             $stmt->execute($values);
             
             echo json_encode(['success' => true, 'message' => 'Video updated successfully']);
@@ -111,7 +118,7 @@ try {
                 throw new Exception('Video ID is required');
             }
 
-            $stmt = $db->prepare("DELETE FROM mom_challenge_videos WHERE id = ?");
+            $stmt = $db->prepare("DELETE FROM mom_sub_pack_videos WHERE id = ? AND challenge_id IS NOT NULL");
             $stmt->execute([$input['id']]);
             
             echo json_encode(['success' => true, 'message' => 'Video deleted successfully']);

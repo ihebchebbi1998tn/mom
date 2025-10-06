@@ -3,7 +3,6 @@ import { MessageCircle, Calendar as CalendarIcon, CheckCircle, ArrowLeft, Clock,
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -228,25 +227,12 @@ const Consultation = () => {
                     <div className="space-y-3">
                       <Label className="text-right block text-sm font-medium">اختاري تاريخ الموعد</Label>
                        <div className="border rounded-lg p-3 bg-card shadow-inner flex justify-center items-center">
-                         <div className="max-w-sm">
-                           <Calendar
-                             mode="single"
-                             selected={selectedDate}
-                             onSelect={setSelectedDate}
-                             disabled={isDateDisabled}
-                             className="pointer-events-auto mx-auto bg-card text-card-foreground [&_.rdp-caption]:text-foreground [&_.rdp-caption]:text-center [&_.rdp-head_cell]:text-foreground [&_.rdp-button]:text-foreground [&_.rdp-day]:font-medium"
-                            dir="ltr"
-                            style={{ direction: 'ltr' }}
-                            modifiers={{
-                              available: (date) => !isDateDisabled(date) && getRemainingSlots(date) > 0,
-                              limited: (date) => !isDateDisabled(date) && getRemainingSlots(date) <= 2 && getRemainingSlots(date) > 0
-                            }}
-                            modifiersStyles={{
-                              available: { backgroundColor: '#dcfce7', color: '#16a34a', fontWeight: '600' },
-                              limited: { backgroundColor: '#fef3c7', color: '#d97706', fontWeight: '600' }
-                            }}
-                          />
-                        </div>
+                         <CustomCalendar
+                           selected={selectedDate}
+                           onSelect={setSelectedDate}
+                           disabled={isDateDisabled}
+                           availabilities={availabilities}
+                         />
                       </div>
                       
                       {selectedDate && (

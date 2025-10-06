@@ -63,12 +63,14 @@ function getVideosByWorkshopId($workshopId, $db) {
             $stmt = $db->prepare("SELECT * FROM mom_sub_pack_videos 
                                  WHERE workshop_id = ? 
                                  AND sub_pack_id IS NULL
+                                 AND challenge_id IS NULL
                                  AND status = 'active' 
                                  ORDER BY order_index ASC, created_at ASC");
         } else {
             $stmt = $db->prepare("SELECT * FROM mom_sub_pack_videos 
                                  WHERE workshop_id = ? 
                                  AND sub_pack_id IS NULL
+                                 AND challenge_id IS NULL
                                  ORDER BY order_index ASC, created_at ASC");
         }
         

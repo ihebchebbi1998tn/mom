@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "@/components/ImageUpload";
-import { getTextDirection, getTextAlignmentClasses } from "@/utils/textAlignment";
+import { getTextDirection, getTextAlignmentClasses, isPrimarilyArabic } from "@/utils/textAlignment";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
@@ -235,9 +235,8 @@ const BlogEditor = () => {
                     }}
                     placeholder="أدخل عنوان المقال"
                     required
-                    dir="auto"
-                    style={{ unicodeBidi: 'plaintext' }}
-                    className={`${getTextAlignmentClasses(formData.title)} ${errors.title ? 'border-red-500 border-2' : ''}`}
+                    dir={isPrimarilyArabic(formData.title) ? 'rtl' : 'ltr'}
+                    className={`${isPrimarilyArabic(formData.title) ? 'text-right' : 'text-left'} ${errors.title ? 'border-red-500 border-2' : ''}`}
                   />
                 </div>
                 
@@ -290,9 +289,8 @@ const BlogEditor = () => {
                   placeholder="ملخص مختصر للمقال"
                   rows={3}
                   required
-                  dir="auto"
-                  style={{ unicodeBidi: 'plaintext' }}
-                  className={`${getTextAlignmentClasses(formData.excerpt)} ${errors.excerpt ? 'border-red-500 border-2' : ''}`}
+                  dir={isPrimarilyArabic(formData.excerpt) ? 'rtl' : 'ltr'}
+                  className={`${isPrimarilyArabic(formData.excerpt) ? 'text-right' : 'text-left'} ${errors.excerpt ? 'border-red-500 border-2' : ''}`}
                 />
               </div>
               
@@ -302,22 +300,39 @@ const BlogEditor = () => {
                   {errors.content && <span className="text-red-500 ml-2">(Requis)</span>}
                 </Label>
                 <div 
-                  className={`bg-white rounded-md border min-h-[500px] ${getTextAlignmentClasses(formData.content)} ${errors.content ? 'border-red-500 border-2' : ''}`}
-                  dir="auto"
-                  style={{ unicodeBidi: 'plaintext' }}
+                  className={`bg-white rounded-md border min-h-[500px] ${errors.content ? 'border-red-500 border-2' : ''}`}
                 >
-                  <ReactQuill
-                    theme="snow"
-                    value={formData.content}
-                    onChange={(value) => {
-                      setFormData({...formData, content: value});
-                      setErrors({...errors, content: false});
-                    }}
-                    modules={quillModules}
-                    formats={quillFormats}
-                    placeholder="اكتب محتوى المقال هنا مع التنسيق..."
-                    style={{ height: '450px' }}
-                  />
+                  <style dangerouslySetInnerHTML={{__html: `
+                    .quill-rtl-content .ql-editor {
+                      direction: rtl;
+                      text-align: right;
+                    }
+                    .quill-rtl-content .ql-editor p,
+                    .quill-rtl-content .ql-editor h1,
+                    .quill-rtl-content .ql-editor h2,
+                    .quill-rtl-content .ql-editor h3,
+                    .quill-rtl-content .ql-editor div {
+                      text-align: right;
+                    }
+                    .quill-ltr-content .ql-editor {
+                      direction: ltr;
+                      text-align: left;
+                    }
+                  `}} />
+                  <div className={isPrimarilyArabic(formData.content) ? 'quill-rtl-content' : 'quill-ltr-content'}>
+                    <ReactQuill
+                      theme="snow"
+                      value={formData.content}
+                      onChange={(value) => {
+                        setFormData({...formData, content: value});
+                        setErrors({...errors, content: false});
+                      }}
+                      modules={quillModules}
+                      formats={quillFormats}
+                      placeholder="اكتب محتوى المقال هنا مع التنسيق..."
+                      style={{ height: '450px' }}
+                    />
+                  </div>
                 </div>
               </div>
               
