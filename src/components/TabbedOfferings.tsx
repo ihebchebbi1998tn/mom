@@ -308,6 +308,8 @@ const TabbedOfferings = () => {
                                   muted={false}
                                   loop
                                   playsInline
+                                  preload="none"
+                                  style={{ contentVisibility: 'auto' }}
                                 />
                               </div>
                             )}
@@ -339,7 +341,7 @@ const TabbedOfferings = () => {
                           
                           {/* Description - if available */}
                           {pack.description && (
-                            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                            <p className="text-sm text-muted-foreground mb-4">
                               {pack.description}
                             </p>
                           )}

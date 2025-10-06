@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Play, Clock, Users, Star, ArrowLeft, User } from "lucide-react";
+import { Play, Clock, Users, Star, ArrowLeft, User, Briefcase, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import oldLogo from "@/assets/maman-attentionnee-logo.png";
 
@@ -18,6 +18,26 @@ interface CoursePack {
   image_url?: string;
   description?: string;
   status: string;
+  workshops?: Workshop[];
+  challenges?: Challenge[];
+}
+
+interface Workshop {
+  id: number;
+  title: string;
+  description?: string;
+  duration?: string;
+  image_url?: string;
+  price?: number;
+}
+
+interface Challenge {
+  id: number;
+  title: string;
+  description?: string;
+  duration?: string;
+  image_url?: string;
+  difficulty?: string;
 }
 
 const CustomerDashboard = () => {
@@ -34,7 +54,31 @@ const CustomerDashboard = () => {
       const response = await fetch('https://spadadibattaglia.com/mom/api/course_packs.php');
       const data = await response.json();
       if (data.success) {
-        setCoursePacks(data.data?.filter((pack: CoursePack) => pack.status === 'active') || []);
+        const activePacks = data.data?.filter((pack: CoursePack) => pack.status === 'active') || [];
+        
+        // Fetch workshops and challenges for each pack
+        const packsWithExtras = await Promise.all(
+          activePacks.map(async (pack: CoursePack) => {
+            try {
+              // Fetch linked workshops
+              const workshopsResponse = await fetch(`https://spadadibattaglia.com/mom/api/pack_workshop_links.php?pack_id=${pack.id}`);
+              const workshopsData = await workshopsResponse.json();
+              const workshops = workshopsData.success ? workshopsData.data : [];
+
+              // Fetch linked challenges
+              const challengesResponse = await fetch(`https://spadadibattaglia.com/mom/api/pack_challenge_links.php?pack_id=${pack.id}`);
+              const challengesData = await challengesResponse.json();
+              const challenges = challengesData.success ? challengesData.data : [];
+
+              return { ...pack, workshops, challenges };
+            } catch (error) {
+              console.error(`Error fetching extras for pack ${pack.id}:`, error);
+              return { ...pack, workshops: [], challenges: [] };
+            }
+          })
+        );
+        
+        setCoursePacks(packsWithExtras);
       }
     } catch (error) {
       console.error('Error fetching course packs:', error);
@@ -234,6 +278,69 @@ const CustomerDashboard = () => {
                         )}
                       </div>
                     </div>
+
+                    {/* Workshops Preview */}
+                    {pack.workshops && pack.workshops.length > 0 && (
+                      <div className="space-y-2 border-t pt-3">
+                        <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                          <Briefcase className="w-4 h-4" />
+                          الورشات المتضمنة ({pack.workshops.length})
+                        </p>
+                        <div className="space-y-2">
+                          {pack.workshops.slice(0, 2).map((workshop) => (
+                            <div key={workshop.id} className="text-xs p-2 bg-secondary/30 rounded">
+                              <div className="font-medium">{workshop.title}</div>
+                              {workshop.duration && (
+                                <div className="text-muted-foreground flex items-center gap-1 mt-1">
+                                  <Clock className="w-3 h-3" />
+                                  {workshop.duration}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                          {pack.workshops.length > 2 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{pack.workshops.length - 2} ورشة إضافية
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Challenges Preview */}
+                    {pack.challenges && pack.challenges.length > 0 && (
+                      <div className="space-y-2 border-t pt-3">
+                        <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                          <Trophy className="w-4 h-4" />
+                          التحديات المتضمنة ({pack.challenges.length})
+                        </p>
+                        <div className="space-y-2">
+                          {pack.challenges.slice(0, 2).map((challenge) => (
+                            <div key={challenge.id} className="text-xs p-2 bg-secondary/30 rounded">
+                              <div className="font-medium">{challenge.title}</div>
+                              <div className="text-muted-foreground flex items-center gap-2 mt-1">
+                                {challenge.duration && (
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    {challenge.duration}
+                                  </span>
+                                )}
+                                {challenge.difficulty && (
+                                  <Badge variant="secondary" className="text-xs px-1 py-0">
+                                    {challenge.difficulty}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                          {pack.challenges.length > 2 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{pack.challenges.length - 2} تحدي إضافي
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </Card>
               ))}
