@@ -84,7 +84,7 @@ const TabbedOfferings = () => {
     if (!isMobile && hoveredPack !== null) {
       const timer = setTimeout(() => {
         setPlayingVideo(hoveredPack);
-      }, 1000);
+      }, 3000);
 
       return () => clearTimeout(timer);
     } else if (!isMobile) {
@@ -92,10 +92,14 @@ const TabbedOfferings = () => {
     }
   }, [hoveredPack, isMobile]);
 
-  // Mobile: play video for pack in viewport immediately
+  // Mobile: play video for pack in viewport after 1.5 seconds
   useEffect(() => {
     if (isMobile && visiblePackInView !== null) {
-      setPlayingVideo(visiblePackInView);
+      const timer = setTimeout(() => {
+        setPlayingVideo(visiblePackInView);
+      }, 1500);
+
+      return () => clearTimeout(timer);
     } else if (isMobile && visiblePackInView === null) {
       setPlayingVideo(null);
     }
@@ -109,26 +113,23 @@ const TabbedOfferings = () => {
       
       if (videoElement) {
         if (playingVideo === packId) {
-          // Show loading state
-          setLoadingVideos(prev => ({ ...prev, [packId]: true }));
+          // Show loading on mobile
+          if (isMobile) {
+            setLoadingVideos(prev => ({ ...prev, [packId]: true }));
+          }
           
-          // Hide spinner when video actually starts playing
-          const onPlaying = () => {
+          // Play instantly
+          videoElement.play().catch(err => console.log('Video play error:', err));
+          
+          // Listen for when video actually starts playing
+          const handlePlaying = () => {
             setLoadingVideos(prev => ({ ...prev, [packId]: false }));
           };
-
-          videoElement.addEventListener('playing', onPlaying);
           
-          // Start playing immediately - let it buffer while playing
-          videoElement.play()
-            .catch(err => {
-              console.log('Video play error:', err);
-              setLoadingVideos(prev => ({ ...prev, [packId]: false }));
-            });
-
-          // Cleanup
+          videoElement.addEventListener('playing', handlePlaying);
+          
           return () => {
-            videoElement.removeEventListener('playing', onPlaying);
+            videoElement.removeEventListener('playing', handlePlaying);
           };
         } else {
           videoElement.pause();
@@ -137,7 +138,7 @@ const TabbedOfferings = () => {
         }
       }
     });
-  }, [playingVideo]);
+  }, [playingVideo, isMobile]);
 
   const fetchData = async () => {
     try {
@@ -326,18 +327,19 @@ const TabbedOfferings = () => {
                                   muted={false}
                                   loop
                                   playsInline
-                                  preload={isMobile ? "auto" : "metadata"}
+                                  preload="none"
                                   style={{ contentVisibility: 'auto' }}
                                 />
-                                {/* Loading Spinner */}
-                                {loadingVideos[pack.id] && (
-                                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                                    <Loader2 className="w-8 h-8 text-white animate-spin" />
-                                  </div>
-                                )}
                               </div>
                             )}
                           </div>
+                          
+                          {/* Loading Spinner - Mobile Only */}
+                          {isMobile && loadingVideos[pack.id] && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
+                              <Loader2 className="w-10 h-10 text-white animate-spin" />
+                            </div>
+                          )}
                         </div>
 
                         {/* Content Section */}
