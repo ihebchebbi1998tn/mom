@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Star, Trash2, Eye, CheckCircle, XCircle, Clock, MessageSquare } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { isPrimarilyArabic } from "@/utils/textAlignment";
 
 interface Review {
   id: number;
@@ -28,9 +29,9 @@ const ReviewsManagement = () => {
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const { toast } = useToast();
 
-  // Function to detect if text contains Latin characters
-  const isLatinText = (text: string) => {
-    return /[a-zA-Z]/.test(text);
+  // Function to detect if text is primarily Arabic (more reliable than just checking for Latin)
+  const isArabicText = (text: string) => {
+    return isPrimarilyArabic(text);
   };
 
   const fetchReviews = async () => {
@@ -151,12 +152,12 @@ const ReviewsManagement = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100"><CheckCircle className="w-3 h-3 mr-1" />Approuvé</Badge>;
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100" dir="ltr"><CheckCircle className="w-3 h-3 mr-1" />Approuvé</Badge>;
       case 'rejected':
-        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100"><XCircle className="w-3 h-3 mr-1" />Rejeté</Badge>;
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100" dir="ltr"><XCircle className="w-3 h-3 mr-1" />Rejeté</Badge>;
       case 'pending':
       default:
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"><Clock className="w-3 h-3 mr-1" />En attente</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100" dir="ltr"><Clock className="w-3 h-3 mr-1" />En attente</Badge>;
     }
   };
 
@@ -252,8 +253,8 @@ const ReviewsManagement = () => {
                     <TableCell>
                       <div 
                         className="font-semibold"
-                        dir={isLatinText(review.user_name) ? "ltr" : "rtl"}
-                        style={isLatinText(review.user_name) ? { textAlign: 'left' } : {}}
+                        dir={isArabicText(review.user_name) ? "rtl" : "ltr"}
+                        style={isArabicText(review.user_name) ? {} : { textAlign: 'left' }}
                       >
                         {review.user_name}
                       </div>
@@ -349,9 +350,9 @@ const ReviewsManagement = () => {
       {/* Review Detail Modal */}
       {selectedReview && (
         <AlertDialog open={!!selectedReview} onOpenChange={() => setSelectedReview(null)}>
-          <AlertDialogContent className="max-w-2xl">
+          <AlertDialogContent className="max-w-2xl" dir="ltr">
             <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center gap-2">
+              <AlertDialogTitle className="flex items-center gap-2" dir="ltr">
                 <MessageSquare className="w-5 h-5" />
                 Détail de l'avis
               </AlertDialogTitle>
@@ -359,17 +360,17 @@ const ReviewsManagement = () => {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="font-semibold text-sm text-muted-foreground">Utilisateur:</p>
+                      <p className="font-semibold text-sm text-muted-foreground" dir="ltr">Utilisateur:</p>
                       <p 
                         className="font-medium"
-                        dir={isLatinText(selectedReview.user_name) ? "ltr" : "rtl"}
-                        style={isLatinText(selectedReview.user_name) ? { textAlign: 'left' } : {}}
+                        dir={isArabicText(selectedReview.user_name) ? "rtl" : "ltr"}
+                        style={isArabicText(selectedReview.user_name) ? {} : { textAlign: 'left' }}
                       >
                         {selectedReview.user_name}
                       </p>
                     </div>
                     <div>
-                      <p className="font-semibold text-sm text-muted-foreground">Email:</p>
+                      <p className="font-semibold text-sm text-muted-foreground" dir="ltr">Email:</p>
                       <p className="font-medium" dir="ltr" style={{ textAlign: 'left' }}>
                         {selectedReview.user_email}
                       </p>
@@ -378,34 +379,36 @@ const ReviewsManagement = () => {
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="font-semibold text-sm text-muted-foreground">Note:</p>
+                      <p className="font-semibold text-sm text-muted-foreground" dir="ltr">Note:</p>
                       <div className="flex items-center gap-2">
                         {renderStars(selectedReview.rating)}
                         <span>({selectedReview.rating}/5)</span>
                       </div>
                     </div>
                     <div>
-                      <p className="font-semibold text-sm text-muted-foreground">Statut:</p>
+                      <p className="font-semibold text-sm text-muted-foreground" dir="ltr">Statut:</p>
                       {getStatusBadge(selectedReview.status)}
                     </div>
                   </div>
                   
                   <div>
-                    <p className="font-semibold text-sm text-muted-foreground">Date de création:</p>
+                    <p className="font-semibold text-sm text-muted-foreground" dir="ltr">Date de création:</p>
                     <p dir="ltr" style={{ textAlign: 'left' }}>{selectedReview.formatted_date}</p>
                   </div>
                   
                   <div>
-                    <p className="font-semibold text-sm text-muted-foreground">Avis:</p>
-                    <div className="bg-muted p-3 rounded-md">
-                      <p className="text-sm leading-relaxed">"{selectedReview.review_text}"</p>
+                    <p className="font-semibold text-sm text-muted-foreground" dir="ltr">Avis:</p>
+                    <div className="bg-muted p-3 rounded-md" dir="rtl">
+                      <p className="text-sm leading-relaxed text-right" style={{ unicodeBidi: 'plaintext' }}>
+                        "{selectedReview.review_text}"
+                      </p>
                     </div>
                   </div>
                 </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Fermer</AlertDialogCancel>
+              <AlertDialogCancel dir="ltr">Fermer</AlertDialogCancel>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

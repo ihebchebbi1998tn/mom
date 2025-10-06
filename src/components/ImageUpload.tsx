@@ -51,17 +51,18 @@ const ImageUpload = ({ onUploadComplete, disabled, label = "رفع صورة", cu
     // Create preview
     const preview = URL.createObjectURL(file);
     setPreviewUrl(preview);
+
+    // Auto-upload the selected file
+    await uploadFile(file);
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile) return;
-
+  const uploadFile = async (file: File) => {
     try {
       setCompressing(true);
       setUploadProgress(0);
 
       // Compress image
-      const compressedFile = await compressImage(selectedFile, 1200, 800, 0.8);
+      const compressedFile = await compressImage(file, 1200, 800, 0.8);
       
       setCompressing(false);
       setUploading(true);
@@ -90,7 +91,6 @@ const ImageUpload = ({ onUploadComplete, disabled, label = "رفع صورة", cu
                 description: "تم ضغط ورفع الصورة بنجاح"
               });
               onUploadComplete(response.image_url);
-              resetUpload();
             } else {
               throw new Error(response.message || 'Upload failed');
             }
@@ -100,9 +100,13 @@ const ImageUpload = ({ onUploadComplete, disabled, label = "رفع صورة", cu
         } else {
           throw new Error(`Upload failed with status ${xhr.status}`);
         }
+        setUploading(false);
+        setCompressing(false);
       };
 
       xhr.onerror = () => {
+        setUploading(false);
+        setCompressing(false);
         throw new Error('Upload request failed');
       };
 
@@ -115,9 +119,10 @@ const ImageUpload = ({ onUploadComplete, disabled, label = "رفع صورة", cu
         description: error instanceof Error ? error.message : "حدث خطأ غير متوقع",
         variant: "destructive"
       });
-    } finally {
       setUploading(false);
       setCompressing(false);
+      setPreviewUrl("");
+      resetUpload();
     }
   };
 
@@ -216,17 +221,6 @@ const ImageUpload = ({ onUploadComplete, disabled, label = "رفع صورة", cu
                     </div>
                   )}
 
-                  {!compressing && !uploading && selectedFile && (
-                    <Button
-                      type="button"
-                      onClick={handleUpload}
-                      className="w-full btn-hero"
-                      disabled={disabled}
-                    >
-                      <Upload className="w-4 h-4 ml-2" />
-                      رفع الصورة
-                    </Button>
-                  )}
                 </div>
               </div>
             </div>

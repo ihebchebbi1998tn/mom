@@ -504,11 +504,18 @@ const CoursePacksManagement = () => {
 
           {/* Add Button */}
           {currentView === 'packs' && (
-            <Button className="btn-hero" onClick={() => setIsCreatePackOpen(true)}>
-              <Plus className="w-4 h-4 ml-2" />
-              <span className="hidden sm:inline">Ajouter un nouveau pack</span>
-              <span className="sm:hidden">Ajouter</span>
-            </Button>
+            <>
+              <Button className="btn-hero" onClick={() => setIsCreatePackOpen(true)}>
+                <Plus className="w-4 h-4 ml-2" />
+                <span className="hidden sm:inline">Ajouter un nouveau pack</span>
+                <span className="sm:hidden">Pack</span>
+              </Button>
+              <Button className="btn-hero" onClick={() => setIsCreateSubPackOpen(true)}>
+                <Plus className="w-4 h-4 ml-2" />
+                <span className="hidden sm:inline">Ajouter un nouveau sous-pack</span>
+                <span className="sm:hidden">Sous-pack</span>
+              </Button>
+            </>
           )}
           
           {currentView === 'subpacks' && (

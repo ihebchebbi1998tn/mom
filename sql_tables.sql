@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: spadadtdbuser.mysql.db
--- Generation Time: Oct 04, 2025 at 09:34 AM
+-- Generation Time: Oct 05, 2025 at 07:17 PM
 -- Server version: 8.4.6-6
 -- PHP Version: 8.1.33
 
@@ -217,7 +217,8 @@ CREATE TABLE `mom_sub_pack_requests` (
 
 CREATE TABLE `mom_sub_pack_videos` (
   `id` int NOT NULL,
-  `sub_pack_id` int NOT NULL,
+  `sub_pack_id` int DEFAULT NULL,
+  `workshop_id` int DEFAULT NULL,
   `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` text COLLATE utf8mb4_unicode_ci,
   `video_url` text COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -229,7 +230,7 @@ CREATE TABLE `mom_sub_pack_videos` (
   `status` enum('active','inactive') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ;
 
 -- --------------------------------------------------------
 
@@ -429,7 +430,8 @@ ALTER TABLE `mom_sub_pack_requests`
 ALTER TABLE `mom_sub_pack_videos`
   ADD PRIMARY KEY (`id`),
   ADD KEY `sub_pack_id` (`sub_pack_id`),
-  ADD KEY `idx_available_at` (`available_at`);
+  ADD KEY `idx_available_at` (`available_at`),
+  ADD KEY `idx_workshop_id` (`workshop_id`);
 
 --
 -- Indexes for table `mom_track_visitors`
@@ -621,6 +623,7 @@ ALTER TABLE `mom_sub_packs`
 -- Constraints for table `mom_sub_pack_videos`
 --
 ALTER TABLE `mom_sub_pack_videos`
+  ADD CONSTRAINT `fk_workshop_videos` FOREIGN KEY (`workshop_id`) REFERENCES `mom_workshops` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `mom_sub_pack_videos_ibfk_1` FOREIGN KEY (`sub_pack_id`) REFERENCES `mom_sub_packs` (`id`) ON DELETE CASCADE;
 
 --

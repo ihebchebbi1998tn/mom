@@ -49,15 +49,15 @@ const WorkshopRequestsManagement = () => {
         setRequests(data.data || []);
       } else {
         toast({
-          title: "خطأ",
-          description: "فشل في تحميل الطلبات",
+          title: "Erreur",
+          description: "Échec du chargement des demandes",
           variant: "destructive"
         });
       }
     } catch (error) {
       toast({
-        title: "خطأ في الاتصال",
-        description: "تعذر الاتصال بالخادم",
+        title: "Erreur de connexion",
+        description: "Impossible de se connecter au serveur",
         variant: "destructive"
       });
     } finally {
@@ -85,8 +85,8 @@ const WorkshopRequestsManagement = () => {
 
       if (data.success) {
         toast({
-          title: "تم التحديث بنجاح",
-          description: `تم ${newStatus === 'accepted' ? 'قبول' : 'رفض'} الطلب`
+          title: "Mise à jour réussie",
+          description: `Demande ${newStatus === 'accepted' ? 'acceptée' : 'refusée'}`
         });
         fetchRequests();
         setIsModalOpen(false);
@@ -96,8 +96,8 @@ const WorkshopRequestsManagement = () => {
       }
     } catch (error: any) {
       toast({
-        title: "خطأ",
-        description: error.message || "فشل في تحديث الطلب",
+        title: "Erreur",
+        description: error.message || "Échec de la mise à jour de la demande",
         variant: "destructive"
       });
     } finally {
@@ -118,11 +118,11 @@ const WorkshopRequestsManagement = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'accepted':
-        return <Badge className="bg-green-100 text-green-700">مقبول</Badge>;
+        return <Badge className="bg-green-100 text-green-700">Accepté</Badge>;
       case 'rejected':
-        return <Badge className="bg-red-100 text-red-700">مرفوض</Badge>;
+        return <Badge className="bg-red-100 text-red-700">Rejeté</Badge>;
       case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-700">قيد المراجعة</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-700">En attente</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -145,28 +145,28 @@ const WorkshopRequestsManagement = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>إدارة طلبات الورشات</CardTitle>
+          <CardTitle>Gestion des demandes d'ateliers</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="flex-1 relative">
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder="البحث بالاسم، البريد الإلكتروني، أو الورشة..."
+                placeholder="Rechercher par nom, email ou atelier..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pr-10"
+                className="pl-10"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="تصفية حسب الحالة" />
+                <SelectValue placeholder="Filtrer par statut" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
-                <SelectItem value="pending">قيد المراجعة</SelectItem>
-                <SelectItem value="accepted">مقبول</SelectItem>
-                <SelectItem value="rejected">مرفوض</SelectItem>
+                <SelectItem value="all">Tous les statuts</SelectItem>
+                <SelectItem value="pending">En attente</SelectItem>
+                <SelectItem value="accepted">Accepté</SelectItem>
+                <SelectItem value="rejected">Rejeté</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -174,7 +174,7 @@ const WorkshopRequestsManagement = () => {
           <div className="space-y-4">
             {filteredRequests.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                لا توجد طلبات
+                Aucune demande
               </div>
             ) : (
               filteredRequests.map((request) => (
@@ -187,14 +187,14 @@ const WorkshopRequestsManagement = () => {
                           {getStatusBadge(request.status)}
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          <span className="font-medium">الورشة:</span> {request.workshop_title}
+                          <span className="font-medium">Atelier:</span> {request.workshop_title}
                         </p>
                         <div className="flex flex-col sm:flex-row gap-2 text-sm text-muted-foreground">
                           <span>📧 {request.user_email}</span>
                           {request.user_phone && <span>📞 {request.user_phone}</span>}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          تاريخ الطلب: {new Date(request.created_at).toLocaleDateString('ar-EG', {
+                          Date de la demande: {new Date(request.created_at).toLocaleDateString('fr-FR', {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric',
@@ -204,7 +204,7 @@ const WorkshopRequestsManagement = () => {
                         </p>
                         {request.admin_notes && (
                           <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
-                            <span className="font-medium">ملاحظات الإدارة:</span> {request.admin_notes}
+                            <span className="font-medium">Notes administratives:</span> {request.admin_notes}
                           </div>
                         )}
                       </div>
@@ -221,8 +221,8 @@ const WorkshopRequestsManagement = () => {
                                 handleStatusUpdate(request.id, 'accepted');
                               }}
                             >
-                              <CheckCircle className="w-4 h-4 ml-2" />
-                              قبول
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              Accepter
                             </Button>
                             <Button
                               size="sm"
@@ -233,8 +233,8 @@ const WorkshopRequestsManagement = () => {
                                 setIsModalOpen(true);
                               }}
                             >
-                              <XCircle className="w-4 h-4 ml-2" />
-                              رفض
+                              <XCircle className="w-4 h-4 mr-2" />
+                              Refuser
                             </Button>
                           </>
                         )}
@@ -244,8 +244,8 @@ const WorkshopRequestsManagement = () => {
                             variant="outline"
                             onClick={() => handleViewReceipt(request.recu_link!)}
                           >
-                            <Eye className="w-4 h-4 ml-2" />
-                            عرض الإيصال
+                            <Eye className="w-4 h-4 mr-2" />
+                            Voir le reçu
                           </Button>
                         )}
                       </div>
@@ -262,11 +262,11 @@ const WorkshopRequestsManagement = () => {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>رفض الطلب</DialogTitle>
+            <DialogTitle>Refuser la demande</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <Textarea
-              placeholder="اكتب سبب الرفض (اختياري)"
+              placeholder="Écrire la raison du refus (optionnel)"
               rows={4}
               id="admin-notes"
             />
@@ -279,7 +279,7 @@ const WorkshopRequestsManagement = () => {
                 }}
                 disabled={actionLoading}
               >
-                إلغاء
+                Annuler
               </Button>
               <Button
                 variant="destructive"
@@ -291,8 +291,8 @@ const WorkshopRequestsManagement = () => {
                 }}
                 disabled={actionLoading}
               >
-                {actionLoading ? <Loader2 className="w-4 h-4 animate-spin ml-2" /> : <XCircle className="w-4 h-4 ml-2" />}
-                تأكيد الرفض
+                {actionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <XCircle className="w-4 h-4 mr-2" />}
+                Confirmer le refus
               </Button>
             </div>
           </div>
@@ -303,7 +303,7 @@ const WorkshopRequestsManagement = () => {
       <Dialog open={isReceiptModalOpen} onOpenChange={setIsReceiptModalOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>إيصال الدفع</DialogTitle>
+            <DialogTitle>Reçu de paiement</DialogTitle>
           </DialogHeader>
           <div className="flex justify-center p-4">
             <img 

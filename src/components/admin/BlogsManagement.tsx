@@ -268,7 +268,7 @@ const BlogsManagement = () => {
                     <img 
                       src={blog.featured_image} 
                       alt={blog.title}
-                      className="w-full h-32 object-cover"
+                      className="w-full h-32 object-contain"
                       onError={(e) => {
                         e.currentTarget.src = 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=600&h=200&fit=crop';
                       }}

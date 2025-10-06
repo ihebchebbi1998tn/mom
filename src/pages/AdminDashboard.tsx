@@ -9,8 +9,6 @@ import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import CoursePacksManagement from "@/components/CoursePacksManagement";
 import WorkshopsManagement from "@/components/WorkshopsManagement";
-import WorkshopRequestsManagement from "@/components/WorkshopRequestsManagement";
-import ChallengeRequestsManagement from "@/components/ChallengeRequestsManagement";
 import UserManagement from "@/components/UserManagement";
 import RequestsManagement from "@/components/RequestsManagement";
 import ConsultationAvailabilityManagement from "@/components/ConsultationAvailabilityManagement";
@@ -80,7 +78,11 @@ const AdminDashboard = () => {
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
   const [visitorCount, setVisitorCount] = useState<number>(0);
   const [userCount, setUserCount] = useState<number>(0);
-  const [activeTab, setActiveTab] = useState("users");
+  
+  // Read tab from URL parameter or default to "users"
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialTab = urlParams.get('tab') || 'users';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   useEffect(() => {
@@ -123,11 +125,8 @@ const AdminDashboard = () => {
     { value: "requests", label: "Demandes", icon: ShoppingCart },
     { value: "packs", label: "Packs", icon: Video },
     { value: "workshops", label: "Workshops", icon: Settings },
-    { value: "workshop-requests", label: "D. Workshops", icon: Settings },
-    { value: "challenge-requests", label: "D. Challenges", icon: Target },
     { value: "consultations", label: "Consultations", icon: CalendarIcon },
     { value: "reviews", label: "Avis", icon: MessageSquare },
-    { value: "blogs", label: "Articles", icon: BookOpen },
     { value: "visitors", label: "Visiteurs", icon: BarChart3 },
   ];
 
@@ -146,10 +145,6 @@ const AdminDashboard = () => {
         return <CoursePacksManagement />;
       case "workshops":
         return <WorkshopsManagement />;
-      case "workshop-requests":
-        return <WorkshopRequestsManagement />;
-      case "challenge-requests":
-        return <ChallengeRequestsManagement />;
       case "consultations":
         return <ConsultationAvailabilityManagement />;
       case "reviews":
@@ -339,7 +334,7 @@ const AdminDashboard = () => {
         ) : (
           /* Desktop: Use tabs */
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-10 mb-6">
+            <TabsList className="grid w-full grid-cols-7 mb-6">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -367,14 +362,6 @@ const AdminDashboard = () => {
 
             <TabsContent value="workshops" className="space-y-6">
               <WorkshopsManagement />
-            </TabsContent>
-
-            <TabsContent value="workshop-requests" className="space-y-6">
-              <WorkshopRequestsManagement />
-            </TabsContent>
-
-            <TabsContent value="challenge-requests" className="space-y-6">
-              <ChallengeRequestsManagement />
             </TabsContent>
 
             <TabsContent value="consultations" className="space-y-6">

@@ -42,10 +42,7 @@ switch ($method) {
 
 function getAllVideos($db) {
     try {
-        $stmt = $db->prepare("SELECT v.*, w.title as workshop_title 
-                              FROM mom_workshop_videos v 
-                              LEFT JOIN mom_workshops w ON v.workshop_id = w.id 
-                              ORDER BY v.workshop_id, v.order_index");
+        $stmt = $db->prepare("SELECT * FROM mom_sub_pack_videos WHERE workshop_id IS NOT NULL ORDER BY workshop_id, order_index");
         $stmt->execute();
         $videos = $stmt->fetchAll();
         
@@ -63,12 +60,16 @@ function getVideosByWorkshopId($workshopId, $db) {
     
     try {
         if ($userAccess) {
-            $stmt = $db->prepare("SELECT * FROM mom_workshop_videos 
+            $stmt = $db->prepare("SELECT * FROM mom_sub_pack_videos 
                                  WHERE workshop_id = ? 
+                                 AND sub_pack_id IS NULL
                                  AND status = 'active' 
                                  ORDER BY order_index ASC, created_at ASC");
         } else {
-            $stmt = $db->prepare("SELECT * FROM mom_workshop_videos WHERE workshop_id = ? ORDER BY order_index ASC, created_at ASC");
+            $stmt = $db->prepare("SELECT * FROM mom_sub_pack_videos 
+                                 WHERE workshop_id = ? 
+                                 AND sub_pack_id IS NULL
+                                 ORDER BY order_index ASC, created_at ASC");
         }
         
         $stmt->execute([$workshopId]);
@@ -87,13 +88,10 @@ function getVideo($id, $db) {
     $userAccess = isset($_GET['user_access']) && $_GET['user_access'] === 'true';
     
     try {
-        $baseQuery = "SELECT v.*, w.title as workshop_title 
-                     FROM mom_workshop_videos v 
-                     LEFT JOIN mom_workshops w ON v.workshop_id = w.id 
-                     WHERE v.id = ?";
+        $baseQuery = "SELECT * FROM mom_sub_pack_videos WHERE id = ?";
         
         if ($userAccess) {
-            $baseQuery .= " AND v.status = 'active'";
+            $baseQuery .= " AND status = 'active'";
         }
         
         $stmt = $db->prepare($baseQuery);
@@ -122,7 +120,7 @@ function createVideo($db) {
     }
     
     try {
-        $stmt = $db->prepare("INSERT INTO mom_workshop_videos (workshop_id, title, description, video_url, thumbnail_url, duration, order_index, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $db->prepare("INSERT INTO mom_sub_pack_videos (workshop_id, title, description, video_url, thumbnail_url, duration, order_index, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $input['workshop_id'],
             $input['title'],
@@ -194,7 +192,7 @@ function updateVideo($db) {
         
         $values[] = $input['id'];
         
-        $sql = "UPDATE mom_workshop_videos SET " . implode(', ', $fields) . " WHERE id = ?";
+        $sql = "UPDATE mom_sub_pack_videos SET " . implode(', ', $fields) . " WHERE id = ?";
         $stmt = $db->prepare($sql);
         $stmt->execute($values);
         
@@ -220,7 +218,7 @@ function deleteVideo($db) {
     }
     
     try {
-        $stmt = $db->prepare("DELETE FROM mom_workshop_videos WHERE id = ?");
+        $stmt = $db->prepare("DELETE FROM mom_sub_pack_videos WHERE id = ?");
         $stmt->execute([$input['id']]);
         
         if ($stmt->rowCount() > 0) {

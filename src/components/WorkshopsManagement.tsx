@@ -7,9 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit, Trash2, Calendar, MapPin, Users, Clock } from "lucide-react";
+import { Plus, Edit, Trash2, Calendar, MapPin, Users, Clock, Video } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getTextAlignmentClasses, getTextDirection, getContainerDirection } from "@/utils/textAlignment";
+import WorkshopVideosManagement from "./WorkshopVideosManagement";
 
 interface Workshop {
   id: number;
@@ -35,6 +36,8 @@ const WorkshopsManagement = () => {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingWorkshop, setEditingWorkshop] = useState<Workshop | null>(null);
+  const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(null);
+  const [showVideos, setShowVideos] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -229,6 +232,18 @@ const WorkshopsManagement = () => {
     const statusInfo = statusMap[status as keyof typeof statusMap] || statusMap.active;
     return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
   };
+
+  if (showVideos && selectedWorkshop) {
+    return (
+      <WorkshopVideosManagement 
+        workshop={selectedWorkshop}
+        onBack={() => {
+          setShowVideos(false);
+          setSelectedWorkshop(null);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6" dir="ltr">
@@ -495,10 +510,21 @@ const WorkshopsManagement = () => {
                   )}
                 </div>
                 <div className="flex lg:flex-col gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="default"
+                    onClick={() => {
+                      setSelectedWorkshop(workshop);
+                      setShowVideos(true);
+                    }}
+                    title="Voir les vidéos"
+                  >
+                    <Video className="w-4 h-4" />
+                  </Button>
                   <Button size="sm" variant="outline" onClick={() => handleEdit(workshop)}>
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button 
+                  <Button
                     size="sm" 
                     variant="outline" 
                     className="text-red-500 hover:text-red-600"

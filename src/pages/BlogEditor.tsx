@@ -31,6 +31,12 @@ const BlogEditor = () => {
   const { id } = useParams();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{
+    title?: boolean;
+    excerpt?: boolean;
+    content?: boolean;
+    category?: boolean;
+  }>({});
 
   const [formData, setFormData] = useState({
     title: '',
@@ -119,7 +125,17 @@ const BlogEditor = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.excerpt || !formData.content || !formData.category) {
+    // Validate required fields
+    const newErrors = {
+      title: !formData.title.trim(),
+      excerpt: !formData.excerpt.trim(),
+      content: !formData.content.trim() || formData.content === '<p><br></p>',
+      category: !formData.category
+    };
+    
+    setErrors(newErrors);
+    
+    if (Object.values(newErrors).some(error => error)) {
       toast({
         title: "Erreur",
         description: "Veuillez remplir tous les champs requis",
@@ -151,7 +167,7 @@ const BlogEditor = () => {
           title: "Succès",
           description: id ? "Article mis à jour avec succès" : "Article créé avec succès",
         });
-        navigate('/admin');
+        navigate('/admin?tab=blogs');
       } else {
         toast({
           title: "Erreur",
@@ -206,22 +222,41 @@ const BlogEditor = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="title" dir="ltr" className="text-left">Titre de l'Article *</Label>
+                  <Label htmlFor="title" dir="ltr" className="text-left">
+                    Titre de l'Article *
+                    {errors.title && <span className="text-red-500 ml-2">(Requis)</span>}
+                  </Label>
                   <Input
                     id="title"
                     value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                    onChange={(e) => {
+                      setFormData({...formData, title: e.target.value});
+                      setErrors({...errors, title: false});
+                    }}
                     placeholder="أدخل عنوان المقال"
                     required
-                    dir={getTextDirection(formData.title)}
-                    className={getTextAlignmentClasses(formData.title)}
+                    dir="auto"
+                    style={{ unicodeBidi: 'plaintext' }}
+                    className={`${getTextAlignmentClasses(formData.title)} ${errors.title ? 'border-red-500 border-2' : ''}`}
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="category" dir="ltr" className="text-left">Catégorie *</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
-                    <SelectTrigger dir={getTextDirection(formData.category || "اختر التصنيف")}>
+                  <Label htmlFor="category" dir="ltr" className="text-left">
+                    Catégorie *
+                    {errors.category && <span className="text-red-500 ml-2">(Requis)</span>}
+                  </Label>
+                  <Select 
+                    value={formData.category} 
+                    onValueChange={(value) => {
+                      setFormData({...formData, category: value});
+                      setErrors({...errors, category: false});
+                    }}
+                  >
+                    <SelectTrigger 
+                      dir={getTextDirection(formData.category || "اختر التصنيف")}
+                      className={errors.category ? 'border-red-500 border-2' : ''}
+                    >
                       <SelectValue placeholder="اختر التصنيف" />
                     </SelectTrigger>
                     <SelectContent>
@@ -241,26 +276,43 @@ const BlogEditor = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="excerpt" dir="ltr" className="text-left">Résumé *</Label>
+                <Label htmlFor="excerpt" dir="ltr" className="text-left">
+                  Résumé *
+                  {errors.excerpt && <span className="text-red-500 ml-2">(Requis)</span>}
+                </Label>
                 <Textarea
                   id="excerpt"
                   value={formData.excerpt}
-                  onChange={(e) => setFormData({...formData, excerpt: e.target.value})}
+                  onChange={(e) => {
+                    setFormData({...formData, excerpt: e.target.value});
+                    setErrors({...errors, excerpt: false});
+                  }}
                   placeholder="ملخص مختصر للمقال"
                   rows={3}
                   required
-                  dir={getTextDirection(formData.excerpt)}
-                  className={getTextAlignmentClasses(formData.excerpt)}
+                  dir="auto"
+                  style={{ unicodeBidi: 'plaintext' }}
+                  className={`${getTextAlignmentClasses(formData.excerpt)} ${errors.excerpt ? 'border-red-500 border-2' : ''}`}
                 />
               </div>
               
               <div className="space-y-2 col-span-full">
-                <Label htmlFor="content" dir="ltr" className="text-left">Contenu de l'Article *</Label>
-                <div className="bg-white rounded-md border min-h-[500px]">
+                <Label htmlFor="content" dir="ltr" className="text-left">
+                  Contenu de l'Article *
+                  {errors.content && <span className="text-red-500 ml-2">(Requis)</span>}
+                </Label>
+                <div 
+                  className={`bg-white rounded-md border min-h-[500px] ${getTextAlignmentClasses(formData.content)} ${errors.content ? 'border-red-500 border-2' : ''}`}
+                  dir="auto"
+                  style={{ unicodeBidi: 'plaintext' }}
+                >
                   <ReactQuill
                     theme="snow"
                     value={formData.content}
-                    onChange={(value) => setFormData({...formData, content: value})}
+                    onChange={(value) => {
+                      setFormData({...formData, content: value});
+                      setErrors({...errors, content: false});
+                    }}
                     modules={quillModules}
                     formats={quillFormats}
                     placeholder="اكتب محتوى المقال هنا مع التنسيق..."
@@ -277,7 +329,8 @@ const BlogEditor = () => {
                     value={formData.author}
                     onChange={(e) => setFormData({...formData, author: e.target.value})}
                     placeholder="اسم الكاتب"
-                    dir={getTextDirection(formData.author)}
+                    dir="auto"
+                    style={{ unicodeBidi: 'plaintext' }}
                     className={getTextAlignmentClasses(formData.author)}
                   />
                 </div>
@@ -300,7 +353,8 @@ const BlogEditor = () => {
                     value={formData.read_time}
                     onChange={(e) => setFormData({...formData, read_time: e.target.value})}
                     placeholder="5 دقائق"
-                    dir={getTextDirection(formData.read_time)}
+                    dir="auto"
+                    style={{ unicodeBidi: 'plaintext' }}
                     className={getTextAlignmentClasses(formData.read_time)}
                   />
                 </div>
