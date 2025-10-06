@@ -66,6 +66,7 @@ const TabbedOfferings = () => {
   const [playingVideo, setPlayingVideo] = useState<number | null>(null);
   const [visiblePackInView, setVisiblePackInView] = useState<number | null>(null);
   const [loadingVideos, setLoadingVideos] = useState<{ [key: number]: boolean }>({});
+  const [mutedVideos, setMutedVideos] = useState<{ [key: number]: boolean }>({});
   const packRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const videoRefs = useRef<{ [key: number]: HTMLVideoElement | null }>({});
 
@@ -105,7 +106,7 @@ const TabbedOfferings = () => {
     }
   }, [isMobile, visiblePackInView]);
 
-  // Control video playback programmatically
+  // Control video playback programmatically with optimized loading
   useEffect(() => {
     Object.keys(videoRefs.current).forEach((key) => {
       const packId = parseInt(key);
@@ -113,32 +114,64 @@ const TabbedOfferings = () => {
       
       if (videoElement) {
         if (playingVideo === packId) {
-          // Show loading on mobile
+          // Show loading spinner
           if (isMobile) {
             setLoadingVideos(prev => ({ ...prev, [packId]: true }));
           }
           
-          // Play instantly
-          videoElement.play().catch(err => console.log('Video play error:', err));
+          // Always keep muted for reliable autoplay on mobile
+          videoElement.muted = true;
+          setMutedVideos(prev => ({ ...prev, [packId]: true }));
           
-          // Listen for when video actually starts playing
+          // Ensure video is loaded before playing
+          if (videoElement.readyState >= 2) {
+            videoElement.play().catch(err => console.log('Video play error:', err));
+          } else {
+            const handleCanPlay = () => {
+              videoElement.play().catch(err => console.log('Video play error:', err));
+              videoElement.removeEventListener('canplay', handleCanPlay);
+            };
+            videoElement.addEventListener('canplay', handleCanPlay);
+          }
+          
           const handlePlaying = () => {
             setLoadingVideos(prev => ({ ...prev, [packId]: false }));
           };
           
+          const handleWaiting = () => {
+            if (isMobile) {
+              setLoadingVideos(prev => ({ ...prev, [packId]: true }));
+            }
+          };
+          
           videoElement.addEventListener('playing', handlePlaying);
+          videoElement.addEventListener('waiting', handleWaiting);
           
           return () => {
             videoElement.removeEventListener('playing', handlePlaying);
+            videoElement.removeEventListener('waiting', handleWaiting);
           };
         } else {
-          videoElement.pause();
+          if (!videoElement.paused) {
+            videoElement.pause();
+          }
           videoElement.currentTime = 0;
+          videoElement.muted = true;
           setLoadingVideos(prev => ({ ...prev, [packId]: false }));
+          setMutedVideos(prev => ({ ...prev, [packId]: true }));
         }
       }
     });
   }, [playingVideo, isMobile]);
+
+  const toggleMute = (packId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const videoElement = videoRefs.current[packId];
+    if (videoElement) {
+      videoElement.muted = !videoElement.muted;
+      setMutedVideos(prev => ({ ...prev, [packId]: videoElement.muted }));
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -324,12 +357,34 @@ const TabbedOfferings = () => {
                                   ref={(el) => videoRefs.current[pack.id] = el}
                                   src={pack.intro_video_url}
                                   className="w-full h-full object-contain"
-                                  muted={false}
+                                  muted={true}
                                   loop
                                   playsInline
-                                  preload="none"
+                                  preload="metadata"
                                   style={{ contentVisibility: 'auto' }}
                                 />
+                                
+                                {/* Mute/Unmute Button - Shows when video is playing */}
+                                {playingVideo === pack.id && (
+                                  <button
+                                    onClick={(e) => toggleMute(pack.id, e)}
+                                    className="absolute bottom-3 right-3 z-30 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-all duration-200"
+                                  >
+                                    {mutedVideos[pack.id] !== false ? (
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+                                        <line x1="23" y1="9" x2="17" y2="15"/>
+                                        <line x1="17" y1="9" x2="23" y2="15"/>
+                                      </svg>
+                                    ) : (
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+                                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                                      </svg>
+                                    )}
+                                  </button>
+                                )}
                               </div>
                             )}
                           </div>
