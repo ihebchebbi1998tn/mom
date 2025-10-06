@@ -364,26 +364,57 @@ const TabbedOfferings = () => {
                                   style={{ contentVisibility: 'auto' }}
                                 />
                                 
-                                {/* Mute/Unmute Button - Shows when video is playing */}
+                                {/* Mute/Unmute Button with animated indicator */}
                                 {playingVideo === pack.id && (
-                                  <button
-                                    onClick={(e) => toggleMute(pack.id, e)}
-                                    className="absolute bottom-3 right-3 z-30 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-all duration-200"
-                                  >
-                                    {mutedVideos[pack.id] !== false ? (
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
-                                        <line x1="23" y1="9" x2="17" y2="15"/>
-                                        <line x1="17" y1="9" x2="23" y2="15"/>
-                                      </svg>
-                                    ) : (
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
-                                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-                                      </svg>
+                                  <>
+                                    {/* Floating text - Arabic instruction */}
+                                    {mutedVideos[pack.id] !== false && (
+                                      <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30">
+                                        <div className="bg-black/70 text-white px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap shadow-lg">
+                                          اضغط لتشغيل الصوت
+                                        </div>
+                                      </div>
                                     )}
-                                  </button>
+                                    
+                                    <div className="absolute bottom-3 right-3 z-30">
+                                      {/* Animated pulse rings - only show when muted */}
+                                      {mutedVideos[pack.id] !== false && (
+                                        <>
+                                          <div className="absolute inset-0 rounded-full bg-pink-500/50 animate-ping scale-125" />
+                                          <div className="absolute inset-0 rounded-full bg-yellow-400/40 animate-pulse scale-110" style={{ animationDelay: '0.3s' }} />
+                                          <div className="absolute inset-0 rounded-full bg-pink-500/30 animate-ping scale-150" style={{ animationDelay: '0.6s' }} />
+                                        </>
+                                      )}
+                                      
+                                      {/* Animated arrow pointing to button - only when muted */}
+                                      {mutedVideos[pack.id] !== false && (
+                                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 -ml-4 animate-bounce">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="drop-shadow-[0_0_8px_rgba(236,72,153,0.8)] filter">
+                                            <path d="M12 5v14m0 0l7-7m-7 7l-7-7" />
+                                          </svg>
+                                        </div>
+                                      )}
+                                    
+                                      <button
+                                        onClick={(e) => toggleMute(pack.id, e)}
+                                        className="relative bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-all duration-200"
+                                      >
+                                        {mutedVideos[pack.id] !== false ? (
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+                                            <line x1="23" y1="9" x2="17" y2="15"/>
+                                            <line x1="17" y1="9" x2="23" y2="15"/>
+                                          </svg>
+                                        ) : (
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+                                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                                          </svg>
+                                        )}
+                                      </button>
+                                    </div>
+                                  </>
                                 )}
                               </div>
                             )}
