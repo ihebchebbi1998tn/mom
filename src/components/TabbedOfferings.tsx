@@ -112,19 +112,24 @@ const TabbedOfferings = () => {
           // Show loading state
           setLoadingVideos(prev => ({ ...prev, [packId]: true }));
           
-          // Preload and play
-          if (videoElement.readyState < 3) {
-            videoElement.load();
-          }
+          // Hide spinner when video actually starts playing
+          const onPlaying = () => {
+            setLoadingVideos(prev => ({ ...prev, [packId]: false }));
+          };
+
+          videoElement.addEventListener('playing', onPlaying);
           
+          // Start playing immediately - let it buffer while playing
           videoElement.play()
-            .then(() => {
-              setLoadingVideos(prev => ({ ...prev, [packId]: false }));
-            })
             .catch(err => {
               console.log('Video play error:', err);
               setLoadingVideos(prev => ({ ...prev, [packId]: false }));
             });
+
+          // Cleanup
+          return () => {
+            videoElement.removeEventListener('playing', onPlaying);
+          };
         } else {
           videoElement.pause();
           videoElement.currentTime = 0;
