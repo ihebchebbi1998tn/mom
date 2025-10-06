@@ -8,16 +8,22 @@ import { getTextAlignmentClasses, getTextDirection, getContainerDirection } from
 import EnhancedAudioPlayer from "@/components/EnhancedAudioPlayer";
 const Testimonials = () => {
   const testimonials = [{
-    name: "أميرة",
-    package: "باقة الأم المثالية",
-    audioUrl: "/audio/testimonial1.mp3"
+    name: "سارة محمد",
+    package: "باك ذهبي",
+    audioUrl: "/audio/testimonial1.mp3",
+    imageUrl: "https://images.unsplash.com/photo-1516534775068-ba3e7458af70?w=800&auto=format&fit=crop"
   }, {
-    name: "زينب",
-    package: "برنامج تربية الطفل",
-    audioUrl: "/audio/testimonial2.mp3"
+    name: "فاطمة أحمد",
+    package: "باك ذهبي",
+    audioUrl: "/audio/testimonial2.mp3",
+    imageUrl: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&auto=format&fit=crop"
   }, {
-    name: "خديجة",
-    package: "استشارات الأمومة الشاملة",
+    name: "نور الهدى",
+    package: "باك ذهبي",
+    imageUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop"
+  }, {
+    name: "ليلى حسن",
+    package: "باك ذهبي",
     audioUrl: "/audio/testimonial3.mp3"
   }];
   const {
@@ -81,13 +87,26 @@ const Testimonials = () => {
               {/* Mom Name and Package */}
               <div className="text-right mb-4 flex-grow">
                 <h3 className="text-xl font-bold text-foreground mb-2">{testimonial.name}</h3>
-                <p className="text-primary font-medium">{testimonial.package}</p>
+                <p className="text-primary font-medium" dir="rtl">{testimonial.package}</p>
               </div>
 
-              {/* Enhanced Audio Player */}
-              <div className="mb-4">
-                <EnhancedAudioPlayer src={testimonial.audioUrl} />
-              </div>
+              {/* Review Image (if exists) */}
+              {testimonial.imageUrl && (
+                <div className="mb-4 rounded-lg overflow-hidden">
+                  <img 
+                    src={testimonial.imageUrl} 
+                    alt={`Review from ${testimonial.name}`}
+                    className="w-full h-48 object-cover"
+                  />
+                </div>
+              )}
+
+              {/* Enhanced Audio Player (if exists) */}
+              {testimonial.audioUrl && (
+                <div className="mb-4">
+                  <EnhancedAudioPlayer src={testimonial.audioUrl} />
+                </div>
+              )}
               
 
               {/* Decorative Elements */}
