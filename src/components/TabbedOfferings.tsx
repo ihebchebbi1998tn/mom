@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { BookOpen, Star, Users, ArrowLeft, Calendar, Clock, MessageSquare, CheckCircle, PlayCircle } from "lucide-react";
+import { BookOpen, Star, Users, ArrowLeft, Calendar, Clock, MessageSquare, CheckCircle, PlayCircle, Loader2 } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -65,6 +65,7 @@ const TabbedOfferings = () => {
   const [hoveredPack, setHoveredPack] = useState<number | null>(null);
   const [playingVideo, setPlayingVideo] = useState<number | null>(null);
   const [visiblePackInView, setVisiblePackInView] = useState<number | null>(null);
+  const [loadingVideos, setLoadingVideos] = useState<{ [key: number]: boolean }>({});
   const packRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const videoRefs = useRef<{ [key: number]: HTMLVideoElement | null }>({});
 
@@ -91,14 +92,10 @@ const TabbedOfferings = () => {
     }
   }, [hoveredPack, isMobile]);
 
-  // Mobile: play video for pack in viewport after 3 seconds
+  // Mobile: play video for pack in viewport immediately
   useEffect(() => {
     if (isMobile && visiblePackInView !== null) {
-      const timer = setTimeout(() => {
-        setPlayingVideo(visiblePackInView);
-      }, 3000);
-
-      return () => clearTimeout(timer);
+      setPlayingVideo(visiblePackInView);
     } else if (isMobile && visiblePackInView === null) {
       setPlayingVideo(null);
     }
@@ -112,10 +109,26 @@ const TabbedOfferings = () => {
       
       if (videoElement) {
         if (playingVideo === packId) {
-          videoElement.play().catch(err => console.log('Video play error:', err));
+          // Show loading state
+          setLoadingVideos(prev => ({ ...prev, [packId]: true }));
+          
+          // Preload and play
+          if (videoElement.readyState < 3) {
+            videoElement.load();
+          }
+          
+          videoElement.play()
+            .then(() => {
+              setLoadingVideos(prev => ({ ...prev, [packId]: false }));
+            })
+            .catch(err => {
+              console.log('Video play error:', err);
+              setLoadingVideos(prev => ({ ...prev, [packId]: false }));
+            });
         } else {
           videoElement.pause();
           videoElement.currentTime = 0;
+          setLoadingVideos(prev => ({ ...prev, [packId]: false }));
         }
       }
     });
@@ -308,9 +321,15 @@ const TabbedOfferings = () => {
                                   muted={false}
                                   loop
                                   playsInline
-                                  preload="metadata"
+                                  preload={isMobile ? "auto" : "metadata"}
                                   style={{ contentVisibility: 'auto' }}
                                 />
+                                {/* Loading Spinner */}
+                                {loadingVideos[pack.id] && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                    <Loader2 className="w-8 h-8 text-white animate-spin" />
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
