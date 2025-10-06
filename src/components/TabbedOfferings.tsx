@@ -83,7 +83,7 @@ const TabbedOfferings = () => {
     if (!isMobile && hoveredPack !== null) {
       const timer = setTimeout(() => {
         setPlayingVideo(hoveredPack);
-      }, 3000);
+      }, 1000);
 
       return () => clearTimeout(timer);
     } else if (!isMobile) {
@@ -308,7 +308,7 @@ const TabbedOfferings = () => {
                                   muted={false}
                                   loop
                                   playsInline
-                                  preload="none"
+                                  preload="auto"
                                   style={{ contentVisibility: 'auto' }}
                                 />
                               </div>
