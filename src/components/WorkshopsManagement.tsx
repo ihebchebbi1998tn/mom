@@ -11,6 +11,7 @@ import { Plus, Edit, Trash2, Calendar, MapPin, Users, Clock, Video } from "lucid
 import { useToast } from "@/hooks/use-toast";
 import { getTextAlignmentClasses, getTextDirection, getContainerDirection } from "@/utils/textAlignment";
 import WorkshopVideosManagement from "./WorkshopVideosManagement";
+import AdminThumbnailUpload from "./admin/AdminThumbnailUpload";
 
 interface Workshop {
   id: number;
@@ -47,6 +48,7 @@ const WorkshopsManagement = () => {
     location: '',
     highlights: [''],
     price: 0,
+    image_url: '',
     max_participants: 50,
     status: 'active' as 'active' | 'inactive' | 'completed' | 'cancelled'
   });
@@ -174,6 +176,7 @@ const WorkshopsManagement = () => {
       location: workshop.location,
       highlights: workshop.highlights || [''],
       price: workshop.price,
+      image_url: workshop.image_url || '',
       max_participants: workshop.max_participants,
       status: workshop.status
     });
@@ -191,6 +194,7 @@ const WorkshopsManagement = () => {
       location: '',
       highlights: [''],
       price: 0,
+      image_url: '',
       max_participants: 50,
       status: 'active'
     });
@@ -305,6 +309,16 @@ const WorkshopsManagement = () => {
                   dir={getTextDirection(formData.description)}
                   style={{ unicodeBidi: 'plaintext' }}
                   required
+                />
+              </div>
+
+              <div>
+                <Label>Image de l'Atelier</Label>
+                <AdminThumbnailUpload
+                  currentThumbnail={formData.image_url}
+                  onUploadComplete={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
+                  onUploadStart={() => {}}
+                  disabled={false}
                 />
               </div>
 

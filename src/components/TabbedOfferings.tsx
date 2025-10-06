@@ -473,57 +473,68 @@ const TabbedOfferings = () => {
               <>
                 <div className="grid xl:grid-cols-3 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
                   {workshops.map((workshop, index) => (
-                    <div 
+                  <div 
                       key={workshop.id} 
-                      className={`card-elegant p-6 flex flex-col h-full transition-all duration-1000 hover:scale-105 hover:shadow-xl ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                      className={`card-elegant overflow-hidden flex flex-col h-full transition-all duration-1000 hover:scale-105 hover:shadow-xl ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
                       style={{ transitionDelay: isVisible ? `${300 + index * 150}ms` : '0ms' }}
                     >
-                      <div className="mb-4">
+                      {/* Image Section */}
+                      <div className="relative h-48 overflow-hidden">
+                        <img 
+                          src={workshop.image_url || "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=200&fit=crop&crop=center"} 
+                          alt={workshop.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          loading="lazy"
+                        />
+                      </div>
+
+                      {/* Content Section */}
+                      <div className="p-6 flex-1 flex flex-col">
                         <h3 
-                          className={`text-xl font-bold text-foreground mb-2 ${getTextAlignmentClasses(workshop.title)} ${getContainerDirection(workshop.title)}`} 
+                          className={`text-xl font-bold text-foreground mb-3 ${getTextAlignmentClasses(workshop.title)} ${getContainerDirection(workshop.title)}`} 
                           dir={getTextDirection(workshop.title)}
                           style={{ unicodeBidi: 'plaintext' }}
                         >
                           {workshop.title}
                         </h3>
-                      </div>
 
-                      <p 
-                        className={`text-muted-foreground mb-4 leading-relaxed flex-grow ${getTextAlignmentClasses(workshop.description)} ${getContainerDirection(workshop.description)}`} 
-                        dir={getTextDirection(workshop.description)}
-                        style={{ unicodeBidi: 'plaintext' }}
-                      >
-                        {workshop.description}
-                      </p>
+                        <p 
+                          className={`text-muted-foreground mb-4 leading-relaxed flex-grow ${getTextAlignmentClasses(workshop.description)} ${getContainerDirection(workshop.description)}`} 
+                          dir={getTextDirection(workshop.description)}
+                          style={{ unicodeBidi: 'plaintext' }}
+                        >
+                          {workshop.description}
+                        </p>
 
-                      <div className="space-y-3 mb-6">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="w-4 h-4 text-primary flex-shrink-0" />
-                          <span>{workshop.duration}</span>
+                        <div className="space-y-3 mb-6">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Clock className="w-4 h-4 text-primary flex-shrink-0" />
+                            <span>{workshop.duration}</span>
+                          </div>
                         </div>
+
+                        {workshop.highlights && workshop.highlights.length > 0 && (
+                          <div className="mb-4">
+                            <h4 className="text-sm font-semibold text-foreground mb-2">نقاط القوة:</h4>
+                            <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                              {workshop.highlights.map((highlight, idx) => (
+                                <li key={idx}>{highlight}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        <Button 
+                          className="btn-hero w-full mt-auto" 
+                          onClick={() => {
+                            const message = encodeURIComponent(`أريد التسجيل في ${workshop.title}`);
+                            window.open(`https://wa.me/21652451892?text=${message}`, '_blank');
+                          }}
+                        >
+                          احجزي مقعدك الآن
+                          <ArrowLeft className="w-4 h-4 mr-2" />
+                        </Button>
                       </div>
-
-                      {workshop.highlights && workshop.highlights.length > 0 && (
-                        <div className="mb-4">
-                          <h4 className="text-sm font-semibold text-foreground mb-2">نقاط القوة:</h4>
-                          <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-                            {workshop.highlights.map((highlight, idx) => (
-                              <li key={idx}>{highlight}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      <Button 
-                        className="btn-hero w-full mt-auto" 
-                        onClick={() => {
-                          const message = encodeURIComponent(`أريد التسجيل في ${workshop.title}`);
-                          window.open(`https://wa.me/21652451892?text=${message}`, '_blank');
-                        }}
-                      >
-                        احجزي مقعدك الآن
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                      </Button>
                     </div>
                   ))}
                 </div>
