@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -104,7 +105,23 @@ const TabbedOfferings = () => {
       
       if (videoElement) {
         if (playingVideo === packId) {
-          videoElement.play().catch(err => console.log('Video play error:', err));
+          // Start playing as soon as ANY data is available (even 1 second)
+          const tryPlay = () => {
+            videoElement.play().catch(err => {
+              console.log('Video play error:', err);
+              // If play fails, try again when more data loads
+              if (videoElement.readyState < 2) {
+                videoElement.addEventListener('loadeddata', tryPlay, { once: true });
+              }
+            });
+          };
+          
+          // Play immediately if any data available, otherwise wait for first chunk
+          if (videoElement.readyState >= 1) {
+            tryPlay();
+          } else {
+            videoElement.addEventListener('loadedmetadata', tryPlay, { once: true });
+          }
         } else {
           videoElement.pause();
           videoElement.currentTime = 0;
@@ -263,16 +280,27 @@ const TabbedOfferings = () => {
                           : 'border border-border/50'
                       }`}>
                         {/* Image/Video Section */}
-                        <div className="relative h-48 overflow-hidden perspective-1000">
-                          <div 
-                            className={`relative w-full h-full transition-all duration-700 transform-style-3d ${
-                              playingVideo === pack.id && pack.intro_video_url 
-                                ? 'rotate-y-180' 
-                                : ''
-                            }`}
-                          >
-                            {/* Front - Image */}
-                            <div className="absolute inset-0 backface-hidden">
+                        <div className="relative h-48 overflow-hidden">
+                          {/* Show video when playing, otherwise show image */}
+                          {playingVideo === pack.id && pack.intro_video_url ? (
+                            <div className="absolute inset-0 animate-in fade-in duration-300">
+                              <video 
+                                ref={(el) => videoRefs.current[pack.id] = el}
+                                src={pack.intro_video_url}
+                                className="w-full h-full object-contain bg-black"
+                                muted={false}
+                                loop
+                                playsInline
+                                preload="auto"
+                                poster={pack.image_url || undefined}
+                                style={{ 
+                                  transform: 'translateZ(0)',
+                                  willChange: 'transform'
+                                }}
+                              />
+                            </div>
+                          ) : (
+                            <div className="absolute inset-0">
                               <img 
                                 src={pack.image_url || "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=200&fit=crop&crop=center"} 
                                 alt={pack.title}
@@ -289,28 +317,7 @@ const TabbedOfferings = () => {
                                 </div>
                               )}
                             </div>
-                            
-                            {/* Back - Video */}
-                            {pack.intro_video_url && (
-                              <div className="absolute inset-0 backface-hidden rotate-y-180">
-                                <video 
-                                  ref={(el) => videoRefs.current[pack.id] = el}
-                                  src={pack.intro_video_url}
-                                  className="w-full h-full object-contain"
-                                  muted={false}
-                                  loop
-                                  playsInline
-                                  preload="metadata"
-                                  poster={pack.image_url || undefined}
-                                  style={{ 
-                                    contentVisibility: 'auto',
-                                    transform: 'translateZ(0)',
-                                    willChange: 'transform'
-                                  }}
-                                />
-                              </div>
-                            )}
-                          </div>
+                          )}
                         </div>
 
                         {/* Content Section */}
