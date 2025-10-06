@@ -308,7 +308,7 @@ const TabbedOfferings = () => {
                                   muted={false}
                                   loop
                                   playsInline
-                                  preload="auto"
+                                  preload="metadata"
                                   style={{ contentVisibility: 'auto' }}
                                 />
                               </div>
