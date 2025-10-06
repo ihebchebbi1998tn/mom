@@ -78,27 +78,19 @@ const TabbedOfferings = () => {
     setVisiblePacksCount(isMobile ? 4 : 6);
   }, [isMobile]);
 
-  // Desktop: hover behavior
+  // Desktop: hover behavior - instant video
   useEffect(() => {
     if (!isMobile && hoveredPack !== null) {
-      const timer = setTimeout(() => {
-        setPlayingVideo(hoveredPack);
-      }, 3000);
-
-      return () => clearTimeout(timer);
+      setPlayingVideo(hoveredPack);
     } else if (!isMobile) {
       setPlayingVideo(null);
     }
   }, [hoveredPack, isMobile]);
 
-  // Mobile: play video for pack in viewport after 3 seconds
+  // Mobile: play video for pack in viewport - instant
   useEffect(() => {
     if (isMobile && visiblePackInView !== null) {
-      const timer = setTimeout(() => {
-        setPlayingVideo(visiblePackInView);
-      }, 3000);
-
-      return () => clearTimeout(timer);
+      setPlayingVideo(visiblePackInView);
     } else if (isMobile && visiblePackInView === null) {
       setPlayingVideo(null);
     }
@@ -308,8 +300,13 @@ const TabbedOfferings = () => {
                                   muted={false}
                                   loop
                                   playsInline
-                                  preload="none"
-                                  style={{ contentVisibility: 'auto' }}
+                                  preload="metadata"
+                                  poster={pack.image_url || undefined}
+                                  style={{ 
+                                    contentVisibility: 'auto',
+                                    transform: 'translateZ(0)',
+                                    willChange: 'transform'
+                                  }}
                                 />
                               </div>
                             )}
