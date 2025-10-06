@@ -290,6 +290,13 @@ const TabbedOfferings = () => {
                       }`}>
                         {/* Image/Video Section */}
                         <div className="relative h-48 overflow-hidden perspective-1000">
+                          {/* Loading Spinner - Overlays everything */}
+                          {loadingVideos[pack.id] && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
+                              <Loader2 className="w-12 h-12 text-white animate-spin" />
+                            </div>
+                          )}
+                          
                           <div 
                             className={`relative w-full h-full transition-all duration-700 transform-style-3d ${
                               playingVideo === pack.id && pack.intro_video_url 
@@ -329,12 +336,6 @@ const TabbedOfferings = () => {
                                   preload={isMobile ? "auto" : "metadata"}
                                   style={{ contentVisibility: 'auto' }}
                                 />
-                                {/* Loading Spinner */}
-                                {loadingVideos[pack.id] && (
-                                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                                    <Loader2 className="w-8 h-8 text-white animate-spin" />
-                                  </div>
-                                )}
                               </div>
                             )}
                           </div>
