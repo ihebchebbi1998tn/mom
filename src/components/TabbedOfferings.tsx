@@ -70,6 +70,8 @@ const TabbedOfferings = () => {
   const [videoDurations, setVideoDurations] = useState<{ [key: number]: number }>({});
   const [videoCurrentTimes, setVideoCurrentTimes] = useState<{ [key: number]: number }>({});
   const [videoPaused, setVideoPaused] = useState<{ [key: number]: boolean }>({});
+  const [showControls, setShowControls] = useState<{ [key: number]: boolean }>({});
+  const [controlsTimeout, setControlsTimeout] = useState<{ [key: number]: NodeJS.Timeout | null }>({});
   const packRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const videoRefs = useRef<{ [key: number]: HTMLVideoElement | null }>({});
 
@@ -126,6 +128,9 @@ const TabbedOfferings = () => {
           videoElement.muted = true;
           setMutedVideos(prev => ({ ...prev, [packId]: true }));
           
+          // Show controls initially (they'll auto-hide if unmuted)
+          setShowControls(prev => ({ ...prev, [packId]: true }));
+          
           // Ensure video is loaded before playing
           if (videoElement.readyState >= 2) {
             videoElement.play().catch(err => console.log('Video play error:', err));
@@ -162,10 +167,34 @@ const TabbedOfferings = () => {
           videoElement.muted = true;
           setLoadingVideos(prev => ({ ...prev, [packId]: false }));
           setMutedVideos(prev => ({ ...prev, [packId]: true }));
+          setShowControls(prev => ({ ...prev, [packId]: true }));
+          // Clear timeout when video stops
+          if (controlsTimeout[packId]) {
+            clearTimeout(controlsTimeout[packId]);
+          }
         }
       }
     });
   }, [playingVideo, isMobile]);
+
+  const resetControlsTimeout = (packId: number) => {
+    // Clear existing timeout
+    if (controlsTimeout[packId]) {
+      clearTimeout(controlsTimeout[packId]);
+    }
+    
+    // Show controls
+    setShowControls(prev => ({ ...prev, [packId]: true }));
+    
+    // Only set auto-hide if video is unmuted
+    if (mutedVideos[packId] === false) {
+      const timeout = setTimeout(() => {
+        setShowControls(prev => ({ ...prev, [packId]: false }));
+      }, 6000);
+      
+      setControlsTimeout(prev => ({ ...prev, [packId]: timeout }));
+    }
+  };
 
   const toggleMute = (packId: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -173,6 +202,17 @@ const TabbedOfferings = () => {
     if (videoElement) {
       videoElement.muted = !videoElement.muted;
       setMutedVideos(prev => ({ ...prev, [packId]: videoElement.muted }));
+      
+      // If unmuting, start the auto-hide timer
+      if (!videoElement.muted) {
+        resetControlsTimeout(packId);
+      } else {
+        // If muting, always show controls
+        if (controlsTimeout[packId]) {
+          clearTimeout(controlsTimeout[packId]);
+        }
+        setShowControls(prev => ({ ...prev, [packId]: true }));
+      }
     }
   };
 
@@ -187,6 +227,7 @@ const TabbedOfferings = () => {
         videoElement.pause();
         setVideoPaused(prev => ({ ...prev, [packId]: true }));
       }
+      resetControlsTimeout(packId);
     }
   };
 
@@ -194,16 +235,20 @@ const TabbedOfferings = () => {
     e.stopPropagation();
     const videoElement = videoRefs.current[packId];
     if (videoElement) {
-      videoElement.currentTime = Math.max(0, videoElement.currentTime - 10);
+      videoElement.currentTime = 0;
+      setVideoCurrentTimes(prev => ({ ...prev, [packId]: 0 }));
+      resetControlsTimeout(packId);
     }
   };
 
   const handleProgressChange = (packId: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
     const videoElement = videoRefs.current[packId];
-    if (videoElement) {
+    if (videoElement && videoDurations[packId]) {
       const time = parseFloat(e.target.value);
       videoElement.currentTime = time;
       setVideoCurrentTimes(prev => ({ ...prev, [packId]: time }));
+      resetControlsTimeout(packId);
     }
   };
 
@@ -416,9 +461,13 @@ const TabbedOfferings = () => {
                                 
                                 {/* Video Controls Overlay */}
                                 {playingVideo === pack.id && (
-                                  <>
+                                  <div 
+                                    onMouseMove={() => resetControlsTimeout(pack.id)}
+                                    onTouchStart={() => resetControlsTimeout(pack.id)}
+                                    className="absolute inset-0 z-20"
+                                  >
                                     {/* Floating text - Arabic instruction - smaller with pink background */}
-                                    {mutedVideos[pack.id] !== false && (
+                                    {mutedVideos[pack.id] !== false && showControls[pack.id] !== false && (
                                       <div className="absolute -top-12 left-1/2 -translate-x-1/2 -ml-4 z-30 animate-bounce">
                                         <div className="bg-pink-500/80 text-white px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap shadow-lg">
                                           اضغط لتشغيل الصوت
@@ -431,8 +480,8 @@ const TabbedOfferings = () => {
                                       </div>
                                     )}
                                     
-                                    {/* Bottom Controls Bar */}
-                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-3 z-30">
+                                    {/* Bottom Controls Bar - Show/Hide based on state */}
+                                    <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-3 z-30 transition-opacity duration-300 ${showControls[pack.id] !== false ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                                        {/* Progress Bar - Pink for passed, Gray for remaining */}
                                        <div className="mb-2" dir="ltr">
                                         <input
@@ -521,10 +570,10 @@ const TabbedOfferings = () => {
                                             )}
                                           </button>
                                         </div>
-                                      </div>
-                                    </div>
-                                  </>
-                                )}
+                                       </div>
+                                     </div>
+                                  </div>
+                                 )}
                               </div>
                             )}
                           </div>

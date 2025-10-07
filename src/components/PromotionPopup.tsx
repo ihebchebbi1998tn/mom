@@ -107,13 +107,6 @@ export const PromotionPopup = () => {
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-[95vw] sm:max-w-md p-0 overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 border-2 border-primary/20 max-h-[95vh] overflow-y-auto">
-        <button
-          onClick={handleClose}
-          className="absolute right-2 top-2 sm:right-4 sm:top-4 z-50 rounded-full bg-background/80 backdrop-blur-sm p-1.5 sm:p-2 hover:bg-background transition-colors"
-        >
-          <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-        </button>
-        
         <div className="relative">
           {/* Pack Image */}
           <div className="relative h-48 sm:h-64 overflow-hidden">

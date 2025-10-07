@@ -172,10 +172,12 @@ const BlogsManagement = () => {
                   <div className="flex-1 space-y-3">
                     <div 
                       className="flex items-center gap-3 flex-wrap"
-                      dir={getTextDirection(blog.title)}
+                      dir={getTextDirection(blog.title) === 'ltr' ? 'ltr' : 'rtl'}
                     >
                       <h3 
                         className={`text-lg font-semibold ${getTextAlignmentClasses(blog.title)}`}
+                        dir="auto"
+                        lang="ar"
                       >
                         {blog.title}
                       </h3>
@@ -187,7 +189,8 @@ const BlogsManagement = () => {
                     
                     <p 
                       className={`text-muted-foreground text-sm line-clamp-2 ${getTextAlignmentClasses(blog.excerpt)}`}
-                      dir={getTextDirection(blog.excerpt)}
+                      dir="auto"
+                      lang="ar"
                     >
                       {blog.excerpt}
                     </p>

@@ -58,7 +58,7 @@ const About = () => {
               نساعدك على الإستمتاع بحياتك&nbsp;و&nbsp;أمومتك
             </h3>
             <div className="text-right space-y-4 text-lg text-muted-foreground leading-relaxed">
-              <p className="mb-4 text-yellow-300 font-medium">
+              <p className="mb-4 text-yellow-400 font-semibold">
                 هدفنا:"أسرة متوازنة.. طفل متوازن"
               </p>
               <p className="mb-4">

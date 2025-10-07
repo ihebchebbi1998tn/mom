@@ -17,6 +17,15 @@ interface Pack {
   title: string;
 }
 
+interface Promotion {
+  id: number;
+  pack_ids: number[];
+  discount_percentage: number;
+  description: string | null;
+  end_date: string;
+  is_active: number;
+}
+
 interface PromotionsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -24,6 +33,7 @@ interface PromotionsModalProps {
 
 const PromotionsModal = ({ open, onOpenChange }: PromotionsModalProps) => {
   const [packs, setPacks] = useState<Pack[]>([]);
+  const [currentPromotion, setCurrentPromotion] = useState<Promotion | null>(null);
   const [selectedPackIds, setSelectedPackIds] = useState<number[]>([]);
   const [discountPercentage, setDiscountPercentage] = useState("");
   const [description, setDescription] = useState("");
@@ -34,6 +44,7 @@ const PromotionsModal = ({ open, onOpenChange }: PromotionsModalProps) => {
   useEffect(() => {
     if (open) {
       fetchPacks();
+      fetchActivePromotion();
     }
   }, [open]);
 
@@ -50,17 +61,35 @@ const PromotionsModal = ({ open, onOpenChange }: PromotionsModalProps) => {
     }
   };
 
+  const fetchActivePromotion = async () => {
+    try {
+      const response = await fetch("https://spadadibattaglia.com/mom/api/promotions.php?active=true");
+      const data = await response.json();
+      if (data.success && data.promotion) {
+        const promo = data.promotion;
+        setCurrentPromotion(promo);
+        setSelectedPackIds(promo.pack_ids || []);
+        setDiscountPercentage(promo.discount_percentage.toString());
+        setDescription(promo.description || "");
+        setEndDate(new Date(promo.end_date));
+        setIsActive(promo.is_active === 1);
+      } else {
+        resetForm();
+      }
+    } catch (error) {
+      console.error("Error fetching active promotion:", error);
+    }
+  };
+
   const togglePackSelection = (packId: number) => {
     setSelectedPackIds(prev =>
-      prev.includes(packId)
-        ? prev.filter(id => id !== packId)
-        : [...prev, packId]
+      prev.includes(packId) ? [] : [packId]
     );
   };
 
   const handleSubmit = async () => {
     if (selectedPackIds.length === 0) {
-      toast.error("Veuillez sélectionner au moins un pack");
+      toast.error("Veuillez sélectionner un pack");
       return;
     }
     if (!discountPercentage || parseFloat(discountPercentage) <= 0 || parseFloat(discountPercentage) > 100) {
@@ -74,10 +103,12 @@ const PromotionsModal = ({ open, onOpenChange }: PromotionsModalProps) => {
 
     setLoading(true);
     try {
+      const isUpdate = currentPromotion !== null;
       const response = await fetch("https://spadadibattaglia.com/mom/api/promotions.php", {
-        method: "POST",
+        method: isUpdate ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          ...(isUpdate && { id: currentPromotion.id }),
           pack_ids: selectedPackIds,
           discount_percentage: parseFloat(discountPercentage),
           description,
@@ -88,21 +119,22 @@ const PromotionsModal = ({ open, onOpenChange }: PromotionsModalProps) => {
 
       const data = await response.json();
       if (data.success) {
-        toast.success("Promotion créée avec succès!");
+        toast.success(isUpdate ? "Promotion mise à jour avec succès!" : "Promotion créée avec succès!");
         resetForm();
         onOpenChange(false);
       } else {
-        toast.error(data.message || "Échec de la création de la promotion");
+        toast.error(data.message || `Échec de ${isUpdate ? "la mise à jour" : "la création"} de la promotion`);
       }
     } catch (error) {
-      console.error("Error creating promotion:", error);
-      toast.error("Échec de la création de la promotion");
+      console.error("Error saving promotion:", error);
+      toast.error(`Échec de ${currentPromotion ? "la mise à jour" : "la création"} de la promotion`);
     } finally {
       setLoading(false);
     }
   };
 
   const resetForm = () => {
+    setCurrentPromotion(null);
     setSelectedPackIds([]);
     setDiscountPercentage("");
     setDescription("");
@@ -116,17 +148,20 @@ const PromotionsModal = ({ open, onOpenChange }: PromotionsModalProps) => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-left" dir="ltr">
             <Percent className="w-5 h-5 text-primary" />
-            Créer une Promotion
+            {currentPromotion ? "Modifier la Promotion Active" : "Créer une Promotion"}
           </DialogTitle>
           <DialogDescription className="text-left">
-            Sélectionnez les packs, définissez la réduction et la période de validité
+            {currentPromotion 
+              ? "Modifier la promotion active actuelle"
+              : "Sélectionnez les packs, définissez la réduction et la période de validité"
+            }
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4" dir="ltr">
           {/* Select Packs */}
           <div className="space-y-3">
-            <Label className="text-left block">Sélectionner les Packs *</Label>
+            <Label className="text-left block">Sélectionner un Pack *</Label>
             <div className="border rounded-lg p-4 max-h-48 overflow-y-auto space-y-2 text-right" dir="rtl">
               {packs.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-left" dir="ltr">Aucun pack disponible</p>
@@ -144,13 +179,13 @@ const PromotionsModal = ({ open, onOpenChange }: PromotionsModalProps) => {
                     dir="rtl"
                   >
                     <div className={cn(
-                      "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
+                      "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors",
                       selectedPackIds.includes(pack.id)
                         ? "bg-primary border-primary"
                         : "border-muted-foreground"
                     )}>
                       {selectedPackIds.includes(pack.id) && (
-                        <div className="w-3 h-3 bg-primary-foreground rounded-sm" />
+                        <div className="w-3 h-3 bg-primary-foreground rounded-full" />
                       )}
                     </div>
                     <span className="text-sm font-medium text-right" dir="rtl" lang="ar" style={{ unicodeBidi: "plaintext" }}>{pack.title}</span>
@@ -230,19 +265,6 @@ const PromotionsModal = ({ open, onOpenChange }: PromotionsModalProps) => {
             </Popover>
           </div>
 
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="description" className="text-left block">Description (Optionnel)</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Ajouter une description pour cette promotion..."
-              rows={3}
-              dir="ltr"
-            />
-          </div>
-
           {/* Active Status */}
           <div className="flex items-center justify-between p-4 border rounded-lg">
             <div className="text-left">
@@ -274,7 +296,10 @@ const PromotionsModal = ({ open, onOpenChange }: PromotionsModalProps) => {
             className="flex-1"
             disabled={loading}
           >
-            {loading ? "Création..." : "Créer la Promotion"}
+            {loading 
+              ? (currentPromotion ? "Mise à jour..." : "Création...") 
+              : (currentPromotion ? "Mettre à jour" : "Créer la Promotion")
+            }
           </Button>
         </div>
       </DialogContent>

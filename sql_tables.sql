@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: spadadtdbuser.mysql.db
--- Generation Time: Oct 05, 2025 at 07:17 PM
+-- Generation Time: Oct 07, 2025 at 09:49 AM
 -- Server version: 8.4.6-6
 -- PHP Version: 8.1.33
 
@@ -106,6 +106,20 @@ CREATE TABLE `mom_packs` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `mom_pack_challenge_links`
+--
+
+CREATE TABLE `mom_pack_challenge_links` (
+  `id` int NOT NULL,
+  `pack_id` int NOT NULL,
+  `challenge_id` int NOT NULL,
+  `order_index` int NOT NULL DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `mom_pack_sub_pack_links`
 --
 
@@ -115,6 +129,37 @@ CREATE TABLE `mom_pack_sub_pack_links` (
   `sub_pack_id` int NOT NULL,
   `order_index` int NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `mom_pack_workshop_links`
+--
+
+CREATE TABLE `mom_pack_workshop_links` (
+  `id` int NOT NULL,
+  `pack_id` int NOT NULL,
+  `workshop_id` int NOT NULL,
+  `order_index` int NOT NULL DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `mom_promotions`
+--
+
+CREATE TABLE `mom_promotions` (
+  `id` int NOT NULL,
+  `pack_ids` json NOT NULL COMMENT 'Array of pack IDs that have this promotion',
+  `discount_percentage` decimal(5,2) NOT NULL COMMENT 'Discount percentage (0-100)',
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `end_date` datetime NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -219,6 +264,7 @@ CREATE TABLE `mom_sub_pack_videos` (
   `id` int NOT NULL,
   `sub_pack_id` int DEFAULT NULL,
   `workshop_id` int DEFAULT NULL,
+  `challenge_id` int DEFAULT NULL,
   `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` text COLLATE utf8mb4_unicode_ci,
   `video_url` text COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -371,6 +417,15 @@ ALTER TABLE `mom_packs`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `mom_pack_challenge_links`
+--
+ALTER TABLE `mom_pack_challenge_links`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_pack_challenge` (`pack_id`,`challenge_id`),
+  ADD KEY `pack_id` (`pack_id`),
+  ADD KEY `challenge_id` (`challenge_id`);
+
+--
 -- Indexes for table `mom_pack_sub_pack_links`
 --
 ALTER TABLE `mom_pack_sub_pack_links`
@@ -378,6 +433,21 @@ ALTER TABLE `mom_pack_sub_pack_links`
   ADD UNIQUE KEY `unique_pack_sub_pack` (`pack_id`,`sub_pack_id`),
   ADD KEY `pack_id` (`pack_id`),
   ADD KEY `sub_pack_id` (`sub_pack_id`);
+
+--
+-- Indexes for table `mom_pack_workshop_links`
+--
+ALTER TABLE `mom_pack_workshop_links`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_pack_workshop` (`pack_id`,`workshop_id`),
+  ADD KEY `pack_id` (`pack_id`),
+  ADD KEY `workshop_id` (`workshop_id`);
+
+--
+-- Indexes for table `mom_promotions`
+--
+ALTER TABLE `mom_promotions`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `mom_requests`
@@ -431,7 +501,8 @@ ALTER TABLE `mom_sub_pack_videos`
   ADD PRIMARY KEY (`id`),
   ADD KEY `sub_pack_id` (`sub_pack_id`),
   ADD KEY `idx_available_at` (`available_at`),
-  ADD KEY `idx_workshop_id` (`workshop_id`);
+  ADD KEY `idx_workshop_id` (`workshop_id`),
+  ADD KEY `idx_challenge_id` (`challenge_id`);
 
 --
 -- Indexes for table `mom_track_visitors`
@@ -505,9 +576,27 @@ ALTER TABLE `mom_packs`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `mom_pack_challenge_links`
+--
+ALTER TABLE `mom_pack_challenge_links`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `mom_pack_sub_pack_links`
 --
 ALTER TABLE `mom_pack_sub_pack_links`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `mom_pack_workshop_links`
+--
+ALTER TABLE `mom_pack_workshop_links`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `mom_promotions`
+--
+ALTER TABLE `mom_promotions`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
@@ -594,11 +683,25 @@ ALTER TABLE `mom_challenge_videos`
   ADD CONSTRAINT `mom_challenge_videos_ibfk_1` FOREIGN KEY (`challenge_id`) REFERENCES `mom_challenges` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `mom_pack_challenge_links`
+--
+ALTER TABLE `mom_pack_challenge_links`
+  ADD CONSTRAINT `mom_pack_challenge_links_ibfk_1` FOREIGN KEY (`pack_id`) REFERENCES `mom_packs` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `mom_pack_challenge_links_ibfk_2` FOREIGN KEY (`challenge_id`) REFERENCES `mom_challenges` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `mom_pack_sub_pack_links`
 --
 ALTER TABLE `mom_pack_sub_pack_links`
   ADD CONSTRAINT `mom_pack_sub_pack_links_ibfk_1` FOREIGN KEY (`pack_id`) REFERENCES `mom_packs` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `mom_pack_sub_pack_links_ibfk_2` FOREIGN KEY (`sub_pack_id`) REFERENCES `mom_sub_packs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `mom_pack_workshop_links`
+--
+ALTER TABLE `mom_pack_workshop_links`
+  ADD CONSTRAINT `mom_pack_workshop_links_ibfk_1` FOREIGN KEY (`pack_id`) REFERENCES `mom_packs` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `mom_pack_workshop_links_ibfk_2` FOREIGN KEY (`workshop_id`) REFERENCES `mom_workshops` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `mom_requests`
@@ -623,6 +726,7 @@ ALTER TABLE `mom_sub_packs`
 -- Constraints for table `mom_sub_pack_videos`
 --
 ALTER TABLE `mom_sub_pack_videos`
+  ADD CONSTRAINT `fk_challenge_videos` FOREIGN KEY (`challenge_id`) REFERENCES `mom_challenges` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_workshop_videos` FOREIGN KEY (`workshop_id`) REFERENCES `mom_workshops` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `mom_sub_pack_videos_ibfk_1` FOREIGN KEY (`sub_pack_id`) REFERENCES `mom_sub_packs` (`id`) ON DELETE CASCADE;
 

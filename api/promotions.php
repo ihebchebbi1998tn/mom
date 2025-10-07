@@ -37,6 +37,23 @@ try {
                         'message' => 'Promotion not found'
                     ]);
                 }
+            } elseif (isset($_GET['active'])) {
+                // Get active promotions (end_date not passed)
+                $stmt = $conn->query("SELECT * FROM mom_promotions WHERE end_date >= NOW() AND is_active = 1 ORDER BY created_at DESC LIMIT 1");
+                $promotion = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($promotion) {
+                    $promotion['pack_ids'] = json_decode($promotion['pack_ids'], true);
+                    echo json_encode([
+                        'success' => true,
+                        'promotion' => $promotion
+                    ]);
+                } else {
+                    echo json_encode([
+                        'success' => true,
+                        'promotion' => null
+                    ]);
+                }
             } else {
                 // Get all promotions
                 $stmt = $conn->query("SELECT * FROM mom_promotions ORDER BY created_at DESC");

@@ -11,10 +11,10 @@ const Hero = () => {
     isVisible
   } = useScrollAnimation();
   const isMobile = useIsMobile();
-  const scrollToAbout = () => {
-    const aboutSection = document.getElementById('about');
-    if (aboutSection) {
-      aboutSection.scrollIntoView({
+  const scrollToTestimonials = () => {
+    const testimonialsSection = document.getElementById('testimonials');
+    if (testimonialsSection) {
+      testimonialsSection.scrollIntoView({
         behavior: 'smooth'
       });
     }
@@ -51,7 +51,7 @@ const Hero = () => {
                 ابدئي رحلة التعلم الآن
                 <ArrowLeft className="w-5 h-5 mr-2" />
               </Button>
-              <Button size="lg" variant="outline" className="btn-outline rounded-full px-6 py-3 text-lg font-semibold" onClick={scrollToAbout}>
+              <Button size="lg" variant="outline" className="btn-outline rounded-full px-6 py-3 text-lg font-semibold" onClick={scrollToTestimonials}>
                 اكتشفي المزيد
               </Button>
             </div>
