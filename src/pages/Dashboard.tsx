@@ -148,7 +148,8 @@ const Dashboard = () => {
 
   // Video modal state
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState<{url: string, title: string, poster?: string} | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<{url: string, title: string, poster?: string, videoId?: string} | null>(null);
+  const [watchedVideosState, setWatchedVideosState] = useState<string[]>([]);
 
   // Receipt modal state
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
@@ -166,6 +167,9 @@ const Dashboard = () => {
     fetchUserRequests();
     fetchSubPackRequests();
     fetchAvailabilities();
+    // Load watched videos from localStorage
+    const watchedVideos = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+    setWatchedVideosState(watchedVideos);
   }, []);
 
   // Fetch sub-packs for each course pack to show in preview
@@ -290,15 +294,25 @@ const Dashboard = () => {
     setSelectedVideo({
       url: video.video_url,
       title: video.title,
-      poster: video.thumbnail_url
+      poster: video.thumbnail_url,
+      videoId: video.id
     });
     setIsVideoModalOpen(true);
+  };
+
+  // Check if video is watched
+  const isVideoWatched = (videoId: string) => {
+    const watchedVideos = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+    return watchedVideos.includes(videoId);
   };
 
 
   const handleCloseVideoModal = () => {
     setIsVideoModalOpen(false);
     setSelectedVideo(null);
+    // Refresh watched videos state to update UI
+    const watchedVideos = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+    setWatchedVideosState(watchedVideos);
   };
   const fetchSubPacks = async (packId: string) => {
     try {
@@ -1125,7 +1139,15 @@ const Dashboard = () => {
                                 محتوى الباقة:
                               </div>
                               <div className="space-y-2">
-                                {packSubPacksList.map((subPack, idx) => (
+                                {packSubPacksList
+                                  .sort((a, b) => {
+                                    const aHasChallenge = a.title.includes('تحدي');
+                                    const bHasChallenge = b.title.includes('تحدي');
+                                    if (aHasChallenge && !bHasChallenge) return 1;
+                                    if (!aHasChallenge && bHasChallenge) return -1;
+                                    return 0;
+                                  })
+                                  .map((subPack, idx) => (
                                   <div key={idx} className="flex items-center gap-3 p-2 bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg">
                                     <div className="w-6 h-6 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
                                       {idx + 1}
@@ -1163,10 +1185,6 @@ const Dashboard = () => {
                   </Button>
 
                   <div className="text-center mb-12">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-700 rounded-full text-sm font-medium mb-4">
-                      <BookOpen className="w-4 h-4" />
-                      فصول الباقة
-                    </div>
                     <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
                       فصول {selectedPack.title}
                     </h2>
@@ -1176,7 +1194,15 @@ const Dashboard = () => {
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-                    {subPacks.map((subPack, index) => (
+                    {subPacks
+                      .sort((a, b) => {
+                        const aHasChallenge = a.title.includes('تحدي');
+                        const bHasChallenge = b.title.includes('تحدي');
+                        if (aHasChallenge && !bHasChallenge) return 1;
+                        if (!aHasChallenge && bHasChallenge) return -1;
+                        return 0;
+                      })
+                      .map((subPack, index) => (
                       <Card key={subPack.id} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer bg-white" onClick={() => handleSubPackClick(subPack)}>
                         {/* Sub-Pack Banner Image */}
                         {subPack.banner_image_url ? (
@@ -1186,9 +1212,6 @@ const Dashboard = () => {
                               alt={subPack.title}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             />
-                            <div className="absolute top-4 left-4 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg">
-                              <span className="font-bold text-lg text-pink-600">{index + 1}</span>
-                            </div>
                           </div>
                         ) : (
                           <div className="bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600 p-8 text-white relative overflow-hidden">
@@ -1230,10 +1253,6 @@ const Dashboard = () => {
               {currentView === 'videos' && selectedSubPack && (
                 <>
                   <div className="text-center mb-12">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-medium mb-4">
-                      <PlayCircle className="w-4 h-4" />
-                      المحتوى التعليمي
-                    </div>
                     <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
                       فيديوهات {selectedSubPack.title}
                     </h2>
@@ -1249,11 +1268,21 @@ const Dashboard = () => {
                           className="relative overflow-hidden bg-white cursor-pointer"
                           onClick={() => handleVideoClick(video)}
                         >
+                          {/* Watched Overlay */}
+                          {isVideoWatched(video.id) && (
+                            <div className="absolute inset-0 bg-gray-900/40 z-10 flex items-center justify-center">
+                              <div className="bg-white/90 px-4 py-2 rounded-full text-sm font-semibold text-gray-700">
+                                تمت المشاهدة
+                              </div>
+                            </div>
+                          )}
+                          
                           <VideoThumbnail
                             videoUrl={video.video_url}
                             thumbnailUrl={video.thumbnail_url}
                             alt={video.title}
                             className="w-full h-80 object-contain group-hover:scale-105 transition-transform duration-500"
+                            priority={index < 2}
                           />
                           
                           {/* Video Number Badge */}
@@ -1576,6 +1605,7 @@ const Dashboard = () => {
               videoUrl={selectedVideo.url}
               title={selectedVideo.title}
               poster={selectedVideo.poster}
+              videoId={selectedVideo.videoId}
             />
           )}
 

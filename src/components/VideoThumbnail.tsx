@@ -6,11 +6,14 @@ interface VideoThumbnailProps {
   thumbnailUrl?: string;
   alt: string;
   className?: string;
+  priority?: boolean; // For above-the-fold thumbnails
 }
 
-const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className }: VideoThumbnailProps) => {
+const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className, priority = false }: VideoThumbnailProps) => {
   const [generatedThumbnail, setGeneratedThumbnail] = useState<string | null>(null);
-  const [isInView, setIsInView] = useState(false);
+  const [isInView, setIsInView] = useState(priority); // Priority images start visible
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -35,7 +38,7 @@ const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className }: VideoThumbna
 
   // Lazy load: only generate thumbnail when in viewport
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || priority) return; // Skip observer for priority images
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -43,13 +46,16 @@ const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className }: VideoThumbna
           setIsInView(true);
         }
       },
-      { rootMargin: '50px' }
+      { 
+        rootMargin: priority ? '0px' : '200px', // Larger margin for better preloading
+        threshold: 0.01
+      }
     );
 
     observer.observe(containerRef.current);
 
     return () => observer.disconnect();
-  }, []);
+  }, [priority]);
 
   useEffect(() => {
     // Skip if already have cached thumbnail or not in view
@@ -61,14 +67,18 @@ const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className }: VideoThumbna
 
     const generateThumbnail = () => {
       try {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        // Optimize canvas size for faster processing (max 640px width)
+        const maxWidth = 640;
+        const scale = Math.min(1, maxWidth / video.videoWidth);
+        canvas.width = video.videoWidth * scale;
+        canvas.height = video.videoHeight * scale;
 
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { alpha: false }); // Faster without alpha
         if (ctx) {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.6); // Lower quality for faster generation
           setGeneratedThumbnail(dataUrl);
+          setIsLoading(false);
           
           // Cache the thumbnail
           try {
@@ -76,15 +86,27 @@ const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className }: VideoThumbna
             localStorage.setItem(cacheKey, dataUrl);
           } catch (cacheError) {
             console.warn('Could not cache thumbnail:', cacheError);
+            // Clear old cache if storage is full
+            if (cacheError instanceof Error && cacheError.name === 'QuotaExceededError') {
+              try {
+                Object.keys(localStorage).forEach(key => {
+                  if (key.startsWith('video-thumb-')) {
+                    localStorage.removeItem(key);
+                  }
+                });
+              } catch {}
+            }
           }
         }
       } catch (error) {
         console.error('Error generating thumbnail:', error);
+        setHasError(true);
+        setIsLoading(false);
       }
     };
 
     const handleLoadedData = () => {
-      // Seek to first frame (0.1 seconds to ensure we get a valid frame)
+      // Seek to first frame
       video.currentTime = 0.1;
     };
 
@@ -92,12 +114,19 @@ const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className }: VideoThumbna
       generateThumbnail();
     };
 
+    const handleError = () => {
+      setHasError(true);
+      setIsLoading(false);
+    };
+
     video.addEventListener('loadeddata', handleLoadedData);
     video.addEventListener('seeked', handleSeeked);
+    video.addEventListener('error', handleError);
 
     return () => {
       video.removeEventListener('loadeddata', handleLoadedData);
       video.removeEventListener('seeked', handleSeeked);
+      video.removeEventListener('error', handleError);
     };
   }, [videoUrl, thumbnailUrl, isInView, generatedThumbnail]);
 
@@ -110,18 +139,31 @@ const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className }: VideoThumbna
         <img 
           src={displayThumbnail} 
           alt={alt} 
-          className={className}
-          loading="lazy"
+          className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+          loading={priority ? 'eager' : 'lazy'}
           draggable={false}
+          onLoad={() => setIsLoading(false)}
+          decoding="async"
         />
-      ) : (
-        <div className={`${className} bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center animate-pulse`}>
+      ) : hasError ? (
+        <div className={`${className} bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center`}>
           <PlayCircle className="w-16 h-16 text-white opacity-50" />
+        </div>
+      ) : (
+        <div className={`${className} bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center`}>
+          <div className="flex flex-col items-center gap-3">
+            <PlayCircle className="w-16 h-16 text-white opacity-50 animate-pulse" />
+            <div className="w-12 h-1 bg-white/30 rounded-full overflow-hidden">
+              <div className="h-full bg-white/70 animate-[loading_1.5s_ease-in-out_infinite]" style={{
+                animation: 'loading 1.5s ease-in-out infinite',
+              }}></div>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Hidden video and canvas for thumbnail generation from first frame */}
-      {videoUrl && isInView && !generatedThumbnail && (
+      {videoUrl && isInView && !generatedThumbnail && !hasError && (
         <>
           <video
             ref={videoRef}
@@ -129,6 +171,7 @@ const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className }: VideoThumbna
             className="hidden"
             crossOrigin="anonymous"
             preload="metadata"
+            playsInline
             muted
           />
           <canvas ref={canvasRef} className="hidden" />

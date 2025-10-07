@@ -413,6 +413,16 @@
   animation-delay: 300ms;
 }
 
+/* Loading animation for thumbnails */
+@keyframes loading {
+  0%, 100% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(400%);
+  }
+}
+
 @layer utilities {
   /* 3D Flip Animation Utilities */
   .perspective-1000 {

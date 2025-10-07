@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Volume2, VolumeX, Maximize, X, RotateCcw, Loader2 } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Maximize, X, RotateCcw, Loader2, Minimize } from "lucide-react";
 
 interface ModernVideoModalProps {
   isOpen: boolean;
@@ -9,9 +9,10 @@ interface ModernVideoModalProps {
   videoUrl: string;
   title: string;
   poster?: string;
+  videoId?: string;
 }
 
-const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVideoModalProps) => {
+const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster, videoId }: ModernVideoModalProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -22,8 +23,7 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadProgress, setLoadProgress] = useState(0);
-
-  let hideControlsTimeout: NodeJS.Timeout;
+  const [controlsTimeout, setControlsTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -37,7 +37,17 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
       setCurrentTime(video.currentTime);
     };
 
-    const handlePlay = () => setIsPlaying(true);
+    const handlePlay = () => {
+      setIsPlaying(true);
+      // Mark video as watched when played
+      if (videoId) {
+        const watchedVideos = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
+        if (!watchedVideos.includes(videoId)) {
+          watchedVideos.push(videoId);
+          localStorage.setItem('watchedVideos', JSON.stringify(watchedVideos));
+        }
+      }
+    };
     const handlePause = () => setIsPlaying(false);
     const handleEnded = () => setIsPlaying(false);
     
@@ -145,6 +155,7 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
     
     video.muted = !video.muted;
     setIsMuted(video.muted);
+    resetControlsTimeout();
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,9 +173,11 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
       video.muted = false;
       setIsMuted(false);
     }
+    resetControlsTimeout();
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
     const video = videoRef.current;
     if (!video) return;
     
@@ -173,13 +186,16 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
       video.currentTime = time;
       setCurrentTime(time);
     }
+    resetControlsTimeout();
   };
 
   const handleSeekInput = (e: React.FormEvent<HTMLInputElement>) => {
+    e.stopPropagation();
     const time = parseFloat((e.target as HTMLInputElement).value);
     if (!isNaN(time)) {
       setCurrentTime(time);
     }
+    resetControlsTimeout();
   };
 
   const restart = () => {
@@ -187,17 +203,20 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
     if (!video) return;
     
     video.currentTime = 0;
-    video.pause();
-    setIsPlaying(false);
+    setCurrentTime(0);
+    resetControlsTimeout();
   };
 
   const toggleFullscreen = () => {
     const container = document.querySelector('.video-modal-container');
     if (!document.fullscreenElement && container) {
-      container.requestFullscreen();
+      container.requestFullscreen().catch(err => {
+        console.log('Error attempting to enable fullscreen:', err);
+      });
     } else if (document.fullscreenElement) {
       document.exitFullscreen();
     }
+    resetControlsTimeout();
   };
 
   const formatTime = (seconds: number) => {
@@ -206,12 +225,25 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleMouseMove = () => {
+  const resetControlsTimeout = () => {
+    // Clear existing timeout
+    if (controlsTimeout) {
+      clearTimeout(controlsTimeout);
+    }
+    
+    // Show controls
     setShowControls(true);
-    clearTimeout(hideControlsTimeout);
-    hideControlsTimeout = setTimeout(() => {
+    
+    // Set auto-hide timeout
+    const timeout = setTimeout(() => {
       if (isPlaying) setShowControls(false);
     }, 3000);
+    
+    setControlsTimeout(timeout);
+  };
+
+  const handleMouseMove = () => {
+    resetControlsTimeout();
   };
 
   const handleClose = () => {
@@ -293,11 +325,11 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
           )}
 
           {/* Bottom Controls */}
-          <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-6 transition-opacity duration-300 ${
-            showControls ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4 transition-all duration-300 ${
+            showControls ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
           }`}>
             {/* Progress Bar */}
-            <div className="mb-4">
+            <div className="mb-3" dir="ltr">
               <input
                 type="range"
                 min={0}
@@ -306,48 +338,55 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
                 value={currentTime}
                 onChange={handleSeek}
                 onInput={handleSeekInput}
-                className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="w-full h-1 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-lg [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-lg [&::-moz-range-track]:bg-transparent [&::-moz-range-progress]:h-1 [&::-moz-range-progress]:rounded-lg [&::-moz-range-progress]:bg-pink-500"
                 style={{
-                  background: `linear-gradient(to right, #ec4899 0%, #ec4899 ${duration > 0 ? (currentTime / duration) * 100 : 0}%, rgba(255,255,255,0.2) ${duration > 0 ? (currentTime / duration) * 100 : 0}%, rgba(255,255,255,0.2) 100%)`
+                  background: `linear-gradient(to right, rgb(236 72 153) 0%, rgb(236 72 153) ${duration > 0 ? (currentTime / duration) * 100 : 0}%, rgba(255,255,255,0.3) ${duration > 0 ? (currentTime / duration) * 100 : 0}%, rgba(255,255,255,0.3) 100%)`
                 }}
               />
               <style dangerouslySetInnerHTML={{__html: `
                 input[type="range"]::-webkit-slider-thumb {
                   appearance: none;
-                  width: 16px;
-                  height: 16px;
+                  width: 14px;
+                  height: 14px;
                   border-radius: 50%;
                   background: #ec4899;
                   cursor: grab;
-                  box-shadow: 0 2px 6px rgba(236, 72, 153, 0.5);
-                  transition: transform 0.1s ease;
+                  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.6);
+                  transition: transform 0.15s ease;
+                  margin-top: -6.5px;
                 }
                 input[type="range"]::-webkit-slider-thumb:hover {
                   transform: scale(1.2);
+                  box-shadow: 0 2px 12px rgba(236, 72, 153, 0.8);
                 }
                 input[type="range"]::-webkit-slider-thumb:active {
                   cursor: grabbing;
                   transform: scale(1.1);
                 }
                 input[type="range"]::-moz-range-thumb {
-                  width: 16px;
-                  height: 16px;
+                  width: 14px;
+                  height: 14px;
                   border-radius: 50%;
                   background: #ec4899;
                   cursor: grab;
                   border: none;
-                  box-shadow: 0 2px 6px rgba(236, 72, 153, 0.5);
-                  transition: transform 0.1s ease;
+                  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.6);
+                  transition: transform 0.15s ease;
                 }
                 input[type="range"]::-moz-range-thumb:hover {
                   transform: scale(1.2);
+                  box-shadow: 0 2px 12px rgba(236, 72, 153, 0.8);
                 }
                 input[type="range"]::-moz-range-thumb:active {
                   cursor: grabbing;
                   transform: scale(1.1);
                 }
               `}} />
-              <div className="flex justify-between text-white text-sm mt-2" dir="ltr">
+              
+              {/* Duration Display */}
+              <div className="flex justify-between items-center mt-1.5 text-white text-xs font-medium">
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
               </div>
@@ -355,70 +394,86 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster }: ModernVi
 
             {/* Control Buttons */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={togglePlay}
-                  className="text-white hover:bg-white/20 rounded-full w-12 h-12 p-0 z-50"
+              {/* Left Side - Mute + Volume */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleMute();
+                  }}
+                  className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 transition-all duration-200"
+                  title={isMuted ? 'إلغاء الكتم' : 'كتم الصوت'}
                 >
-                  {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
-                </Button>
+                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                </button>
+                
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  value={isMuted ? 0 : volume}
+                  onChange={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleVolumeChange(e);
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="w-20 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer hidden md:block"
+                  style={{
+                    background: `linear-gradient(to right, #ec4899 0%, #ec4899 ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.2) ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.2) 100%)`
+                  }}
+                />
+              </div>
 
-                <Button
-                  variant="ghost"
-                  size="sm"
+              {/* Right Side - Play/Pause, Rewind, Time, Fullscreen */}
+              <div className="flex items-center gap-2">
+                {/* Time Display */}
+                <span className="text-white text-xs font-medium hidden sm:block" dir="ltr">
+                  {formatTime(currentTime)} / {formatTime(duration)}
+                </span>
+                
+                {/* Fullscreen Button */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleFullscreen();
+                  }}
+                  className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 transition-all duration-200"
+                  title="ملء الشاشة"
+                >
+                  {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+                </button>
+                
+                {/* Rewind Button */}
+                <button
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     restart();
                   }}
-                  className="text-white hover:bg-white/20 rounded-full w-10 h-10 p-0 z-50"
+                  className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 transition-all duration-200"
+                  title="إعادة التشغيل"
                 >
-                  <RotateCcw className="w-5 h-5" />
-                </Button>
-
-                <div className="flex items-center gap-3">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleMute();
-                    }}
-                    className="text-white hover:bg-white/20 rounded-full w-10 h-10 p-0 z-50"
-                  >
-                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                  </Button>
-                  
-                  <input
-                    type="range"
-                    min={0}
-                    max={1}
-                    step={0.1}
-                    value={isMuted ? 0 : volume}
-                    onChange={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleVolumeChange(e);
-                    }}
-                    className="w-20 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer hidden md:block z-50"
-                    style={{
-                      background: `linear-gradient(to right, #ec4899 0%, #ec4899 ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.2) ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.2) 100%)`
-                    }}
-                  />
-                </div>
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+                
+                {/* Play/Pause Button */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    togglePlay(e);
+                  }}
+                  className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 transition-all duration-200"
+                  title={isPlaying ? 'إيقاف مؤقت' : 'تشغيل'}
+                >
+                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+                </button>
               </div>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleFullscreen}
-                className="text-white hover:bg-white/20 rounded-full w-10 h-10 p-0"
-              >
-                <Maximize className="w-5 h-5" />
-              </Button>
             </div>
           </div>
         </div>

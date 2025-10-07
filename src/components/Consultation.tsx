@@ -171,21 +171,6 @@ const Consultation = () => {
     <section id="consultation" className="py-20 section-gradient" ref={sectionRef}>
       <div className="container mx-auto px-4">
         
-        {/* Section Header */}
-        <div className={`text-center mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          <h2 className="text-3xl lg:text-5xl font-bold text-foreground mb-6">
-            إستشارات تربوية متخصصة
-          </h2>
-          <div className="max-w-3xl mx-auto">
-            <p className="text-xl font-semibold text-primary mb-4">
-              "حاج إستشارة تربوية"
-            </p>
-            <p className="text-lg text-muted-foreground">
-              استشارة شخصية مع خبيرة التربية لحل التحديات مع أطفالك
-            </p>
-          </div>
-        </div>
-
         <div className={`max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           {/* Simple Book Now Button */}
           <div className="text-center">
@@ -311,7 +296,7 @@ const Consultation = () => {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm text-foreground">
-                      <span className="font-semibold">الكاميرا:</span> يجب تشغيل الكاميرا مع الأب والأم
+                      <span className="font-semibold">الكاميرا:</span> يجب تشغيل الكاميرا
                     </p>
                   </div>
                 </div>
