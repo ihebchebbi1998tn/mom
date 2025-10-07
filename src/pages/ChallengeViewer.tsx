@@ -1,18 +1,29 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Play, Loader2 } from 'lucide-react';
+import { ArrowRight, Play, Clock, Eye, Loader2, Lock } from 'lucide-react';
 import { useAuth } from "@/contexts/AuthContext";
-import ModernVideoModal from "@/components/ModernVideoModal";
+import VideoPlayer from "@/components/VideoPlayer";
 import { useToast } from "@/hooks/use-toast";
+
+interface Challenge {
+  id: number;
+  title: string;
+  description?: string;
+}
 
 interface Video {
   id: number;
+  challenge_id: number;
   title: string;
+  description?: string;
   video_url: string;
   thumbnail_url?: string;
+  duration?: string;
   order_index: number;
+  views: number;
+  status: string;
 }
 
 const ChallengeViewer = () => {
@@ -20,32 +31,31 @@ const ChallengeViewer = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [videos, setVideos] = useState<Video[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [hasAccess, setHasAccess] = useState(false);
 
   useEffect(() => {
     if (challengeId && user?.id) {
-      checkAccessAndFetchVideos();
+      checkAccess();
     }
   }, [challengeId, user?.id]);
 
-  const checkAccessAndFetchVideos = async () => {
+  useEffect(() => {
+    if (hasAccess && challengeId) {
+      fetchChallengeData();
+    }
+  }, [hasAccess, challengeId]);
+
+  const checkAccess = async () => {
     try {
-      // Check if user has access to this challenge
-      const accessResponse = await fetch(`https://spadadibattaglia.com/mom/api/challenge_requests.php?user_id=${user?.id}`);
+      const accessResponse = await fetch(`https://spadadibattaglia.com/mom/api/check_challenge_access.php?user_id=${user?.id}&challenge_id=${challengeId}`);
       const accessData = await accessResponse.json();
-      
-      if (!accessData.success) {
-        throw new Error('Failed to check access');
-      }
 
-      const request = accessData.data.find((req: any) => 
-        String(req.challenge_id) === challengeId && req.status === 'accepted'
-      );
-
-      if (!request) {
+      if (!accessData.success || !accessData.hasAccess) {
         toast({
           title: 'غير مصرح بالوصول',
           description: 'ليس لديك صلاحية للوصول إلى هذا التحدي',
@@ -54,13 +64,45 @@ const ChallengeViewer = () => {
         navigate('/challenges');
         return;
       }
+      
+      if (accessData.accessType === 'pack') {
+        toast({
+          title: 'تم الوصول عبر الباك',
+          description: `لديك وصول لهذا التحدي عبر ${accessData.packName}`,
+        });
+      }
+      
+      setHasAccess(true);
+    } catch (error) {
+      console.error('Error checking access:', error);
+      toast({
+        title: 'خطأ',
+        description: 'فشل التحقق من صلاحية الوصول',
+        variant: 'destructive',
+      });
+      navigate('/challenges');
+    }
+  };
+
+  const fetchChallengeData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch challenge details
+      const challengeResponse = await fetch(`https://spadadibattaglia.com/mom/api/challenges.php?id=${challengeId}`);
+      const challengeData = await challengeResponse.json();
+      
+      if (challengeData.success && challengeData.challenges) {
+        setChallenge(challengeData.challenges[0]);
+      }
 
       // Fetch challenge videos
       const videosResponse = await fetch(`https://spadadibattaglia.com/mom/api/challenge_videos.php?challenge_id=${challengeId}&user_access=true`);
       const videosData = await videosResponse.json();
       
       if (videosData.success) {
-        setVideos(videosData.videos || []);
+        const activeVideos = (videosData.videos || []).filter((v: Video) => v.status === 'active');
+        setVideos(activeVideos);
       }
     } catch (error) {
       console.error('Error loading challenge content:', error);
@@ -74,16 +116,43 @@ const ChallengeViewer = () => {
     }
   };
 
-  const handleVideoClick = (video: Video) => {
+  const handleVideoSelect = (video: Video) => {
     setSelectedVideo(video);
-    setIsModalOpen(true);
+    
+    // Update video views
+    fetch(`https://spadadibattaglia.com/mom/api/challenge_videos.php`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: video.id,
+        views: video.views + 1
+      })
+    }).catch(() => {
+      // Ignore errors for view counting
+    });
   };
+
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-accent flex items-center justify-center">
+        <div className="text-center">
+          <Lock className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+          <h2 className="text-2xl font-bold text-foreground mb-4">الوصول محظور</h2>
+          <p className="text-muted-foreground mb-6">ليس لديك صلاحية للوصول لهذا التحدي</p>
+          <Button onClick={() => navigate('/challenges')} className="btn-hero">
+            <ArrowRight className="w-4 h-4 ml-2" />
+            العودة للتحديات
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-background to-accent flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">جاري تحميل محتوى التحدي...</p>
         </div>
       </div>
@@ -91,65 +160,132 @@ const ChallengeViewer = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 p-6">
-      <div className="max-w-6xl mx-auto">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/challenges')}
-          className="mb-6"
-        >
-          <ArrowRight className="w-4 h-4 ml-2" />
-          العودة إلى التحديات
-        </Button>
-
-        <h1 className="text-3xl font-bold text-primary mb-8 text-center">محتوى التحدي</h1>
-
-        {videos.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {videos.map((video) => (
-              <Card
-                key={video.id}
-                className="cursor-pointer hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                onClick={() => handleVideoClick(video)}
-              >
-                <CardContent className="p-0">
-                  <div className="relative aspect-video bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center group">
-                    {video.thumbnail_url ? (
-                      <img 
-                        src={video.thumbnail_url} 
-                        alt={video.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <Play className="w-16 h-16 text-primary opacity-50 group-hover:opacity-100 transition-opacity" />
-                    )}
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                      <Play className="w-12 h-12 text-white" />
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-lg text-primary mb-2">{video.title}</h3>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span>الفيديو {video.order_index + 1}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+    <div className="min-h-screen bg-gradient-to-b from-background to-accent">
+      {/* Header */}
+      <div className="bg-white/95 backdrop-blur-md border-b border-border">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center gap-4 mb-4">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/challenges')}
+              className="btn-outline"
+            >
+              <ArrowRight className="w-4 h-4 ml-2" />
+              العودة
+            </Button>
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-lg text-muted-foreground">لا توجد فيديوهات متاحة حالياً</p>
-          </div>
-        )}
+          
+          {challenge && (
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">
+                {challenge.title}
+              </h1>
+              {challenge.description && (
+                <p className="text-muted-foreground mb-4">{challenge.description}</p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
-      <ModernVideoModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        videoUrl={selectedVideo?.video_url || ''}
-        title={selectedVideo?.title || ''}
-      />
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Videos Sidebar */}
+          <div className="lg:col-span-1">
+            <Card className="card-elegant p-6 sticky top-4">
+              <h3 className="text-xl font-bold text-foreground mb-6">فيديوهات التحدي</h3>
+              
+              <div className="space-y-2">
+                {videos.length === 0 ? (
+                  <div className="p-4 text-center text-muted-foreground">
+                    لا توجد فيديوهات متاحة
+                  </div>
+                ) : (
+                  videos.map((video) => (
+                    <button
+                      key={video.id}
+                      onClick={() => handleVideoSelect(video)}
+                      className={`w-full p-4 text-right hover:bg-muted/50 transition-colors rounded-lg border border-border ${
+                        selectedVideo?.id === video.id ? 'bg-primary/10 border-primary' : ''
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Play className="w-4 h-4 text-primary flex-shrink-0" />
+                        <div className="flex-1">
+                          <h5 className="font-medium text-foreground text-sm">{video.title}</h5>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                            {video.duration && <span>{video.duration}</span>}
+                            <span>{video.views} مشاهدة</span>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            </Card>
+          </div>
+
+          {/* Video Player Area */}
+          <div className="lg:col-span-2">
+            {selectedVideo ? (
+              <div className="space-y-6">
+                <Card className="card-elegant overflow-hidden">
+                  <VideoPlayer 
+                    src={selectedVideo.video_url} 
+                    title={selectedVideo.title}
+                    className="w-full aspect-video"
+                    videoId={selectedVideo.id}
+                    onUrlUpdate={(newUrl) => {
+                      setSelectedVideo(prev => prev ? {...prev, video_url: newUrl} : null);
+                      setVideos(prev => prev.map(video => 
+                        video.id === selectedVideo.id ? {...video, video_url: newUrl} : video
+                      ));
+                    }}
+                  />
+                </Card>
+                
+                <Card className="card-elegant p-6">
+                  <h2 className="text-2xl font-bold text-foreground mb-4">
+                    {selectedVideo.title}
+                  </h2>
+                  
+                  {selectedVideo.description && (
+                    <p className="text-muted-foreground mb-4 leading-relaxed">
+                      {selectedVideo.description}
+                    </p>
+                  )}
+                  
+                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                    {selectedVideo.duration && (
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        <span>المدة: {selectedVideo.duration}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1">
+                      <Eye className="w-4 h-4" />
+                      <span>المشاهدات: {selectedVideo.views}</span>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            ) : (
+              <Card className="card-elegant p-12">
+                <div className="text-center">
+                  <Play className="w-16 h-16 mx-auto mb-6 text-muted-foreground opacity-50" />
+                  <h3 className="text-xl font-semibold text-foreground mb-4">
+                    اختاري فيديو للمشاهدة
+                  </h3>
+                  <p className="text-muted-foreground">
+                    اختاري فيديو من القائمة الجانبية لبدء المشاهدة
+                  </p>
+                </div>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

@@ -44,6 +44,7 @@ const Challenges = () => {
   const { toast } = useToast();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [challengeRequests, setChallengeRequests] = useState<ChallengeRequest[]>([]);
+  const [challengePackAccess, setChallengePackAccess] = useState<{[key: number]: {hasAccess: boolean, packName?: string}}>({});
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -137,6 +138,37 @@ const Challenges = () => {
     }
   }, [currentUserId]);
 
+  // Check pack access for all challenges
+  useEffect(() => {
+    if (currentUserId && challenges.length > 0) {
+      checkAllChallengePackAccess();
+    }
+  }, [currentUserId, challenges]);
+
+  const checkAllChallengePackAccess = async () => {
+    const accessMap: {[key: number]: {hasAccess: boolean, packName?: string}} = {};
+    
+    await Promise.all(
+      challenges.map(async (challenge) => {
+        try {
+          const response = await fetch(`https://spadadibattaglia.com/mom/api/check_challenge_access.php?user_id=${currentUserId}&challenge_id=${challenge.id}`);
+          const data = await response.json();
+          
+          if (data.success && data.hasAccess && data.accessType === 'pack') {
+            accessMap[challenge.id] = {
+              hasAccess: true,
+              packName: data.packName
+            };
+          }
+        } catch (error) {
+          console.error(`Error checking pack access for challenge ${challenge.id}:`, error);
+        }
+      })
+    );
+    
+    setChallengePackAccess(accessMap);
+  };
+
   const getChallengeRequestStatus = (challengeId: number) => {
     const request = challengeRequests.find(req => Number(req.challenge_id) === challengeId);
     return request?.status || null;
@@ -146,7 +178,53 @@ const Challenges = () => {
     return challengeRequests.find(req => Number(req.challenge_id) === challengeId);
   };
 
+  // Check if user has requested a specific challenge (any status)
+  const hasRequestedChallenge = (challengeId: number) => {
+    return challengeRequests.some(req => Number(req.challenge_id) === challengeId);
+  };
+
+  // Check if prerequisites are met for a challenge
+  const checkPrerequisites = (challengeId: number): { allowed: boolean; message?: string } => {
+    if (challengeId === 1) {
+      return { allowed: true };
+    }
+    
+    if (challengeId === 2) {
+      if (!hasRequestedChallenge(1)) {
+        return { 
+          allowed: false, 
+          message: 'يجب طلب التحدي الأول قبل الانضمام لهذا التحدي' 
+        };
+      }
+      return { allowed: true };
+    }
+    
+    if (challengeId === 3) {
+      if (!hasRequestedChallenge(1) || !hasRequestedChallenge(2)) {
+        return { 
+          allowed: false, 
+          message: 'يجب طلب التحديات 1 و 2 قبل الانضمام لهذا التحدي' 
+        };
+      }
+      return { allowed: true };
+    }
+    
+    return { allowed: true };
+  };
+
   const handleChallengeRequest = async (challengeId: number) => {
+    // Check prerequisites first
+    const prerequisiteCheck = checkPrerequisites(challengeId);
+    if (!prerequisiteCheck.allowed) {
+      toast({
+        title: 'التحدي مغلق',
+        description: prerequisiteCheck.message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setActionLoading(String(challengeId));
     setActionLoading(String(challengeId));
     try {
       const uid = Number(currentUserId);
@@ -293,7 +371,6 @@ const Challenges = () => {
         <main className="flex-1 px-4 md:px-8 py-6 lg:py-8 overflow-y-auto overflow-x-hidden">
           <div ref={ref} className={`text-center mb-12 transition-all duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
             <div className="flex items-center justify-center gap-3 mb-4">
-              <Target className="w-8 h-8 text-primary" />
               <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">تحديات تطوير الذات</h1>
             </div>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -307,6 +384,7 @@ const Challenges = () => {
                 const requestStatus = getChallengeRequestStatus(challenge.id);
                 const request = getChallengeRequest(challenge.id);
                 const hasUploadedReceipt = request && request.recu_link;
+                const prerequisiteCheck = checkPrerequisites(challenge.id);
 
                 return (
                   <Card key={challenge.id} className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
@@ -334,10 +412,6 @@ const Challenges = () => {
                           <Users className="w-4 h-4 text-primary" />
                           <span>المشتركين: {challenge.participants}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Trophy className="w-4 h-4 text-primary" />
-                          <span>المكافأة: {challenge.reward}</span>
-                        </div>
                       </div>
 
                       {/* Request Status and Actions */}
@@ -350,6 +424,20 @@ const Challenges = () => {
                             </Badge>
                             <Button 
                               className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 w-full"
+                              onClick={() => handleAccessChallenge(challenge.id)}
+                            >
+                              الدخول إلى التحدي
+                              <ArrowLeft className="w-4 h-4 mr-2" />
+                            </Button>
+                          </div>
+                        ) : challengePackAccess[challenge.id]?.hasAccess ? (
+                          <div className="space-y-2">
+                            <Badge className="w-full bg-purple-100 text-purple-700 hover:bg-purple-100 justify-center py-2">
+                              <CheckCircle className="w-4 h-4 ml-2" />
+                              مفتوح عبر {challengePackAccess[challenge.id].packName}
+                            </Badge>
+                            <Button 
+                              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 w-full"
                               onClick={() => handleAccessChallenge(challenge.id)}
                             >
                               الدخول إلى التحدي
@@ -387,6 +475,16 @@ const Challenges = () => {
                             <AlertCircle className="w-4 h-4 ml-2" />
                             مرفوض - {request?.admin_notes || 'يرجى التواصل مع الإدارة'}
                           </Badge>
+                        ) : !prerequisiteCheck.allowed ? (
+                          <div className="space-y-2">
+                            <Badge className="w-full bg-gray-100 text-gray-700 hover:bg-gray-100 justify-center py-2">
+                              <AlertCircle className="w-4 h-4 ml-2" />
+                              مغلق
+                            </Badge>
+                            <p className="text-xs text-muted-foreground text-center">
+                              {prerequisiteCheck.message}
+                            </p>
+                          </div>
                         ) : (
                           <Button 
                             className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 w-full"

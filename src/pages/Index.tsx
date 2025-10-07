@@ -7,6 +7,7 @@ import Founder from "@/components/Founder";
 import Testimonials from "@/components/Testimonials";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import { PromotionPopup } from "@/components/PromotionPopup";
 
 import LoadingScreen from "@/components/LoadingScreen";
 import useVisitorTracking from "@/hooks/useVisitorTracking";
@@ -41,6 +42,7 @@ const Index = () => {
       </main>
       <Footer />
       <FloatingWhatsApp />
+      <PromotionPopup />
     </div>
   );
 };

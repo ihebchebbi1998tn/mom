@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Users, BookOpen, Video, Settings, ArrowLeft, Eye, Edit, Trash2, Plus, ShoppingCart, Calendar as CalendarIcon, BarChart3, MessageSquare, Menu, Target } from "lucide-react";
+import { Users, BookOpen, Video, Settings, ArrowLeft, Eye, Edit, Trash2, Plus, ShoppingCart, Calendar as CalendarIcon, BarChart3, MessageSquare, Menu, Percent } from "lucide-react";
+import PromotionsModal from "@/components/admin/PromotionsModal";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import CoursePacksManagement from "@/components/CoursePacksManagement";
@@ -30,71 +31,121 @@ interface User {
 }
 
 // Mock data for chapters (keeping this for now)
-const mockChapters = [
-  {
+const mockChapters = [{
+  id: 1,
+  title: "سيطرة عالغضب",
+  description: "تعلم كيفية إدارة الغضب بطرق صحية",
+  videosCount: 5,
+  videos: [{
     id: 1,
-    title: "سيطرة عالغضب",
-    description: "تعلم كيفية إدارة الغضب بطرق صحية",
-    videosCount: 5,
-    videos: [
-      { id: 1, title: "مقدمة في إدارة الغضب", duration: "15:30", views: 250 },
-      { id: 2, title: "أسباب الغضب وتأثيره", duration: "22:15", views: 180 },
-      { id: 3, title: "تقنيات التهدئة الفورية", duration: "18:45", views: 320 },
-      { id: 4, title: "بناء عادات إيجابية", duration: "25:20", views: 150 },
-      { id: 5, title: "التطبيق العملي", duration: "20:10", views: 200 }
-    ]
-  },
-  {
+    title: "مقدمة في إدارة الغضب",
+    duration: "15:30",
+    views: 250
+  }, {
     id: 2,
-    title: "ثقة في النفس",
-    description: "بناء الثقة بالنفس وتطوير الشخصية",
-    videosCount: 5,
-    videos: [
-      { id: 1, title: "فهم الثقة بالنفس", duration: "14:30", views: 300 },
-      { id: 2, title: "التخلص من المعتقدات السلبية", duration: "22:40", views: 220 },
-      { id: 3, title: "بناء الثقة الداخلية", duration: "25:15", views: 280 },
-      { id: 4, title: "مواجهة التحديات بثقة", duration: "20:25", views: 190 },
-      { id: 5, title: "المحافظة على الثقة", duration: "16:35", views: 160 }
-    ]
-  },
-  {
+    title: "أسباب الغضب وتأثيره",
+    duration: "22:15",
+    views: 180
+  }, {
     id: 3,
-    title: "دراسة",
-    description: "طرق التعلم الفعال وتنظيم الوقت",
-    videosCount: 5,
-    videos: [
-      { id: 1, title: "أساسيات التعلم الفعال", duration: "16:40", views: 400 },
-      { id: 2, title: "تنظيم الوقت للدراسة", duration: "19:25", views: 350 },
-      { id: 3, title: "تقنيات الحفظ والمراجعة", duration: "21:50", views: 380 },
-      { id: 4, title: "التعامل مع صعوبات التعلم", duration: "24:15", views: 270 },
-      { id: 5, title: "خلق بيئة دراسية مثالية", duration: "17:30", views: 290 }
-    ]
-  }
-];
-
+    title: "تقنيات التهدئة الفورية",
+    duration: "18:45",
+    views: 320
+  }, {
+    id: 4,
+    title: "بناء عادات إيجابية",
+    duration: "25:20",
+    views: 150
+  }, {
+    id: 5,
+    title: "التطبيق العملي",
+    duration: "20:10",
+    views: 200
+  }]
+}, {
+  id: 2,
+  title: "ثقة في النفس",
+  description: "بناء الثقة بالنفس وتطوير الشخصية",
+  videosCount: 5,
+  videos: [{
+    id: 1,
+    title: "فهم الثقة بالنفس",
+    duration: "14:30",
+    views: 300
+  }, {
+    id: 2,
+    title: "التخلص من المعتقدات السلبية",
+    duration: "22:40",
+    views: 220
+  }, {
+    id: 3,
+    title: "بناء الثقة الداخلية",
+    duration: "25:15",
+    views: 280
+  }, {
+    id: 4,
+    title: "مواجهة التحديات بثقة",
+    duration: "20:25",
+    views: 190
+  }, {
+    id: 5,
+    title: "المحافظة على الثقة",
+    duration: "16:35",
+    views: 160
+  }]
+}, {
+  id: 3,
+  title: "دراسة",
+  description: "طرق التعلم الفعال وتنظيم الوقت",
+  videosCount: 5,
+  videos: [{
+    id: 1,
+    title: "أساسيات التعلم الفعال",
+    duration: "16:40",
+    views: 400
+  }, {
+    id: 2,
+    title: "تنظيم الوقت للدراسة",
+    duration: "19:25",
+    views: 350
+  }, {
+    id: 3,
+    title: "تقنيات الحفظ والمراجعة",
+    duration: "21:50",
+    views: 380
+  }, {
+    id: 4,
+    title: "التعامل مع صعوبات التعلم",
+    duration: "24:15",
+    views: 270
+  }, {
+    id: 5,
+    title: "خلق بيئة دراسية مثالية",
+    duration: "17:30",
+    views: 290
+  }]
+}];
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
   const [visitorCount, setVisitorCount] = useState<number>(0);
   const [userCount, setUserCount] = useState<number>(0);
-  
+
   // Read tab from URL parameter or default to "users"
   const urlParams = new URLSearchParams(window.location.search);
   const initialTab = urlParams.get('tab') || 'users';
   const [activeTab, setActiveTab] = useState(initialTab);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-
+  const [isPromotionsModalOpen, setIsPromotionsModalOpen] = useState(false);
   useEffect(() => {
     fetchVisitorCount();
     fetchUserCount();
   }, []);
-
   const fetchVisitorCount = async () => {
     try {
       const response = await fetch('https://spadadibattaglia.com/mom/api/track_visitors.php');
       const result = await response.json();
-      
       if (result.status === 'success') {
         setVisitorCount(result.data.length);
       }
@@ -102,12 +153,10 @@ const AdminDashboard = () => {
       console.error('Error fetching visitor count:', error);
     }
   };
-
   const fetchUserCount = async () => {
     try {
       const response = await fetch('https://spadadibattaglia.com/mom/api/users.php');
       const data = await response.json();
-      
       if (data.success && data.users) {
         setUserCount(data.users.length);
       }
@@ -115,26 +164,42 @@ const AdminDashboard = () => {
       console.error('Error fetching user count:', error);
     }
   };
-
   const handleLogout = () => {
     navigate('/');
   };
-
-  const navigationItems = [
-    { value: "users", label: "Utilisateurs", icon: Users },
-    { value: "requests", label: "Demandes", icon: ShoppingCart },
-    { value: "packs", label: "Packs", icon: Video },
-    { value: "workshops", label: "Workshops", icon: Settings },
-    { value: "consultations", label: "Consultations", icon: CalendarIcon },
-    { value: "reviews", label: "Avis", icon: MessageSquare },
-    { value: "visitors", label: "Visiteurs", icon: BarChart3 },
-  ];
-
+  const navigationItems = [{
+    value: "users",
+    label: "Utilisateurs",
+    icon: Users
+  }, {
+    value: "requests",
+    label: "Demandes",
+    icon: ShoppingCart
+  }, {
+    value: "packs",
+    label: "Packs",
+    icon: Video
+  }, {
+    value: "workshops",
+    label: "Workshops",
+    icon: Settings
+  }, {
+    value: "consultations",
+    label: "Consultations",
+    icon: CalendarIcon
+  }, {
+    value: "reviews",
+    label: "Avis",
+    icon: MessageSquare
+  }, {
+    value: "visitors",
+    label: "Visiteurs",
+    icon: BarChart3
+  }];
   const handleMobileTabChange = (value: string) => {
     setActiveTab(value);
     setIsMobileNavOpen(false);
   };
-
   const renderTabContent = () => {
     switch (activeTab) {
       case "users":
@@ -157,17 +222,14 @@ const AdminDashboard = () => {
         return <UserManagement />;
     }
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-accent admin-dashboard" dir="ltr">
+  return <div className="min-h-screen bg-gradient-to-b from-background to-accent admin-dashboard" dir="ltr">
       {/* Header */}
       <div className="bg-white/95 backdrop-blur-md border-b border-border sticky top-0 z-40 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {/* Mobile Navigation - moved to left */}
-              {isMobile && (
-                <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
+              {isMobile && <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
                   <SheetTrigger asChild>
                     <Button variant="outline" size="icon" className="hover-scale">
                       <Menu className="w-4 h-4" />
@@ -201,39 +263,25 @@ const AdminDashboard = () => {
                       <div className="flex-1 py-3">
                         <nav className="space-y-1 px-2">
                           {navigationItems.map((item, index) => {
-                            const Icon = item.icon;
-                            const isActive = activeTab === item.value;
-                            return (
-                              <Button
-                                key={item.value}
-                                variant={isActive ? "default" : "ghost"}
-                                className={`
+                        const Icon = item.icon;
+                        const isActive = activeTab === item.value;
+                        return <Button key={item.value} variant={isActive ? "default" : "ghost"} className={`
                                   w-full justify-start gap-2.5 h-10 text-left
                                   transition-all duration-200
-                                  ${isActive 
-                                    ? 'bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-md hover:shadow-lg' 
-                                    : 'hover:bg-accent/70 hover:translate-x-1'
-                                  }
-                                `}
-                                style={{ animationDelay: `${index * 50}ms` }}
-                                onClick={() => handleMobileTabChange(item.value)}
-                              >
+                                  ${isActive ? 'bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-md hover:shadow-lg' : 'hover:bg-accent/70 hover:translate-x-1'}
+                                `} style={{
+                          animationDelay: `${index * 50}ms`
+                        }} onClick={() => handleMobileTabChange(item.value)}>
                                 <div className={`
                                   w-7 h-7 rounded-lg flex items-center justify-center shrink-0
-                                  ${isActive 
-                                    ? 'bg-white/20' 
-                                    : 'bg-accent/50'
-                                  }
+                                  ${isActive ? 'bg-white/20' : 'bg-accent/50'}
                                 `}>
                                   <Icon className="w-3.5 h-3.5 ml-[1.5px]" />
                                 </div>
                                 <span className="text-left font-medium text-xs">{item.label}</span>
-                                {isActive && (
-                                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-foreground animate-pulse" />
-                                )}
-                              </Button>
-                            );
-                          })}
+                                {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-foreground animate-pulse" />}
+                              </Button>;
+                      })}
                         </nav>
                       </div>
 
@@ -247,30 +295,28 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   </SheetContent>
-                </Sheet>
-              )}
+                </Sheet>}
               
               <Settings className="w-6 h-6 text-primary hidden sm:block" />
               <div>
-              <h1 className="text-xl md:text-2xl font-bold text-foreground">
-                Tableau de Bord Administrateur
-              </h1>
+              <h1 className="text-xl md:text-2xl font-bold text-foreground">Tableau de Bord </h1>
               <p className="text-sm text-muted-foreground hidden sm:block">Gestion des utilisateurs et du contenu</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Button 
                 variant="outline" 
-                onClick={() => setActiveTab("blogs")}
-                className="btn-outline hidden sm:flex"
+                size="icon"
+                onClick={() => setIsPromotionsModalOpen(true)} 
+                className="btn-outline"
+                title="Gérer les Promotions"
               >
+                <Percent className="w-4 h-4" />
+              </Button>
+              <Button variant="outline" onClick={() => setActiveTab("blogs")} className="btn-outline hidden sm:flex">
                 Gérer les Articles
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleLogout}
-                className="btn-outline"
-              >
+              <Button variant="outline" onClick={handleLogout} className="btn-outline">
                 <ArrowLeft className="w-4 h-4 sm:ml-2" />
                 <span className="hidden sm:inline">Se Déconnecter</span>
               </Button>
@@ -326,25 +372,20 @@ const AdminDashboard = () => {
         </div>
 
         {/* Main Content */}
-        {isMobile ? (
-          /* Mobile: Show current tab content directly */
-          <div className="space-y-6">
+        {isMobile ? (/* Mobile: Show current tab content directly */
+      <div className="space-y-6">
             {renderTabContent()}
-          </div>
-        ) : (
-          /* Desktop: Use tabs */
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          </div>) : (/* Desktop: Use tabs */
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-7 mb-6">
-              {navigationItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <TabsTrigger key={item.value} value={item.value} className="flex items-center gap-2">
+              {navigationItems.map(item => {
+            const Icon = item.icon;
+            return <TabsTrigger key={item.value} value={item.value} className="flex items-center gap-2">
                     <Icon className="w-4 h-4" />
                     <span className="hidden lg:inline">{item.label}</span>
                     <span className="lg:hidden">{item.label.split(' ')[0]}</span>
-                  </TabsTrigger>
-                );
-              })}
+                  </TabsTrigger>;
+          })}
             </TabsList>
 
             {/* Tab Contents */}
@@ -379,11 +420,13 @@ const AdminDashboard = () => {
             <TabsContent value="visitors" className="space-y-6">
               <VisitorStatistics />
             </TabsContent>
-          </Tabs>
-        )}
+          </Tabs>)}
       </div>
-    </div>
-  );
-};
 
+      <PromotionsModal 
+        open={isPromotionsModalOpen} 
+        onOpenChange={setIsPromotionsModalOpen} 
+      />
+    </div>;
+};
 export default AdminDashboard;

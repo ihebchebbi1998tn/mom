@@ -46,6 +46,7 @@ const Workshops = () => {
   const { toast } = useToast();
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [workshopRequests, setWorkshopRequests] = useState<WorkshopRequest[]>([]);
+  const [workshopPackAccess, setWorkshopPackAccess] = useState<{[key: number]: {hasAccess: boolean, packName?: string}}>({});
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -116,6 +117,37 @@ const Workshops = () => {
       fetchWorkshopRequests();
     }
   }, [currentUserId]);
+
+  // Check pack access for all workshops
+  useEffect(() => {
+    if (currentUserId && workshops.length > 0) {
+      checkAllWorkshopPackAccess();
+    }
+  }, [currentUserId, workshops]);
+
+  const checkAllWorkshopPackAccess = async () => {
+    const accessMap: {[key: number]: {hasAccess: boolean, packName?: string}} = {};
+    
+    await Promise.all(
+      workshops.map(async (workshop) => {
+        try {
+          const response = await fetch(`https://spadadibattaglia.com/mom/api/check_workshop_access.php?user_id=${currentUserId}&workshop_id=${workshop.id}`);
+          const data = await response.json();
+          
+          if (data.success && data.hasAccess && data.accessType === 'pack') {
+            accessMap[workshop.id] = {
+              hasAccess: true,
+              packName: data.packName
+            };
+          }
+        } catch (error) {
+          console.error(`Error checking pack access for workshop ${workshop.id}:`, error);
+        }
+      })
+    );
+    
+    setWorkshopPackAccess(accessMap);
+  };
 
   const fetchWorkshopRequests = async () => {
     if (!currentUserId) return;
@@ -347,6 +379,7 @@ const Workshops = () => {
                         const requestStatus = getWorkshopRequestStatus(workshop.id);
                         const request = getWorkshopRequest(workshop.id);
                         const hasUploadedReceipt = request && request.recu_link;
+                        const packAccess = workshopPackAccess[workshop.id];
 
                         if (requestStatus === 'accepted') {
                           return (
@@ -357,6 +390,25 @@ const Workshops = () => {
                               </Badge>
                               <Button 
                                 className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 w-full"
+                                onClick={() => handleAccessWorkshop(workshop.id)}
+                              >
+                                الدخول إلى الورشة
+                                <ArrowLeft className="w-4 h-4 mr-2" />
+                              </Button>
+                            </div>
+                          );
+                        }
+
+                        // Check if unlocked via pack purchase
+                        if (packAccess && packAccess.hasAccess) {
+                          return (
+                            <div className="space-y-2">
+                              <Badge className="w-full bg-purple-100 text-purple-700 hover:bg-purple-100 justify-center py-2">
+                                <CheckCircle className="w-4 h-4 ml-2" />
+                                مفتوح عبر {packAccess.packName}
+                              </Badge>
+                              <Button 
+                                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 w-full"
                                 onClick={() => handleAccessWorkshop(workshop.id)}
                               >
                                 الدخول إلى الورشة

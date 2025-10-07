@@ -48,6 +48,37 @@ interface SubPack {
   status: string;
 }
 
+interface Workshop {
+  id: number;
+  title: string;
+  description: string;
+  duration: string;
+  type: string;
+  next_date: string;
+  enrolled_count: number;
+  max_participants: number;
+  location: string;
+  highlights: string[];
+  price: number;
+  image_url?: string;
+  order_index: number;
+}
+
+interface Challenge {
+  id: number;
+  title: string;
+  description: string;
+  duration: string;
+  difficulty: string;
+  participants: number;
+  reward: string;
+  status: string;
+  start_date: string;
+  end_date: string;
+  price: string;
+  order_index: number;
+}
+
 interface Review {
   id: number;
   name: string;
@@ -61,6 +92,8 @@ const PackDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [pack, setPack] = useState<CoursePack | null>(null);
+  const [workshops, setWorkshops] = useState<Workshop[]>([]);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [selectedVideoUrl, setSelectedVideoUrl] = useState<string | null>(null);
@@ -125,7 +158,30 @@ const PackDetail = () => {
           }
         } catch (subPackError) {
           console.error('Error fetching linked sub-packs:', subPackError);
-          // Continue without sub-packs if API fails
+        }
+        
+        // Fetch linked workshops
+        try {
+          const workshopsResponse = await fetch(`https://spadadibattaglia.com/mom/api/pack_workshop_links.php?pack_id=${id}`);
+          const workshopsData = await workshopsResponse.json();
+          
+          if (workshopsData.success && workshopsData.data) {
+            setWorkshops(workshopsData.data);
+          }
+        } catch (workshopError) {
+          console.error('Error fetching linked workshops:', workshopError);
+        }
+        
+        // Fetch linked challenges
+        try {
+          const challengesResponse = await fetch(`https://spadadibattaglia.com/mom/api/pack_challenge_links.php?pack_id=${id}`);
+          const challengesData = await challengesResponse.json();
+          
+          if (challengesData.success && challengesData.data) {
+            setChallenges(challengesData.data);
+          }
+        } catch (challengeError) {
+          console.error('Error fetching linked challenges:', challengeError);
         }
         
         setPack(packData.data);
@@ -364,6 +420,102 @@ const PackDetail = () => {
                           )}
                           
                           <div className="flex items-center gap-2 text-xs text-primary pt-2">
+                            <CheckCircle className="w-4 h-4" />
+                            <span>مشمول في الباك</span>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Workshops Section */}
+              {workshops.length > 0 && (
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold text-foreground text-center">الورش المشمولة</h3>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {workshops.map((workshop) => (
+                      <Card key={workshop.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                        <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-pink-100 to-purple-100">
+                          {workshop.image_url ? (
+                            <img 
+                              src={workshop.image_url}
+                              alt={workshop.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Calendar className="w-16 h-16 text-primary/30" />
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="p-5 space-y-3">
+                          <h4 className="text-lg font-bold text-foreground line-clamp-2 min-h-[3.5rem]">
+                            {workshop.title}
+                          </h4>
+                          
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {workshop.description}
+                          </p>
+                          
+                          <div className="space-y-2 text-sm">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Clock className="w-4 h-4" />
+                              <span>{workshop.duration}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Users className="w-4 h-4" />
+                              <span>{workshop.enrolled_count}/{workshop.max_participants} مسجل</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-xs text-green-600 pt-2">
+                            <CheckCircle className="w-4 h-4" />
+                            <span>مشمول في الباك</span>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Challenges Section */}
+              {challenges.length > 0 && (
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold text-foreground text-center">التحديات المشمولة</h3>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {challenges.map((challenge) => (
+                      <Card key={challenge.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                        <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-yellow-100 to-orange-100">
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Award className="w-16 h-16 text-primary/30" />
+                          </div>
+                        </div>
+                        
+                        <div className="p-5 space-y-3">
+                          <h4 className="text-lg font-bold text-foreground line-clamp-2 min-h-[3.5rem]">
+                            {challenge.title}
+                          </h4>
+                          
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {challenge.description}
+                          </p>
+                          
+                          <div className="space-y-2 text-sm">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Clock className="w-4 h-4" />
+                              <span>{challenge.duration}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Users className="w-4 h-4" />
+                              <span>{challenge.participants} مشترك</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-xs text-green-600 pt-2">
                             <CheckCircle className="w-4 h-4" />
                             <span>مشمول في الباك</span>
                           </div>
