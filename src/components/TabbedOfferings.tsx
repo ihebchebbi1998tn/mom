@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { BookOpen, Star, Users, ArrowLeft, Calendar, Clock, MessageSquare, CheckCircle, PlayCircle, Loader2, Play, Pause, RotateCcw } from "lucide-react";
+import { BookOpen, Star, Users, ArrowLeft, Calendar, Clock, MessageSquare, CheckCircle, PlayCircle, Loader2, Play, Pause, RotateCcw, Maximize } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -190,7 +190,7 @@ const TabbedOfferings = () => {
     if (mutedVideos[packId] === false) {
       const timeout = setTimeout(() => {
         setShowControls(prev => ({ ...prev, [packId]: false }));
-      }, 6000);
+      }, 2000);
       
       setControlsTimeout(prev => ({ ...prev, [packId]: timeout }));
     }
@@ -256,6 +256,21 @@ const TabbedOfferings = () => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const toggleFullscreen = (packId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const videoElement = videoRefs.current[packId];
+    if (videoElement) {
+      if (!document.fullscreenElement) {
+        videoElement.requestFullscreen().catch(err => {
+          console.log('Error attempting to enable fullscreen:', err);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+      resetControlsTimeout(packId);
+    }
   };
 
   const fetchData = async () => {
@@ -451,12 +466,13 @@ const TabbedOfferings = () => {
                                     }
                                   }}
                                   src={pack.intro_video_url}
-                                  className="w-full h-full object-contain"
+                                  className="w-full h-full object-contain cursor-pointer"
                                   muted={true}
                                   loop
                                   playsInline
                                   preload="metadata"
                                   style={{ contentVisibility: 'auto' }}
+                                  onClick={() => resetControlsTimeout(pack.id)}
                                 />
                                 
                                 {/* Video Controls Overlay */}
@@ -481,16 +497,16 @@ const TabbedOfferings = () => {
                                     )}
                                     
                                     {/* Bottom Controls Bar - Show/Hide based on state */}
-                                    <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-3 z-30 transition-opacity duration-300 ${showControls[pack.id] !== false ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                                    <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-2 z-30 transition-opacity duration-300 ${showControls[pack.id] !== false ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                                        {/* Progress Bar - Pink for passed, Gray for remaining */}
-                                       <div className="mb-2" dir="ltr">
+                                       <div className="mb-1.5" dir="ltr">
                                         <input
                                           type="range"
                                           min="0"
                                           max={videoDurations[pack.id] || 0}
                                           value={videoCurrentTimes[pack.id] || 0}
                                           onChange={(e) => handleProgressChange(pack.id, e)}
-                                          className="w-full h-1 rounded-lg appearance-none cursor-pointer bg-gray-300/50 [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-pink-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:-mt-1 [&::-webkit-slider-thumb]:shadow-lg [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-lg [&::-moz-range-track]:bg-gray-300/50 [&::-moz-range-progress]:h-1 [&::-moz-range-progress]:rounded-lg [&::-moz-range-progress]:bg-pink-500 [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-pink-500 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-lg"
+                                          className="w-full h-0.5 rounded-lg appearance-none cursor-pointer bg-gray-300/50 [&::-webkit-slider-runnable-track]:h-0.5 [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-pink-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:-mt-1 [&::-webkit-slider-thumb]:shadow-lg [&::-moz-range-track]:h-0.5 [&::-moz-range-track]:rounded-lg [&::-moz-range-track]:bg-gray-300/50 [&::-moz-range-progress]:h-0.5 [&::-moz-range-progress]:rounded-lg [&::-moz-range-progress]:bg-pink-500 [&::-moz-range-thumb]:w-2.5 [&::-moz-range-thumb]:h-2.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-pink-500 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-lg"
                                           style={{
                                             background: `linear-gradient(to right, rgb(236 72 153) 0%, rgb(236 72 153) ${((videoCurrentTimes[pack.id] || 0) / (videoDurations[pack.id] || 1)) * 100}%, rgba(209, 213, 219, 0.5) ${((videoCurrentTimes[pack.id] || 0) / (videoDurations[pack.id] || 1)) * 100}%, rgba(209, 213, 219, 0.5) 100%)`
                                           }}
@@ -499,16 +515,16 @@ const TabbedOfferings = () => {
                                       </div>
                                       
                                        {/* Control Buttons - Reversed Order */}
-                                       <div className="flex items-center justify-between gap-2">
+                                       <div className="flex items-center justify-between gap-1.5">
                                          {/* Mute/Unmute Button - Now on Left */}
-                                         <div className="relative flex items-center gap-2">
+                                         <div className="relative flex items-center gap-1.5">
                                             {/* Text Indicator - only show when muted */}
                                             {mutedVideos[pack.id] !== false && (
                                               <span 
                                                 onClick={(e) => toggleMute(pack.id, e)}
-                                                className="text-pink-500 text-xs font-medium bg-pink-500/20 px-2 py-1 rounded animate-pulse whitespace-nowrap flex items-center gap-1 cursor-pointer hover:bg-pink-500/30 transition-colors"
+                                                className="text-pink-500 text-[10px] font-medium bg-pink-500/20 px-1.5 py-0.5 rounded animate-pulse whitespace-nowrap flex items-center gap-1 cursor-pointer hover:bg-pink-500/30 transition-colors"
                                               >
-                                                اضغط للصوت <span className="text-base">◄</span>
+                                                اضغط للصوت <span className="text-sm">◄</span>
                                               </span>
                                             )}
                                            
@@ -524,16 +540,16 @@ const TabbedOfferings = () => {
                                              
                                              <button
                                                onClick={(e) => toggleMute(pack.id, e)}
-                                               className="relative bg-white/20 hover:bg-white/30 text-white rounded-full p-1.5 transition-all duration-200"
+                                               className="relative bg-white/20 hover:bg-white/30 text-white rounded-full p-1 transition-all duration-200"
                                              >
                                             {mutedVideos[pack.id] !== false ? (
-                                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
                                                 <line x1="23" y1="9" x2="17" y2="15"/>
                                                 <line x1="17" y1="9" x2="23" y2="15"/>
                                               </svg>
                                             ) : (
-                                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
                                                 <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
                                                 <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
@@ -544,29 +560,38 @@ const TabbedOfferings = () => {
                                          </div>
                                         
                                         {/* Play/Pause, Rewind, and Time - Now on Right */}
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1.5">
                                           {/* Time Display - LTR */}
-                                          <span className="text-white text-xs font-medium" dir="ltr">
+                                          <span className="text-white text-[10px] font-medium" dir="ltr">
                                             {formatTime(videoCurrentTimes[pack.id] || 0)} / {formatTime(videoDurations[pack.id] || 0)}
                                           </span>
+                                          
+                                          {/* Fullscreen Button */}
+                                          <button
+                                            onClick={(e) => toggleFullscreen(pack.id, e)}
+                                            className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1 transition-all duration-200"
+                                            title="ملء الشاشة"
+                                          >
+                                            <Maximize className="w-3.5 h-3.5" />
+                                          </button>
                                           
                                           {/* Rewind Button */}
                                           <button
                                             onClick={(e) => rewindVideo(pack.id, e)}
-                                            className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1.5 transition-all duration-200"
+                                            className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1 transition-all duration-200"
                                           >
-                                            <RotateCcw className="w-4 h-4" />
+                                            <RotateCcw className="w-3.5 h-3.5" />
                                           </button>
                                           
                                           {/* Play/Pause Button */}
                                           <button
                                             onClick={(e) => togglePlayPause(pack.id, e)}
-                                            className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1.5 transition-all duration-200"
+                                            className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1 transition-all duration-200"
                                           >
                                             {videoPaused[pack.id] ? (
-                                              <Play className="w-4 h-4" />
+                                              <Play className="w-3.5 h-3.5" />
                                             ) : (
-                                              <Pause className="w-4 h-4" />
+                                              <Pause className="w-3.5 h-3.5" />
                                             )}
                                           </button>
                                         </div>
