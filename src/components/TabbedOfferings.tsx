@@ -407,7 +407,7 @@ const TabbedOfferings = () => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto lg:[&>*:last-child:nth-child(3n+1)]:col-start-2">
                   {visiblePacks.map((pack, index) => (
                     <div 
                       key={pack.id}

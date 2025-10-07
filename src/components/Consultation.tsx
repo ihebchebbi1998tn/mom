@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Calendar as CalendarIcon, CheckCircle, ArrowLeft, Clock, Phone, Users, MessageSquare, Video, AlertCircle, FileText, MapPin } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
