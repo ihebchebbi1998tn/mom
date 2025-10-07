@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Calendar as CalendarIcon, CheckCircle, ArrowLeft, Clock, Phone, Users, MessageSquare, Video, AlertCircle, FileText, MapPin } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -320,7 +321,7 @@ const Consultation = () => {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm text-foreground">
-                      <span className="font-semibold">التحضير:</span> من فضلك حضّر ورقة وقلم للحصول على أقصى استفادة
+                      <span className="font-semibold">التحضير:</span> من فضلك أحظر ورقة وقلم للحصول على أقصى استفادة
                     </p>
                   </div>
                 </div>
