@@ -18,44 +18,46 @@ import testimonial6 from "@/assets/testimonials/testimonial-6.png";
 import testimonial7 from "@/assets/testimonials/testimonial-7.png";
 import testimonial8 from "@/assets/testimonials/testimonial-8.png";
 const Testimonials = () => {
-  const testimonials = [{
-    name: "سارة محمد",
+  const audioTestimonials = [{
+    name: "سامية",
     package: "باك ذهبي",
     audioUrl: "/audio/testimonial1.mp3"
   }, {
-    name: "فاطمة أحمد",
-    package: "باك ذهبي",
-    imageUrl: testimonial1
-  }, {
-    name: "نور الهدى",
+    name: "وفاء",
     package: "باك ذهبي",
     audioUrl: "/audio/testimonial2.mp3"
   }, {
-    name: "ليلى حسن",
+    name: "ريم",
+    package: "باك ذهبي",
+    audioUrl: "/audio/testimonial3.mp3"
+  }];
+  
+  const photoTestimonials = [{
+    name: "أميرة",
+    package: "باك ذهبي",
+    imageUrl: testimonial1
+  }, {
+    name: "إيناس",
     package: "باك ذهبي",
     imageUrl: testimonial2
   }, {
-    name: "منى عبدالله",
+    name: "روعة",
     package: "باك ذهبي",
     imageUrl: testimonial3
   }, {
-    name: "هدى يوسف",
-    package: "باك ذهبي",
-    audioUrl: "/audio/testimonial3.mp3"
-  }, {
-    name: "زينب علي",
+    name: "مروى",
     package: "باك ذهبي",
     imageUrl: testimonial4
   }, {
-    name: "رنا خالد",
+    name: "سمية",
     package: "باك ذهبي",
     imageUrl: testimonial5
   }, {
-    name: "أمينة سعيد",
+    name: "سندس",
     package: "باك ذهبي",
     imageUrl: testimonial7
   }, {
-    name: "سلمى إبراهيم",
+    name: "صفاء",
     package: "باك ذهبي",
     imageUrl: testimonial8
   }];
@@ -64,17 +66,29 @@ const Testimonials = () => {
     isVisible
   } = useScrollAnimation();
   const isMobile = useIsMobile();
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentAudioIndex, setCurrentAudioIndex] = useState(0);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const itemsPerPage = isMobile ? 1 : 3;
-  const maxIndex = Math.max(0, testimonials.length - itemsPerPage);
-  const goToPrevious = () => {
-    setCurrentIndex(prev => prev === 0 ? maxIndex : prev - 1);
+  
+  const maxAudioIndex = Math.max(0, audioTestimonials.length - itemsPerPage);
+  const maxPhotoIndex = Math.max(0, photoTestimonials.length - itemsPerPage);
+  
+  const goToPreviousAudio = () => {
+    setCurrentAudioIndex(prev => prev === 0 ? maxAudioIndex : prev - 1);
   };
-  const goToNext = () => {
-    setCurrentIndex(prev => prev >= maxIndex ? 0 : prev + 1);
+  const goToNextAudio = () => {
+    setCurrentAudioIndex(prev => prev >= maxAudioIndex ? 0 : prev + 1);
   };
-  const visibleTestimonials = testimonials.slice(currentIndex, currentIndex + itemsPerPage);
+  const goToPreviousPhoto = () => {
+    setCurrentPhotoIndex(prev => prev === 0 ? maxPhotoIndex : prev - 1);
+  };
+  const goToNextPhoto = () => {
+    setCurrentPhotoIndex(prev => prev >= maxPhotoIndex ? 0 : prev + 1);
+  };
+  
+  const visibleAudioTestimonials = audioTestimonials.slice(currentAudioIndex, currentAudioIndex + itemsPerPage);
+  const visiblePhotoTestimonials = photoTestimonials.slice(currentPhotoIndex, currentPhotoIndex + itemsPerPage);
   return <section id="testimonials" className="py-20 bg-white" ref={sectionRef}>
       <div className="container mx-auto px-4">
         <div className={`max-w-4xl mx-auto text-center mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -87,77 +101,105 @@ const Testimonials = () => {
           </p>
         </div>
 
-        {/* Testimonials Display with Side Navigation */}
-        <div className="relative">
-          {/* Left Arrow */}
-          <Button variant="outline" size="sm" onClick={goToPrevious} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 rounded-full p-3 h-12 w-12 bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300">
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-          
-          {/* Right Arrow */}
-          <Button variant="outline" size="sm" onClick={goToNext} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 rounded-full p-3 h-12 w-12 bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300">
-            <ChevronRight className="h-5 w-5" />
-          </Button>
+        {/* Audio Testimonials Section */}
+        <div className="mb-20">
+          <h3 className="text-2xl font-bold text-foreground text-center mb-8">
+            شهادات صوتية
+          </h3>
+          <div className="relative">
+            {/* Left Arrow */}
+            <Button variant="outline" size="sm" onClick={goToPreviousAudio} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 rounded-full p-3 h-12 w-12 bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300">
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            
+            {/* Right Arrow */}
+            <Button variant="outline" size="sm" onClick={goToNextAudio} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 rounded-full p-3 h-12 w-12 bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300">
+              <ChevronRight className="h-5 w-5" />
+            </Button>
 
-          {/* Testimonials Grid */}
-          <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-3'} gap-6 px-8`}>
-          {visibleTestimonials.map((testimonial, index) => <Card 
-            key={currentIndex + index} 
-            className={`card-cute p-6 relative overflow-hidden flex flex-col transition-all duration-1000 hover:scale-105 hover:shadow-xl ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-            style={{ 
-              transitionDelay: isVisible ? `${300 + index * 200}ms` : '0ms' 
-            }}
-          >
-              {/* Quote Icon */}
-              <div className="absolute top-4 right-4 text-primary/20">
-                <Quote className="w-12 h-12" />
-              </div>
+            {/* Audio Testimonials Grid */}
+            <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-3'} gap-6 px-8`}>
+              {visibleAudioTestimonials.map((testimonial, index) => (
+                <Card 
+                  key={currentAudioIndex + index} 
+                  className={`card-cute p-6 relative overflow-hidden flex flex-col transition-all duration-1000 hover:scale-105 hover:shadow-xl ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                  style={{ 
+                    transitionDelay: isVisible ? `${300 + index * 200}ms` : '0ms' 
+                  }}
+                >
+                  {/* Mom Name */}
+                  <div className="text-right mb-4">
+                    <h3 className="text-lg font-bold text-primary">{testimonial.name}</h3>
+                  </div>
 
-              {/* Audio Icon - only show if audio exists */}
-              {testimonial.audioUrl && (
-                <div className="absolute top-4 left-4 text-primary/30">
-                  <Headphones className="w-8 h-8" />
-                </div>
-              )}
+                  {/* Enhanced Audio Player */}
+                  <div>
+                    <EnhancedAudioPlayer src={testimonial.audioUrl} />
+                  </div>
 
-              {/* Mom Name and Package */}
-              <div className="text-right mb-4">
-                <h3 className="text-xl font-bold text-foreground mb-2">{testimonial.name}</h3>
-                <p className="text-primary font-medium" dir="rtl">{testimonial.package}</p>
-              </div>
+                  {/* Decorative Elements */}
+                  <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary/20 via-primary to-primary/20"></div>
+                </Card>
+              ))}
+            </div>
+            
+            {/* Page Indicator */}
+            <div className="flex justify-center mt-6">
+              <span className="text-sm text-muted-foreground bg-white/50 backdrop-blur-sm px-3 py-1 rounded-full">
+                {currentAudioIndex + 1} - {Math.min(currentAudioIndex + itemsPerPage, audioTestimonials.length)} من {audioTestimonials.length}
+              </span>
+            </div>
+          </div>
+        </div>
 
-              {/* Review Image (if exists) */}
-              {testimonial.imageUrl && (
+        {/* Photo Testimonials Section */}
+        <div>
+          <h3 className="text-2xl font-bold text-foreground text-center mb-8">
+            شهادات مصورة
+          </h3>
+          <div className="relative">
+            {/* Left Arrow */}
+            <Button variant="outline" size="sm" onClick={goToPreviousPhoto} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 rounded-full p-3 h-12 w-12 bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300">
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            
+            {/* Right Arrow */}
+            <Button variant="outline" size="sm" onClick={goToNextPhoto} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 rounded-full p-3 h-12 w-12 bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300">
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+
+            {/* Photo Testimonials Grid */}
+            <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-3'} gap-6 px-8`}>
+              {visiblePhotoTestimonials.map((testimonial, index) => (
                 <div 
-                  className="mb-4 rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity border-2 border-primary/30"
+                  key={currentPhotoIndex + index} 
+                  className={`relative overflow-hidden rounded-lg cursor-pointer transition-all duration-1000 hover:scale-105 hover:shadow-xl ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                  style={{ 
+                    transitionDelay: isVisible ? `${300 + index * 200}ms` : '0ms' 
+                  }}
                   onClick={() => setSelectedImage(testimonial.imageUrl!)}
                 >
+                  {/* Name overlay on top */}
+                  <div className="absolute -top-2 right-4 z-10 px-4 py-2 rounded-lg">
+                    <h3 className="text-lg font-bold text-primary">{testimonial.name}</h3>
+                  </div>
+
+                  {/* Review Image */}
                   <img 
                     src={testimonial.imageUrl} 
                     alt={`Review from ${testimonial.name}`}
-                    className="w-full h-48 object-cover"
+                    className="w-full h-64 object-contain"
                   />
                 </div>
-              )}
-
-              {/* Enhanced Audio Player (if exists) */}
-              {testimonial.audioUrl && (
-                <div>
-                  <EnhancedAudioPlayer src={testimonial.audioUrl} />
-                </div>
-              )}
-              
-
-              {/* Decorative Elements */}
-              <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary/20 via-primary to-primary/20"></div>
-            </Card>)}
-          </div>
-          
-          {/* Page Indicator */}
-          <div className="flex justify-center mt-6">
-            <span className="text-sm text-muted-foreground bg-white/50 backdrop-blur-sm px-3 py-1 rounded-full">
-              {currentIndex + 1} - {Math.min(currentIndex + itemsPerPage, testimonials.length)} من {testimonials.length}
-            </span>
+              ))}
+            </div>
+            
+            {/* Page Indicator */}
+            <div className="flex justify-center mt-6">
+              <span className="text-sm text-muted-foreground bg-white/50 backdrop-blur-sm px-3 py-1 rounded-full">
+                {currentPhotoIndex + 1} - {Math.min(currentPhotoIndex + itemsPerPage, photoTestimonials.length)} من {photoTestimonials.length}
+              </span>
+            </div>
           </div>
         </div>
 
