@@ -120,7 +120,7 @@ export const PromotionPopup = () => {
 
           {/* Discount Badge */}
           <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-destructive text-destructive-foreground px-4 py-2 sm:px-6 sm:py-3 rounded-full shadow-lg animate-pulse">
-            <span className="text-2xl sm:text-3xl font-bold" dir="ltr">-{promotion.discount_percentage}%</span>
+            <span className="text-2xl sm:text-3xl font-bold" dir="ltr">-{Math.round(promotion.discount_percentage)}%</span>
             <span className="text-xs sm:text-sm block" dir="rtl">خصم</span>
           </div>
 

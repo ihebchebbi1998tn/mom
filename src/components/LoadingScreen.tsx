@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
-import oldLogo from "@/assets/maman-attentionnee-logo.png";
+import loadingLogo from "@/assets/loading-logo.png";
 
 interface LoadingScreenProps {
   onLoadingComplete: () => void;
@@ -72,7 +72,7 @@ const LoadingScreen = ({ onLoadingComplete }: LoadingScreenProps) => {
           {/* Logo Circle */}
           <div className="relative w-32 h-32 bg-white rounded-full shadow-2xl flex items-center justify-center border-4 border-pink-200/50">
             <img 
-              src="/lovable-uploads/134a7f12-f652-4af0-b56a-5fef2c8109bb.png" 
+              src={loadingLogo} 
               alt="أكاديمية الأم" 
               className="w-20 h-20 object-contain animate-pulse"
             />

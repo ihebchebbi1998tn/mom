@@ -241,7 +241,7 @@ const Header = () => {
                     <Menu className="w-6 h-6" />
                   </button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[320px] p-0 bg-gradient-to-bl from-pink-50 via-rose-50/95 to-white border-l-2 border-pink-200">
+                <SheetContent side="left" className="w-[320px] p-0 bg-gradient-to-bl from-pink-50 via-rose-50/95 to-white border-r-2 border-pink-200">
                   <div className="p-4 h-full flex flex-col">
                     {/* Logo at Top */}
                     <div className="flex items-center justify-between mb-4 animate-fade-in">

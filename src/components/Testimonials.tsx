@@ -17,6 +17,20 @@ import testimonial5 from "@/assets/testimonials/testimonial-5.png";
 import testimonial6 from "@/assets/testimonials/testimonial-6.png";
 import testimonial7 from "@/assets/testimonials/testimonial-7.png";
 import testimonial8 from "@/assets/testimonials/testimonial-8.png";
+import testimonial9 from "@/assets/testimonials/testimonial-9.png";
+import testimonial10 from "@/assets/testimonials/testimonial-10.png";
+import testimonial11 from "@/assets/testimonials/testimonial-11.png";
+import testimonial12 from "@/assets/testimonials/testimonial-12.png";
+import testimonial13 from "@/assets/testimonials/testimonial-13.png";
+import testimonial14 from "@/assets/testimonials/testimonial-14.png";
+import testimonial15 from "@/assets/testimonials/testimonial-15.png";
+import testimonial16 from "@/assets/testimonials/testimonial-16.png";
+import testimonial17 from "@/assets/testimonials/testimonial-17.png";
+import testimonial18 from "@/assets/testimonials/testimonial-18.png";
+import testimonial19 from "@/assets/testimonials/testimonial-19.png";
+import testimonial20 from "@/assets/testimonials/testimonial-20.png";
+import testimonial21 from "@/assets/testimonials/testimonial-21.png";
+import testimonial22 from "@/assets/testimonials/testimonial-22.png";
 const Testimonials = () => {
   const audioTestimonials = [{
     name: "سامية",
@@ -33,33 +47,93 @@ const Testimonials = () => {
   }];
   
   const photoTestimonials = [{
-    name: "أميرة",
+    name: "أم عبد الله",
     package: "باك ذهبي",
     imageUrl: testimonial1
   }, {
-    name: "إيناس",
+    name: "أم أحمد",
     package: "باك ذهبي",
     imageUrl: testimonial2
   }, {
-    name: "روعة",
+    name: "أم محمد",
     package: "باك ذهبي",
     imageUrl: testimonial3
   }, {
-    name: "مروى",
+    name: "أم سارة",
     package: "باك ذهبي",
     imageUrl: testimonial4
   }, {
-    name: "سمية",
+    name: "أم يوسف",
     package: "باك ذهبي",
     imageUrl: testimonial5
   }, {
-    name: "سندس",
+    name: "أم علي",
+    package: "باك ذهبي",
+    imageUrl: testimonial6
+  }, {
+    name: "أم فاطمة",
     package: "باك ذهبي",
     imageUrl: testimonial7
   }, {
-    name: "صفاء",
+    name: "أم خديجة",
     package: "باك ذهبي",
     imageUrl: testimonial8
+  }, {
+    name: "أم مريم",
+    package: "باك ذهبي",
+    imageUrl: testimonial9
+  }, {
+    name: "أم ليلى",
+    package: "باك ذهبي",
+    imageUrl: testimonial10
+  }, {
+    name: "أم هند",
+    package: "باك ذهبي",
+    imageUrl: testimonial11
+  }, {
+    name: "أم نور",
+    package: "باك ذهبي",
+    imageUrl: testimonial12
+  }, {
+    name: "أم آية",
+    package: "باك ذهبي",
+    imageUrl: testimonial13
+  }, {
+    name: "أم زينب",
+    package: "باك ذهبي",
+    imageUrl: testimonial14
+  }, {
+    name: "أم ياسمين",
+    package: "باك ذهبي",
+    imageUrl: testimonial15
+  }, {
+    name: "أم حنان",
+    package: "باك ذهبي",
+    imageUrl: testimonial16
+  }, {
+    name: "أم سلمى",
+    package: "باك ذهبي",
+    imageUrl: testimonial17
+  }, {
+    name: "أم رقية",
+    package: "باك ذهبي",
+    imageUrl: testimonial18
+  }, {
+    name: "أم إيمان",
+    package: "باك ذهبي",
+    imageUrl: testimonial19
+  }, {
+    name: "أم لينا",
+    package: "باك ذهبي",
+    imageUrl: testimonial20
+  }, {
+    name: "أم سمية",
+    package: "باك ذهبي",
+    imageUrl: testimonial21
+  }, {
+    name: "أم عائشة",
+    package: "باك ذهبي",
+    imageUrl: testimonial22
   }];
   const {
     ref: sectionRef,

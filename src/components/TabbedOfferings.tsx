@@ -497,44 +497,52 @@ const TabbedOfferings = () => {
                                     )}
                                     
                                     {/* Bottom Controls Bar - Show/Hide based on state */}
-                                    <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-2 z-30 transition-opacity duration-300 ${showControls[pack.id] !== false ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                                       {/* Progress Bar - Pink for passed, Gray for remaining */}
-                                       <div className="mb-1.5" dir="ltr">
-                                        <input
-                                          type="range"
-                                          min="0"
-                                          max={videoDurations[pack.id] || 0}
-                                          value={videoCurrentTimes[pack.id] || 0}
-                                          onChange={(e) => handleProgressChange(pack.id, e)}
-                                          className="w-full h-0.5 rounded-lg appearance-none cursor-pointer bg-gray-300/50 [&::-webkit-slider-runnable-track]:h-0.5 [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-pink-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:-mt-1 [&::-webkit-slider-thumb]:shadow-lg [&::-moz-range-track]:h-0.5 [&::-moz-range-track]:rounded-lg [&::-moz-range-track]:bg-gray-300/50 [&::-moz-range-progress]:h-0.5 [&::-moz-range-progress]:rounded-lg [&::-moz-range-progress]:bg-pink-500 [&::-moz-range-thumb]:w-2.5 [&::-moz-range-thumb]:h-2.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-pink-500 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-lg"
-                                          style={{
-                                            background: `linear-gradient(to right, rgb(236 72 153) 0%, rgb(236 72 153) ${((videoCurrentTimes[pack.id] || 0) / (videoDurations[pack.id] || 1)) * 100}%, rgba(209, 213, 219, 0.5) ${((videoCurrentTimes[pack.id] || 0) / (videoDurations[pack.id] || 1)) * 100}%, rgba(209, 213, 219, 0.5) 100%)`
-                                          }}
-                                          onClick={(e) => e.stopPropagation()}
-                                        />
-                                      </div>
-                                      
-                                       {/* Control Buttons - Reversed Order */}
-                                       <div className="flex items-center justify-between gap-1.5">
-                                         {/* Mute/Unmute Button - Now on Left */}
-                                         <div className="relative flex items-center gap-1.5">
-                                            {/* Text Indicator - only show when muted */}
-                                            {mutedVideos[pack.id] !== false && (
-                                              <span 
-                                                onClick={(e) => toggleMute(pack.id, e)}
-                                                className="text-pink-500 text-[10px] font-medium bg-pink-500/20 px-1.5 py-0.5 rounded animate-pulse whitespace-nowrap flex items-center gap-1 cursor-pointer hover:bg-pink-500/30 transition-colors"
-                                              >
-                                                اضغط للصوت <span className="text-sm">◄</span>
-                                              </span>
-                                            )}
+                                   <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-2 z-30 transition-opacity duration-300 ${showControls[pack.id] !== false ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                                       {/* YouTube-style controls: Progress bar + time, then control buttons */}
+                                       <div className="flex items-center gap-2" dir="ltr">
+                                         {/* Progress Bar + Time Display */}
+                                         <div className="flex-1 flex items-center gap-2">
+                                           <input
+                                             type="range"
+                                             min="0"
+                                             max={videoDurations[pack.id] || 0}
+                                             value={videoCurrentTimes[pack.id] || 0}
+                                             onChange={(e) => handleProgressChange(pack.id, e)}
+                                             className="flex-1 h-0.5 rounded-lg appearance-none cursor-pointer bg-gray-300/50 [&::-webkit-slider-runnable-track]:h-0.5 [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-pink-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:-mt-1 [&::-webkit-slider-thumb]:shadow-lg [&::-moz-range-track]:h-0.5 [&::-moz-range-track]:rounded-lg [&::-moz-range-track]:bg-gray-300/50 [&::-moz-range-progress]:h-0.5 [&::-moz-range-progress]:rounded-lg [&::-moz-range-progress]:bg-pink-500 [&::-moz-range-thumb]:w-2.5 [&::-moz-range-thumb]:h-2.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-pink-500 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-lg"
+                                             style={{
+                                               background: `linear-gradient(to right, rgb(236 72 153) 0%, rgb(236 72 153) ${((videoCurrentTimes[pack.id] || 0) / (videoDurations[pack.id] || 1)) * 100}%, rgba(209, 213, 219, 0.5) ${((videoCurrentTimes[pack.id] || 0) / (videoDurations[pack.id] || 1)) * 100}%, rgba(209, 213, 219, 0.5) 100%)`
+                                             }}
+                                             onClick={(e) => e.stopPropagation()}
+                                           />
                                            
-                                           <div className="relative">
-                                             {/* Animated pulse rings - only show when muted */}
+                                           {/* Time Display next to progress bar */}
+                                           <span className="text-white text-[10px] font-medium whitespace-nowrap">
+                                             {formatTime(videoCurrentTimes[pack.id] || 0)} / {formatTime(videoDurations[pack.id] || 0)}
+                                           </span>
+                                         </div>
+
+                                         {/* Control Buttons */}
+                                         <div className="flex items-center gap-1.5 flex-shrink-0">
+                                           {/* Play/Pause Button */}
+                                           <button
+                                             onClick={(e) => togglePlayPause(pack.id, e)}
+                                             className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1 transition-all duration-200"
+                                           >
+                                             {videoPaused[pack.id] ? (
+                                               <Play className="w-3.5 h-3.5" />
+                                             ) : (
+                                               <Pause className="w-3.5 h-3.5" />
+                                             )}
+                                           </button>
+                                           
+                                           {/* Mute Button with blinking animation */}
+                                           <div className="relative flex-shrink-0">
+                                             {/* Animated pulse rings - only show when muted - BIGGER AND PINK */}
                                              {mutedVideos[pack.id] !== false && (
                                                <>
-                                                 <div className="absolute inset-0 rounded-full bg-pink-500/50 animate-ping scale-125" />
-                                                 <div className="absolute inset-0 rounded-full bg-yellow-400/40 animate-pulse scale-110" style={{ animationDelay: '0.3s' }} />
-                                                 <div className="absolute inset-0 rounded-full bg-pink-500/30 animate-ping scale-150" style={{ animationDelay: '0.6s' }} />
+                                                 <div className="absolute inset-0 rounded-full bg-pink-500 animate-ping scale-[2]" />
+                                                 <div className="absolute inset-0 rounded-full bg-pink-400 animate-pulse scale-[1.8]" style={{ animationDelay: '0.2s' }} />
+                                                 <div className="absolute inset-0 rounded-full bg-pink-600/80 animate-ping scale-[2.5]" style={{ animationDelay: '0.4s' }} />
                                                </>
                                              )}
                                              
@@ -542,59 +550,39 @@ const TabbedOfferings = () => {
                                                onClick={(e) => toggleMute(pack.id, e)}
                                                className="relative bg-white/20 hover:bg-white/30 text-white rounded-full p-1 transition-all duration-200"
                                              >
-                                            {mutedVideos[pack.id] !== false ? (
-                                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
-                                                <line x1="23" y1="9" x2="17" y2="15"/>
-                                                <line x1="17" y1="9" x2="23" y2="15"/>
-                                              </svg>
-                                            ) : (
-                                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
-                                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-                                              </svg>
-                                             )}
-                                           </button>
+                                               {mutedVideos[pack.id] !== false ? (
+                                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                   <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+                                                   <line x1="23" y1="9" x2="17" y2="15"/>
+                                                   <line x1="17" y1="9" x2="23" y2="15"/>
+                                                 </svg>
+                                               ) : (
+                                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                   <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+                                                   <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                                                   <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                                                 </svg>
+                                               )}
+                                             </button>
                                            </div>
+                                           
+                                           {/* Rewind Button */}
+                                           <button
+                                             onClick={(e) => rewindVideo(pack.id, e)}
+                                             className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1 transition-all duration-200"
+                                           >
+                                             <RotateCcw className="w-3.5 h-3.5" />
+                                           </button>
+                                           
+                                           {/* Fullscreen Button */}
+                                           <button
+                                             onClick={(e) => toggleFullscreen(pack.id, e)}
+                                             className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1 transition-all duration-200"
+                                             title="ملء الشاشة"
+                                           >
+                                             <Maximize className="w-3.5 h-3.5" />
+                                           </button>
                                          </div>
-                                        
-                                        {/* Play/Pause, Rewind, and Time - Now on Right */}
-                                        <div className="flex items-center gap-1.5">
-                                          {/* Time Display - LTR */}
-                                          <span className="text-white text-[10px] font-medium" dir="ltr">
-                                            {formatTime(videoCurrentTimes[pack.id] || 0)} / {formatTime(videoDurations[pack.id] || 0)}
-                                          </span>
-                                          
-                                          {/* Fullscreen Button */}
-                                          <button
-                                            onClick={(e) => toggleFullscreen(pack.id, e)}
-                                            className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1 transition-all duration-200"
-                                            title="ملء الشاشة"
-                                          >
-                                            <Maximize className="w-3.5 h-3.5" />
-                                          </button>
-                                          
-                                          {/* Rewind Button */}
-                                          <button
-                                            onClick={(e) => rewindVideo(pack.id, e)}
-                                            className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1 transition-all duration-200"
-                                          >
-                                            <RotateCcw className="w-3.5 h-3.5" />
-                                          </button>
-                                          
-                                          {/* Play/Pause Button */}
-                                          <button
-                                            onClick={(e) => togglePlayPause(pack.id, e)}
-                                            className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1 transition-all duration-200"
-                                          >
-                                            {videoPaused[pack.id] ? (
-                                              <Play className="w-3.5 h-3.5" />
-                                            ) : (
-                                              <Pause className="w-3.5 h-3.5" />
-                                            )}
-                                          </button>
-                                        </div>
                                        </div>
                                      </div>
                                   </div>
