@@ -25,6 +25,7 @@ import CourseDetail from "./pages/CourseDetail";
 import CapsulesManagement from "./pages/CapsulesManagement";
 import NotFound from "./pages/NotFound";
 import ChallengesManagement from "./pages/ChallengesManagement";
+import Ebook from "./pages/Ebook";
 
 const queryClient = new QueryClient();
 
@@ -86,6 +87,11 @@ const App = () => (
             <Route path="/challenge/:challengeId" element={
               <ProtectedRoute>
                 <ChallengeViewer />
+              </ProtectedRoute>
+            } />
+            <Route path="/ebook" element={
+              <ProtectedRoute>
+                <Ebook />
               </ProtectedRoute>
             } />
             <Route path="/blogs" element={

@@ -333,25 +333,35 @@ const Challenges = () => {
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-pink-50 via-white to-purple-50">
       {/* Header */}
-      <header className="bg-gradient-to-r from-white via-pink-50/30 to-white backdrop-blur-md border-b border-pink-100/50 sticky top-0 z-30 shadow-lg shadow-pink-100/20 w-full">
+      <header className="bg-gradient-to-r from-white via-pink-50/30 to-white backdrop-blur-md border-b border-pink-100/50 sticky top-0 z-30 shadow-lg shadow-pink-100/20 w-full transition-all duration-300">
         <div className="px-3 sm:px-4 md:px-8 py-3 sm:py-4 lg:py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src="/lovable-uploads/134a7f12-f652-4af0-b56a-5fef2c8109bb.png" alt="MomAcademy" className="h-8 sm:h-10 lg:h-12 w-auto" />
-              <div>
-                <h1 className="text-base sm:text-lg font-semibold text-slate-800">تحديات تطوير الذات</h1>
-                <p className="text-xs sm:text-sm text-slate-500 hidden sm:block">تحديات لتطوير مهاراتك الشخصية</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
+              <Button 
+                variant="ghost" 
+                onClick={handleBackToDashboard} 
+                className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0 transition-all duration-200 transform hover:scale-[1.02] shadow-md p-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+              {/* Mobile Menu Button */}
               {isMobile && (
-                <Button variant="ghost" size="sm" onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  className="p-2 hover:bg-pink-50 rounded-xl transition-colors duration-200"
+                >
                   <Menu className="w-5 h-5" />
                 </Button>
               )}
-              <Button variant="ghost" onClick={handleBackToDashboard} className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white p-2">
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 min-w-0 text-right">
+                <h1 className="text-base sm:text-lg font-semibold text-slate-800 truncate">تحديات تطوير الذات</h1>
+                <p className="text-xs sm:text-sm text-slate-500 hidden sm:block">تحديات لتطوير مهاراتك الشخصية</p>
+              </div>
+              <img src="/lovable-uploads/134a7f12-f652-4af0-b56a-5fef2c8109bb.png" alt="MomAcademy" className="h-8 sm:h-10 lg:h-12 w-auto drop-shadow-sm" />
             </div>
           </div>
         </div>

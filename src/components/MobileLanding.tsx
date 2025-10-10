@@ -54,18 +54,25 @@ const MobileLanding: React.FC<MobileLandingProps> = ({ onSectionSelect }) => {
       delay: 200
     },
     {
+      id: 'ebook',
+      title: 'E-book',
+      icon: BookOpen,
+      description: 'كتابي الإلكتروني قريباً',
+      delay: 250
+    },
+    {
       id: 'blogs',
       title: 'المدوَّنات',
       icon: FileText,
       description: 'مقالات ونصائح مفيدة',
-      delay: 250
+      delay: 300
     },
     {
       id: 'reviews',
       title: 'التقييمات',
       icon: Star,
       description: 'آراء وتجارب العملاء',
-      delay: 300
+      delay: 350
     }
   ];
 

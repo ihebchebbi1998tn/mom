@@ -219,13 +219,13 @@ const Reviews = () => {
         <div className="px-3 sm:px-4 md:px-8 py-3 sm:py-4 lg:py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src="/lovable-uploads/134a7f12-f652-4af0-b56a-5fef2c8109bb.png" alt="MomAcademy - أكاديمية الأم" className="h-8 sm:h-10 lg:h-12 w-auto drop-shadow-sm" />
-              <div className="flex-1 min-w-0">
-                <h1 className="text-base sm:text-lg font-semibold text-slate-800 truncate">التقييمات والآراء</h1>
-                <p className="text-xs sm:text-sm text-slate-500 hidden sm:block">تجارب وآراء عملائنا الكرام</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
+              <Button 
+                variant="ghost" 
+                onClick={handleBackToDashboard} 
+                className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0 transition-all duration-200 transform hover:scale-[1.02] shadow-md p-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
               {/* Mobile Menu Button */}
               {isMobile && (
                 <Button
@@ -237,14 +237,13 @@ const Reviews = () => {
                   <Menu className="w-5 h-5" />
                 </Button>
               )}
-              
-              <Button 
-                variant="ghost" 
-                onClick={handleBackToDashboard} 
-                className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0 transition-all duration-200 transform hover:scale-[1.02] shadow-md p-2"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 min-w-0 text-right">
+                <h1 className="text-base sm:text-lg font-semibold text-slate-800 truncate">التقييمات والآراء</h1>
+                <p className="text-xs sm:text-sm text-slate-500 hidden sm:block">تجارب وآراء عملائنا الكرام</p>
+              </div>
+              <img src="/lovable-uploads/134a7f12-f652-4af0-b56a-5fef2c8109bb.png" alt="MomAcademy - أكاديمية الأم" className="h-8 sm:h-10 lg:h-12 w-auto drop-shadow-sm" />
             </div>
           </div>
         </div>

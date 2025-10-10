@@ -81,6 +81,12 @@ const navigationItems = [
     className: "text-pink-600 hover:text-pink-700 hover:bg-pink-50"
   },
   {
+    title: "E-book",
+    icon: BookOpen,
+    action: "ebook",
+    className: "text-pink-600 hover:text-pink-700 hover:bg-pink-50"
+  },
+  {
     title: "المدوَّنات", 
     icon: BookOpen,
     action: "blogs",
@@ -405,6 +411,9 @@ export function UserSidebar({ onSectionSelect, isOpen = false, onToggle }: UserS
                                 break;
                               case 'challenges':
                                 navigate('/challenges');
+                                break;
+                              case 'ebook':
+                                navigate('/ebook');
                                 break;
                               case 'blogs':
                                 navigate('/blogs');
