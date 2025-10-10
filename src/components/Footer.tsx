@@ -2,8 +2,45 @@ import { Instagram, Facebook } from "lucide-react";
 import { AiOutlineWhatsApp } from "react-icons/ai";
 import { FaTiktok } from "react-icons/fa";
 import oldLogo from "@/assets/maman-attentionnee-logo.png";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Footer = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+
+   const scrollToOfferings = (tab: string) => {
+    const offeringsSection = document.getElementById('offerings');
+    if (offeringsSection) {
+      offeringsSection.scrollIntoView({ behavior: 'smooth' });
+      // Wait for scroll to complete, then trigger tab change
+      setTimeout(() => {
+        const tabTrigger = document.querySelector(`[value="${tab}"]`) as HTMLElement;
+        if (tabTrigger) {
+          tabTrigger.click();
+        }
+      }, 500);
+    }
+  };
+    const handleNavClick = (href: string, e?: React.MouseEvent) => {
+    if (href === '#courses') {
+      e?.preventDefault();
+      scrollToOfferings('courses');
+      setIsMenuOpen(false);
+    } else if (href === '#workshops') {
+      e?.preventDefault();
+      scrollToOfferings('workshops');
+      setIsMenuOpen(false);
+    } else if (href === '#packs') {
+      e?.preventDefault();
+      scrollToOfferings('packs');
+      setIsMenuOpen(false);
+    } else {
+      setIsMenuOpen(false);
+    }
+  };
+
   return (
     <footer className="bg-gradient-to-r from-primary to-primary-light text-white py-16">
       <div className="container mx-auto px-4">
@@ -28,24 +65,27 @@ const Footer = () => {
             <ul className="space-y-3">
               <li>
                 <a 
-                  href="/?tab=courses" 
+                  href="#courses"  
                   className="text-white/80 hover:text-white transition-colors"
+                   onClick={(e) => handleNavClick('#courses', e)}
                 >
                   الدورات
                 </a>
               </li>
               <li>
                 <a 
-                  href="/?tab=workshops" 
+                  href="#workshops"
                   className="text-white/80 hover:text-white transition-colors"
+                   onClick={(e) => handleNavClick('#workshops', e)}
                 >
                   الورشات
                 </a>
               </li>
               <li>
                 <a 
-                  href="/?tab=packs" 
+                  href="#packs"  
                   className="text-white/80 hover:text-white transition-colors"
+                   onClick={(e) => handleNavClick('#packs', e)}
                 >
                   الباقات
                 </a>
