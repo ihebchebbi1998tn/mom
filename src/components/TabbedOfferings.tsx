@@ -641,14 +641,24 @@ const TabbedOfferings = () => {
                           
                           {/* Description: if description contains '-' render each dash-separated item on its own line */}
                           {subPack.description && subPack.description.includes('-') ? (
-                            <ul className="space-y-2 text-sm text-muted-foreground mb-4 flex-1">
-                              {subPack.description.split('-').filter(item => item.trim()).map((item, idx) => (
-                                <li key={idx} className="flex items-start gap-2">
-                                  <span className="text-primary mt-1">•</span>
-                                  <span>{item.trim()}</span>
-                                </li>
-                              ))}
-                            </ul>
+                            (() => {
+                              const parts = subPack.description.split('-').map(p => p.trim()).filter(Boolean);
+                              return (
+                                <div className="text-sm text-muted-foreground mb-4 flex-1">
+                                  {parts[0] && <p className="mb-2">{parts[0]}</p>}
+                                  {parts.length > 1 && (
+                                    <ul className="space-y-2">
+                                      {parts.slice(1).map((item, idx) => (
+                                        <li key={idx} className="flex items-start gap-2">
+                                          <span className="text-primary mt-1">•</span>
+                                          <span>{item}</span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </div>
+                              );
+                            })()
                           ) : (
                             <p className="text-sm text-muted-foreground mb-4 flex-1">
                               {subPack.description}
