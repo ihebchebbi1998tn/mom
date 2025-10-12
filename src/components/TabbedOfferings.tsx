@@ -639,10 +639,21 @@ const TabbedOfferings = () => {
                           {/* Title */}
                           <h3 className="text-xl font-bold text-foreground mb-3">{subPack.title}</h3>
                           
-                          {/* Description */}
-                          <p className="text-sm text-muted-foreground mb-4 flex-1">
-                            {subPack.description}
-                          </p>
+                          {/* Description: if description contains '-' render each dash-separated item on its own line */}
+                          {subPack.description && subPack.description.includes('-') ? (
+                            <ul className="space-y-2 text-sm text-muted-foreground mb-4 flex-1">
+                              {subPack.description.split('-').filter(item => item.trim()).map((item, idx) => (
+                                <li key={idx} className="flex items-start gap-2">
+                                  <span className="text-primary mt-1">•</span>
+                                  <span>{item.trim()}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-sm text-muted-foreground mb-4 flex-1">
+                              {subPack.description}
+                            </p>
+                          )}
 
                           {/* Button */}
                           <Button size="sm" className="btn-hero w-full hover:shadow-[0_0_30px_rgba(233,30,99,0.5)] hover:scale-105 transition-all duration-300 relative overflow-hidden before:absolute before:top-0 before:left-[-100%] before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:animate-shimmer before:skew-x-12" onClick={() => navigate(`/course/${subPack.id}`)}>
