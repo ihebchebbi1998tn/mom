@@ -81,7 +81,7 @@ const navigationItems = [
     className: "text-pink-600 hover:text-pink-700 hover:bg-pink-50"
   },
   {
-    title: "E-book",
+    title: "الكتاب الإلكتروني",
     icon: BookOpen,
     action: "ebook",
     className: "text-pink-600 hover:text-pink-700 hover:bg-pink-50"
@@ -340,11 +340,11 @@ export function UserSidebar({ onSectionSelect, isOpen = false, onToggle }: UserS
       {/* Sidebar */}
       <div className={`
         ${isMobile ? 'fixed' : 'relative'} 
-        ${isMobile && !isOpen ? 'translate-x-full' : 'translate-x-0'}
+        ${isMobile && !isOpen ? '-translate-x-full' : 'translate-x-0'}
         w-80 bg-gradient-to-b from-white to-slate-50/80 shadow-xl 
-        ${isMobile ? 'border-l' : 'border-r'} border-slate-200/50 
+        ${isMobile ? 'border-r' : 'border-r'} border-slate-200/50 
         flex flex-col ${isMobile ? 'h-screen' : 'h-[calc(100vh-80px)]'} transition-transform duration-300 ease-in-out
-        ${isMobile ? 'right-0 top-0 z-40' : 'z-10'}
+        ${isMobile ? 'left-0 top-0 z-40' : 'z-10'}
         flex-shrink-0
       `}>
         {/* Professional Sidebar Header */}
