@@ -510,48 +510,48 @@ const TabbedOfferings = () => {
                                          </div>
 
                                          {/* Control Buttons */}
-                                         <div className="flex items-center gap-1.5 flex-shrink-0">
-                                           {/* Play/Pause Button */}
-                                           <button onClick={e => togglePlayPause(pack.id, e)} className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1 transition-all duration-200">
-                                             {videoPaused[pack.id] ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
-                                           </button>
-                                           
-                                           {/* Mute Button with blinking animation */}
-                                           <div className="relative flex-shrink-0">
-                                             {/* Animated pulse rings - only show when muted - BIGGER AND PINK */}
-                                             {mutedVideos[pack.id] !== false && <>
-                                                 <div className="absolute inset-0 rounded-full bg-pink-500 animate-ping scale-[2]" />
-                                                 <div className="absolute inset-0 rounded-full bg-pink-400 animate-pulse scale-[1.8]" style={{
-                                      animationDelay: '0.2s'
-                                    }} />
-                                                 <div className="absolute inset-0 rounded-full bg-pink-600/80 animate-ping scale-[2.5]" style={{
-                                      animationDelay: '0.4s'
-                                    }} />
-                                               </>}
-                                             
-                                             <button onClick={e => toggleMute(pack.id, e)} className="relative bg-white/20 hover:bg-white/30 text-white rounded-full p-1 transition-all duration-200">
-                                               {mutedVideos[pack.id] !== false ? <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                   <path d="M11 5 6 9H2v6h4l5 4V5Z" />
-                                                   <line x1="23" y1="9" x2="17" y2="15" />
-                                                   <line x1="17" y1="9" x2="23" y2="15" />
-                                                 </svg> : <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                   <path d="M11 5 6 9H2v6h4l5 4V5Z" />
-                                                   <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-                                                   <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-                                                 </svg>}
-                                             </button>
-                                           </div>
-                                           
-                                           {/* Rewind Button */}
-                                           <button onClick={e => rewindVideo(pack.id, e)} className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1 transition-all duration-200">
-                                             <RotateCcw className="w-3.5 h-3.5" />
-                                           </button>
-                                           
-                                           {/* Fullscreen Button */}
-                                           <button onClick={e => toggleFullscreen(pack.id, e)} className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1 transition-all duration-200" title="ملء الشاشة">
-                                             <Maximize className="w-3.5 h-3.5" />
-                                           </button>
-                                         </div>
+                                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                                            {/* Play/Pause Button */}
+                                            <button onClick={e => togglePlayPause(pack.id, e)} className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1.5 transition-all duration-200 flex items-center justify-center">
+                                              {videoPaused[pack.id] ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
+                                            </button>
+                                            
+                                            {/* Mute Button with blinking animation */}
+                                            <div className="relative flex-shrink-0">
+                                              {/* Animated pulse rings - only show when muted - BIGGER AND PINK */}
+                                              {mutedVideos[pack.id] !== false && <>
+                                                  <div className="absolute inset-0 rounded-full bg-pink-500 animate-ping scale-[2]" />
+                                                  <div className="absolute inset-0 rounded-full bg-pink-400 animate-pulse scale-[1.8]" style={{
+                                       animationDelay: '0.2s'
+                                     }} />
+                                                  <div className="absolute inset-0 rounded-full bg-pink-600/80 animate-ping scale-[2.5]" style={{
+                                       animationDelay: '0.4s'
+                                     }} />
+                                                </>}
+                                              
+                                              <button onClick={e => toggleMute(pack.id, e)} className="relative bg-white/20 hover:bg-white/30 text-white rounded-full p-1.5 transition-all duration-200 flex items-center justify-center">
+                                                {mutedVideos[pack.id] !== false ? <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                                                    <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                                                    <line x1="23" y1="9" x2="17" y2="15" />
+                                                    <line x1="17" y1="9" x2="23" y2="15" />
+                                                  </svg> : <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                                                    <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                                                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                                                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                                                  </svg>}
+                                              </button>
+                                            </div>
+                                            
+                                            {/* Rewind Button */}
+                                            <button onClick={e => rewindVideo(pack.id, e)} className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1.5 transition-all duration-200 flex items-center justify-center">
+                                              <RotateCcw className="w-3.5 h-3.5" />
+                                            </button>
+                                            
+                                            {/* Fullscreen Button */}
+                                            <button onClick={e => toggleFullscreen(pack.id, e)} className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1.5 transition-all duration-200 flex items-center justify-center" title="ملء الشاشة">
+                                              <Maximize className="w-3.5 h-3.5" />
+                                            </button>
+                                          </div>
                                        </div>
                                      </div>
                                   </div>}
@@ -582,7 +582,7 @@ const TabbedOfferings = () => {
                             </div>}
                           
                           {/* Description - if available */}
-                          {pack.description && <p className="text-sm text-muted-foreground mb-4">
+                          {pack.description && <p className="text-sm text-muted-foreground mb-4" dir="auto" style={{ unicodeBidi: 'plaintext' }}>
                               {pack.description}
                             </p>}
 
@@ -644,14 +644,14 @@ const TabbedOfferings = () => {
                             (() => {
                               const parts = subPack.description.split('-').map(p => p.trim()).filter(Boolean);
                               return (
-                                <div className="text-sm text-muted-foreground mb-4 flex-1">
+                                <div className="text-sm text-muted-foreground mb-4 flex-1" dir="auto" style={{ unicodeBidi: 'plaintext' }}>
                                   {parts[0] && <p className="mb-2">{parts[0]}</p>}
                                   {parts.length > 1 && (
-                                    <ul className="space-y-2">
-                                      {parts.slice(1).map((item, idx) => (
+                                    <ul className="space-y-1.5">
+                                      {parts.slice(1).map((part, idx) => (
                                         <li key={idx} className="flex items-start gap-2">
-                                          <span className="text-primary mt-1">•</span>
-                                          <span>{item}</span>
+                                          <span className="text-primary mt-1 flex-shrink-0">•</span>
+                                          <span>{part}</span>
                                         </li>
                                       ))}
                                     </ul>
@@ -660,7 +660,7 @@ const TabbedOfferings = () => {
                               );
                             })()
                           ) : (
-                            <p className="text-sm text-muted-foreground mb-4 flex-1">
+                            <p className="text-sm text-muted-foreground mb-4 flex-1" dir="auto" style={{ unicodeBidi: 'plaintext' }}>
                               {subPack.description}
                             </p>
                           )}

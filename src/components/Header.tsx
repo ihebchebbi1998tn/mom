@@ -39,11 +39,11 @@ const Header = () => {
   );
 
   const openInstagram = () => {
-    window.open('https://instagram.com/maman_attentionnee', '_blank');
+    window.open('https://www.instagram.com/maman_attentionnee/', '_blank');
   };
 
   const openFacebook = () => {
-    window.open('https://facebook.com', '_blank');
+    window.open('https://www.facebook.com/profile.php?id=61563899542170', '_blank');
   };
 
   const openWhatsApp = () => {
@@ -76,21 +76,27 @@ const Header = () => {
         <div className="bg-gradient-to-r from-white to-pink-50 border-b border-pink-200 py-2">
           <div className="flex justify-center items-center gap-6 px-4">
             <a 
-              href="#" 
+              href="https://www.instagram.com/maman_attentionnee/" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-pink-600 hover:text-pink-700 transition-colors"
               aria-label="Instagram"
             >
               <Instagram className="w-5 h-5" />
             </a>
             <a 
-              href="#" 
+              href="https://www.facebook.com/profile.php?id=61563899542170" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-pink-600 hover:text-pink-700 transition-colors"
               aria-label="Facebook"
             >
               <Facebook className="w-5 h-5" />
             </a>
             <a 
-              href="#" 
+              href="https://www.tiktok.com/@maman_attentionnee" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-pink-600 hover:text-pink-700 transition-colors"
               aria-label="TikTok"
             >
@@ -123,28 +129,36 @@ const Header = () => {
         <div className="bg-gradient-to-r from-pink-50 to-pink-100 border-b border-pink-200 py-3">
           <div className="flex justify-center items-center gap-8 w-full px-4">
             <a 
-              href="#" 
+              href="https://www.instagram.com/maman_attentionnee/" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-pink-600 hover:text-pink-700 transition-colors"
               aria-label="Instagram"
             >
               <Instagram className="w-5 h-5" />
             </a>
             <a 
-              href="#" 
+              href="https://www.facebook.com/profile.php?id=61563899542170" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-pink-600 hover:text-pink-700 transition-colors"
               aria-label="Facebook"
             >
               <Facebook className="w-5 h-5" />
             </a>
             <a 
-              href="#" 
+              href="https://www.tiktok.com/@maman_attentionnee" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-pink-600 hover:text-pink-700 transition-colors"
               aria-label="TikTok"
             >
               <TikTokIcon />
             </a>
             <a 
-              href="#" 
+              href="https://wa.me/21652451892" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-pink-600 hover:text-pink-700 transition-colors"
               aria-label="WhatsApp"
             >
@@ -169,7 +183,7 @@ const Header = () => {
         <Menu className="w-6 h-6 text-pink-500" />
       </button>
     </SheetTrigger>
-                <SheetContent side="left" className="w-[320px] p-0 bg-gradient-to-bl from-pink-50 via-rose-50/95 to-white border-r-2 border-pink-200">
+                <SheetContent side="right" className="w-[320px] p-0 bg-gradient-to-bl from-pink-50 via-rose-50/95 to-white border-l-2 border-pink-200">
                   <div className="p-4 h-full flex flex-col">
                     {/* Logo at Top */}
                     <div className="flex items-center justify-between mb-4 animate-fade-in">
@@ -200,7 +214,7 @@ const Header = () => {
                           className="text-gray-700 hover:text-pink-600 transition-colors font-medium py-2.5 px-3 rounded-lg hover:bg-pink-50 text-right text-sm"
                           onClick={() => setIsMenuOpen(false)}
                         >
-                          عن المنصة
+                          عن الأكاديمية
                         </a>
                         <a 
                           href="#courses" 
@@ -349,7 +363,7 @@ const Header = () => {
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center justify-center gap-8">
               <a href="#about" className="text-foreground hover:text-primary transition-colors font-medium">
-                عن المنصة
+                عن الأكاديمية
               </a>
               <a 
                 href="#courses" 
