@@ -278,12 +278,17 @@ const Dashboard = () => {
 
   // Intersection observer for mobile viewport detection of packs
   useEffect(() => {
-    if (!isMobile || currentView !== 'packs') return;
+    if (!isMobile) return;
+    if (currentView !== 'packs' || showMobileLanding) {
+      // Clear the visible pack when not in packs view or showing mobile landing
+      setVisiblePackInView(null);
+      return;
+    }
     
     const observers: IntersectionObserver[] = [];
     coursePacks.forEach(pack => {
       const element = packRefs.current[pack.id];
-      if (!element) return;
+      if (!element || !pack.intro_video_url) return;
       
       const observer = new IntersectionObserver(
         entries => {
@@ -305,7 +310,7 @@ const Dashboard = () => {
     return () => {
       observers.forEach(observer => observer.disconnect());
     };
-  }, [isMobile, coursePacks, visiblePackInView, currentView]);
+  }, [isMobile, coursePacks, visiblePackInView, currentView, showMobileLanding]);
 
   // Pack video control functions
   const resetPackControlsTimeout = (packId: string) => {
@@ -1306,6 +1311,7 @@ const Dashboard = () => {
                                   }}
                                   src={pack.intro_video_url}
                                   className="w-full h-full object-cover cursor-pointer"
+                                  autoPlay={playingPackVideo === pack.id}
                                   muted={true}
                                   loop
                                   playsInline
@@ -1457,8 +1463,8 @@ const Dashboard = () => {
                               </h3>
                             </div>
                             
-                            {pack.description && <p className="text-slate-600 text-sm leading-relaxed mb-6 line-clamp-2">
-                                {pack.description}
+                            {pack.description && <p className="text-slate-600 text-sm leading-relaxed mb-6 whitespace-pre-line">
+                                {pack.description.replace(/ - /g, '\n')}
                               </p>}
                             
                             {/* Enhanced Modules Preview */}
@@ -1643,8 +1649,8 @@ const Dashboard = () => {
                                 <h3 className="text-xl lg:text-2xl font-bold leading-tight mb-2">
                                   {course.title}
                                 </h3>
-                                {course.description && <p className="text-sm text-white/80 line-clamp-2">
-                                    {course.description}
+                                {course.description && <p className="text-sm text-white/80 whitespace-pre-line">
+                                    {course.description.replace(/ - /g, '\n')}
                                   </p>}
                               </div>
                             </div>}
@@ -1653,8 +1659,8 @@ const Dashboard = () => {
                             <h3 className="text-xl font-bold text-slate-900 mb-2">
                               {course.title}
                             </h3>
-                            {course.description && <p className="text-slate-600 text-sm leading-relaxed mb-4 line-clamp-2">
-                                {course.description}
+                            {course.description && <p className="text-slate-600 text-sm leading-relaxed mb-4 whitespace-pre-line">
+                                {course.description.replace(/ - /g, '\n')}
                               </p>}
                             {isPending ? <>
                                 <Button variant="outline" className="w-full rounded-full border-yellow-500 text-yellow-600 hover:bg-yellow-50" disabled>
