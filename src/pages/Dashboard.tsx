@@ -6,9 +6,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { BookOpen, Clock, Users, Star, ArrowLeft, ShoppingCart, CheckCircle, Loader2, Eye, PlayCircle, TrendingUp, Award, Target, Calendar, CalendarIcon, MessageSquare, Phone, LogOut, MapPin, Menu, X } from "lucide-react";
+import { BookOpen, Clock, Users, Star, ArrowLeft, ShoppingCart, CheckCircle, Loader2, Eye, PlayCircle, TrendingUp, Award, Target, Calendar, CalendarIcon, MessageSquare, Phone, LogOut, MapPin, Menu, X, Play, Pause, RotateCcw, Maximize } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
@@ -33,6 +33,7 @@ interface CoursePack {
   students: string;
   rating: number;
   image_url?: string;
+  intro_video_url?: string;
   description?: string;
   status: string;
 }
@@ -163,6 +164,20 @@ const Dashboard = () => {
     [requestId: string]: string;
   }>({});
 
+  // Video playback states for packs
+  const [hoveredPack, setHoveredPack] = useState<string | null>(null);
+  const [playingPackVideo, setPlayingPackVideo] = useState<string | null>(null);
+  const [visiblePackInView, setVisiblePackInView] = useState<string | null>(null);
+  const [loadingPackVideos, setLoadingPackVideos] = useState<{ [key: string]: boolean }>({});
+  const [mutedPackVideos, setMutedPackVideos] = useState<{ [key: string]: boolean }>({});
+  const [packVideoDurations, setPackVideoDurations] = useState<{ [key: string]: number }>({});
+  const [packVideoCurrentTimes, setPackVideoCurrentTimes] = useState<{ [key: string]: number }>({});
+  const [packVideoPaused, setPackVideoPaused] = useState<{ [key: string]: boolean }>({});
+  const [showPackControls, setShowPackControls] = useState<{ [key: string]: boolean }>({});
+  const [packControlsTimeout, setPackControlsTimeout] = useState<{ [key: string]: NodeJS.Timeout | null }>({});
+  const packRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const packVideoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
+
   // Get current user ID from auth context
   const currentUserId = user?.id || null;
   useEffect(() => {
@@ -175,6 +190,218 @@ const Dashboard = () => {
     const watchedVideos = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
     setWatchedVideosState(watchedVideos);
   }, []);
+
+  // Desktop: hover behavior for pack videos
+  useEffect(() => {
+    if (!isMobile && hoveredPack !== null) {
+      const timer = setTimeout(() => {
+        setPlayingPackVideo(hoveredPack);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else if (!isMobile) {
+      setPlayingPackVideo(null);
+    }
+  }, [hoveredPack, isMobile]);
+
+  // Mobile: play video for pack in viewport after 3 seconds
+  useEffect(() => {
+    if (isMobile && visiblePackInView !== null) {
+      const timer = setTimeout(() => {
+        setPlayingPackVideo(visiblePackInView);
+      }, 3000);
+      return () => clearTimeout(timer);
+    } else if (isMobile && visiblePackInView === null) {
+      setPlayingPackVideo(null);
+    }
+  }, [isMobile, visiblePackInView]);
+
+  // Control pack video playback with optimized loading
+  useEffect(() => {
+    Object.keys(packVideoRefs.current).forEach(key => {
+      const videoElement = packVideoRefs.current[key];
+      if (videoElement) {
+        if (playingPackVideo === key) {
+          // Show loading spinner
+          if (isMobile) {
+            setLoadingPackVideos(prev => ({ ...prev, [key]: true }));
+          }
+
+          // Always keep muted for reliable autoplay on mobile
+          videoElement.muted = true;
+          setMutedPackVideos(prev => ({ ...prev, [key]: true }));
+
+          // Show controls initially
+          setShowPackControls(prev => ({ ...prev, [key]: true }));
+
+          // Ensure video is loaded before playing
+          if (videoElement.readyState >= 2) {
+            videoElement.play().catch(err => console.log('Pack video play error:', err));
+          } else {
+            const handleCanPlay = () => {
+              videoElement.play().catch(err => console.log('Pack video play error:', err));
+              videoElement.removeEventListener('canplay', handleCanPlay);
+            };
+            videoElement.addEventListener('canplay', handleCanPlay);
+          }
+
+          const handlePlaying = () => {
+            setLoadingPackVideos(prev => ({ ...prev, [key]: false }));
+          };
+          const handleWaiting = () => {
+            if (isMobile) {
+              setLoadingPackVideos(prev => ({ ...prev, [key]: true }));
+            }
+          };
+          videoElement.addEventListener('playing', handlePlaying);
+          videoElement.addEventListener('waiting', handleWaiting);
+          return () => {
+            videoElement.removeEventListener('playing', handlePlaying);
+            videoElement.removeEventListener('waiting', handleWaiting);
+          };
+        } else {
+          if (!videoElement.paused) {
+            videoElement.pause();
+          }
+          videoElement.currentTime = 0;
+          videoElement.muted = true;
+          setLoadingPackVideos(prev => ({ ...prev, [key]: false }));
+          setMutedPackVideos(prev => ({ ...prev, [key]: true }));
+          setShowPackControls(prev => ({ ...prev, [key]: true }));
+          // Clear timeout when video stops
+          if (packControlsTimeout[key]) {
+            clearTimeout(packControlsTimeout[key]);
+          }
+        }
+      }
+    });
+  }, [playingPackVideo, isMobile]);
+
+  // Intersection observer for mobile viewport detection of packs
+  useEffect(() => {
+    if (!isMobile || currentView !== 'packs') return;
+    
+    const observers: IntersectionObserver[] = [];
+    coursePacks.forEach(pack => {
+      const element = packRefs.current[pack.id];
+      if (!element) return;
+      
+      const observer = new IntersectionObserver(
+        entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+              setVisiblePackInView(pack.id);
+            } else if (visiblePackInView === pack.id) {
+              setVisiblePackInView(null);
+            }
+          });
+        },
+        { threshold: 0.5 }
+      );
+      
+      observer.observe(element);
+      observers.push(observer);
+    });
+
+    return () => {
+      observers.forEach(observer => observer.disconnect());
+    };
+  }, [isMobile, coursePacks, visiblePackInView, currentView]);
+
+  // Pack video control functions
+  const resetPackControlsTimeout = (packId: string) => {
+    // Clear existing timeout
+    if (packControlsTimeout[packId]) {
+      clearTimeout(packControlsTimeout[packId]);
+    }
+
+    // Show controls
+    setShowPackControls(prev => ({ ...prev, [packId]: true }));
+
+    // Only set auto-hide if video is unmuted
+    if (mutedPackVideos[packId] === false) {
+      const timeout = setTimeout(() => {
+        setShowPackControls(prev => ({ ...prev, [packId]: false }));
+      }, 2000);
+      setPackControlsTimeout(prev => ({ ...prev, [packId]: timeout }));
+    }
+  };
+
+  const togglePackMute = (packId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const videoElement = packVideoRefs.current[packId];
+    if (videoElement) {
+      videoElement.muted = !videoElement.muted;
+      setMutedPackVideos(prev => ({ ...prev, [packId]: videoElement.muted }));
+
+      // If unmuting, start the auto-hide timer
+      if (!videoElement.muted) {
+        resetPackControlsTimeout(packId);
+      } else {
+        // If muting, always show controls
+        if (packControlsTimeout[packId]) {
+          clearTimeout(packControlsTimeout[packId]);
+        }
+        setShowPackControls(prev => ({ ...prev, [packId]: true }));
+      }
+    }
+  };
+
+  const togglePackPlayPause = (packId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const videoElement = packVideoRefs.current[packId];
+    if (videoElement) {
+      if (videoElement.paused) {
+        videoElement.play();
+        setPackVideoPaused(prev => ({ ...prev, [packId]: false }));
+      } else {
+        videoElement.pause();
+        setPackVideoPaused(prev => ({ ...prev, [packId]: true }));
+      }
+      resetPackControlsTimeout(packId);
+    }
+  };
+
+  const rewindPackVideo = (packId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const videoElement = packVideoRefs.current[packId];
+    if (videoElement) {
+      videoElement.currentTime = 0;
+      setPackVideoCurrentTimes(prev => ({ ...prev, [packId]: 0 }));
+      resetPackControlsTimeout(packId);
+    }
+  };
+
+  const handlePackProgressChange = (packId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    const videoElement = packVideoRefs.current[packId];
+    if (videoElement && packVideoDurations[packId]) {
+      const time = parseFloat(e.target.value);
+      videoElement.currentTime = time;
+      setPackVideoCurrentTimes(prev => ({ ...prev, [packId]: time }));
+      resetPackControlsTimeout(packId);
+    }
+  };
+
+  const formatPackVideoTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const togglePackFullscreen = (packId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const videoElement = packVideoRefs.current[packId];
+    if (videoElement) {
+      if (!document.fullscreenElement) {
+        videoElement.requestFullscreen().catch(err => {
+          console.log('Error attempting to enable fullscreen:', err);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+      resetPackControlsTimeout(packId);
+    }
+  };
 
   // Fetch sub-packs for each course pack to show in preview
   useEffect(() => {
@@ -1038,23 +1265,188 @@ const Dashboard = () => {
                     {coursePacks.map(pack => {
                 const packSubPacksList = packSubPacks[pack.id] || [];
                 const status = getPackRequestStatus(pack.id);
-                return <Card key={pack.id} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white">
-                          {/* Enhanced Pack Image */}
-                          <div className="relative overflow-hidden">
-                            {pack.image_url ? <img src={pack.image_url} alt={pack.title} className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="w-full h-56 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
-                                <BookOpen className="w-16 h-16 text-white" />
-                              </div>}
+                return <Card 
+                          key={pack.id} 
+                          ref={el => packRefs.current[pack.id] = el}
+                          className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white"
+                          onMouseEnter={() => !isMobile && setHoveredPack(pack.id)}
+                          onMouseLeave={() => !isMobile && setHoveredPack(null)}
+                        >
+                          {/* Enhanced Pack Image/Video Section */}
+                          <div className="relative h-56 overflow-hidden">
+                            {/* Image Layer */}
+                            <div className={`absolute inset-0 transition-opacity duration-700 ${playingPackVideo === pack.id && pack.intro_video_url ? 'opacity-0' : 'opacity-100'}`}>
+                              {pack.image_url ? (
+                                <img 
+                                  src={pack.image_url} 
+                                  alt={pack.title} 
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
+                                  <BookOpen className="w-16 h-16 text-white" />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Video Layer */}
+                            {pack.intro_video_url && (
+                              <div className={`absolute inset-0 transition-opacity duration-700 ${playingPackVideo === pack.id ? 'opacity-100' : 'opacity-0'}`}>
+                                <video
+                                  ref={el => {
+                                    packVideoRefs.current[pack.id] = el;
+                                    if (el) {
+                                      el.addEventListener('loadedmetadata', () => {
+                                        setPackVideoDurations(prev => ({ ...prev, [pack.id]: el.duration }));
+                                      });
+                                      el.addEventListener('timeupdate', () => {
+                                        setPackVideoCurrentTimes(prev => ({ ...prev, [pack.id]: el.currentTime }));
+                                      });
+                                    }
+                                  }}
+                                  src={pack.intro_video_url}
+                                  className="w-full h-full object-cover cursor-pointer"
+                                  muted={true}
+                                  loop
+                                  playsInline
+                                  preload="metadata"
+                                  onClick={() => resetPackControlsTimeout(pack.id)}
+                                />
+                                
+                                {/* Video Controls Overlay */}
+                                {playingPackVideo === pack.id && (
+                                  <div 
+                                    onMouseMove={() => resetPackControlsTimeout(pack.id)}
+                                    onTouchStart={() => resetPackControlsTimeout(pack.id)}
+                                    className="absolute inset-0 z-20"
+                                  >
+                                    {/* Floating text - Arabic instruction */}
+                                    {mutedPackVideos[pack.id] !== false && showPackControls[pack.id] !== false && (
+                                      <div className="absolute -top-12 left-1/2 -translate-x-1/2 -ml-4 z-30 animate-bounce">
+                                        <div className="bg-pink-500/80 text-white px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap shadow-lg">
+                                          اضغط لتشغيل الصوت
+                                        </div>
+                                        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="drop-shadow-[0_0_8px_rgba(236,72,153,0.8)]">
+                                            <path d="M12 5v14m0 0l7-7m-7 7l-7-7" />
+                                          </svg>
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Bottom Controls Bar */}
+                                    <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-2 z-30 transition-opacity duration-300 ${showPackControls[pack.id] !== false ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                                      <div className="flex items-center gap-2" dir="ltr">
+                                        {/* Progress Bar + Time Display */}
+                                        <div className="flex-1 flex items-center gap-2">
+                                          <input
+                                            type="range"
+                                            min="0"
+                                            max={packVideoDurations[pack.id] || 0}
+                                            value={packVideoCurrentTimes[pack.id] || 0}
+                                            onChange={e => handlePackProgressChange(pack.id, e)}
+                                            className="flex-1 h-0.5 rounded-lg appearance-none cursor-pointer bg-gray-300/50"
+                                            style={{
+                                              background: `linear-gradient(to right, rgb(236 72 153) 0%, rgb(236 72 153) ${((packVideoCurrentTimes[pack.id] || 0) / (packVideoDurations[pack.id] || 1)) * 100}%, rgba(209, 213, 219, 0.5) ${((packVideoCurrentTimes[pack.id] || 0) / (packVideoDurations[pack.id] || 1)) * 100}%, rgba(209, 213, 219, 0.5) 100%)`
+                                            }}
+                                            onClick={e => e.stopPropagation()}
+                                          />
+                                          
+                                          {/* Time Display */}
+                                          <span className="text-white text-[10px] font-medium whitespace-nowrap">
+                                            {formatPackVideoTime(packVideoCurrentTimes[pack.id] || 0)} / {formatPackVideoTime(packVideoDurations[pack.id] || 0)}
+                                          </span>
+                                        </div>
+
+                                        {/* Control Buttons */}
+                                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                                          {/* Play/Pause Button */}
+                                          <button
+                                            onClick={e => togglePackPlayPause(pack.id, e)}
+                                            className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1.5 transition-all duration-200 flex items-center justify-center"
+                                          >
+                                            {packVideoPaused[pack.id] ? (
+                                              <Play className="w-3.5 h-3.5" />
+                                            ) : (
+                                              <Pause className="w-3.5 h-3.5" />
+                                            )}
+                                          </button>
+                                          
+                                          {/* Mute Button with animation */}
+                                          <div className="relative flex-shrink-0">
+                                            {mutedPackVideos[pack.id] !== false && (
+                                              <>
+                                                <div className="absolute inset-0 rounded-full bg-pink-500 animate-ping scale-[2]" />
+                                                <div className="absolute inset-0 rounded-full bg-pink-400 animate-pulse scale-[1.8]" style={{ animationDelay: '0.2s' }} />
+                                                <div className="absolute inset-0 rounded-full bg-pink-600/80 animate-ping scale-[2.5]" style={{ animationDelay: '0.4s' }} />
+                                              </>
+                                            )}
+                                            
+                                            <button
+                                              onClick={e => togglePackMute(pack.id, e)}
+                                              className="relative bg-white/20 hover:bg-white/30 text-white rounded-full p-1.5 transition-all duration-200 flex items-center justify-center"
+                                            >
+                                              {mutedPackVideos[pack.id] !== false ? (
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                  <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                                                  <line x1="23" y1="9" x2="17" y2="15" />
+                                                  <line x1="17" y1="9" x2="23" y2="15" />
+                                                </svg>
+                                              ) : (
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                  <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                                                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                                                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                                                </svg>
+                                              )}
+                                            </button>
+                                          </div>
+                                          
+                                          {/* Rewind Button */}
+                                          <button
+                                            onClick={e => rewindPackVideo(pack.id, e)}
+                                            className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1.5 transition-all duration-200 flex items-center justify-center"
+                                          >
+                                            <RotateCcw className="w-3.5 h-3.5" />
+                                          </button>
+                                          
+                                          {/* Fullscreen Button */}
+                                          <button
+                                            onClick={e => togglePackFullscreen(pack.id, e)}
+                                            className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1.5 transition-all duration-200 flex items-center justify-center"
+                                            title="ملء الشاشة"
+                                          >
+                                            <Maximize className="w-3.5 h-3.5" />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {/* Loading Spinner */}
+                                {isMobile && loadingPackVideos[pack.id] && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
+                                    <Loader2 className="w-10 h-10 text-white animate-spin" />
+                                  </div>
+                                )}
+                              </div>
+                            )}
                             
                             {/* Status Badge */}
-                            <div className="absolute top-4 right-4">
-                              {status === 'accepted' && <div className="px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full flex items-center gap-1">
+                            <div className="absolute top-4 right-4 z-10">
+                              {status === 'accepted' && (
+                                <div className="px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full flex items-center gap-1 shadow-lg">
                                   <CheckCircle className="w-3 h-3" />
                                   مُفعلة
-                                </div>}
-                              {status === 'pending' && <div className="px-3 py-1 bg-amber-500 text-white text-xs font-semibold rounded-full flex items-center gap-1">
+                                </div>
+                              )}
+                              {status === 'pending' && (
+                                <div className="px-3 py-1 bg-amber-500 text-white text-xs font-semibold rounded-full flex items-center gap-1 shadow-lg">
                                   <Clock className="w-3 h-3" />
                                   قيد المراجعة
-                                </div>}
+                                </div>
+                              )}
                             </div>
                           </div>
                           

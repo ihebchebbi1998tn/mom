@@ -362,34 +362,34 @@ const Header = () => {
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center justify-center gap-8">
-              <a href="#about" className="text-foreground hover:text-primary transition-colors font-medium">
+              <a href="#about" className="text-foreground hover:text-primary transition-colors font-medium whitespace-nowrap">
                 عن الأكاديمية
               </a>
               <a 
                 href="#courses" 
-                className="text-foreground hover:text-primary transition-colors font-medium"
+                className="text-foreground hover:text-primary transition-colors font-medium whitespace-nowrap"
                 onClick={(e) => handleNavClick('#courses', e)}
               >
                 الدورات
               </a>
               <a 
                 href="#workshops" 
-                className="text-foreground hover:text-primary transition-colors font-medium"
+                className="text-foreground hover:text-primary transition-colors font-medium whitespace-nowrap"
                 onClick={(e) => handleNavClick('#workshops', e)}
               >
                 ورشات
               </a>
               <a 
                 href="#packs" 
-                className="text-foreground hover:text-primary transition-colors font-medium"
+                className="text-foreground hover:text-primary transition-colors font-medium whitespace-nowrap"
                 onClick={(e) => handleNavClick('#packs', e)}
               >
                 الباقات
               </a>
-              <a href="#consultation" className="text-foreground hover:text-primary transition-colors font-medium">
+              <a href="#consultation" className="text-foreground hover:text-primary transition-colors font-medium whitespace-nowrap">
                 الاستشارات
               </a>
-              <a href="#testimonials" className="text-foreground hover:text-primary transition-colors font-medium">
+              <a href="#testimonials" className="text-foreground hover:text-primary transition-colors font-medium whitespace-nowrap">
                 آراء العملاء
               </a>
             </nav>
