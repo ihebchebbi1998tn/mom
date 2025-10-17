@@ -47,11 +47,11 @@ const Testimonials = () => {
   const audioTestimonials = [{
     name: "سامية",
     package: "باك ذهبي",
-    audioUrl: "/audio/testimonial1.mp3"
+    audioUrl: "/audio/testimonial2.mp3"
   }, {
     name: "وفاء",
     package: "باك ذهبي",
-    audioUrl: "/audio/testimonial2.mp3"
+    audioUrl: "/audio/testimonial1.mp3"
   }, {
     name: "ريم",
     package: "باك ذهبي",
