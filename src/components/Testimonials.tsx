@@ -56,6 +56,46 @@ const Testimonials = () => {
     name: "ريم",
     package: "باك ذهبي",
     audioUrl: "/audio/testimonial3.mp3"
+  }, {
+    name: "نجلاء",
+    package: "باك ذهبي",
+    audioUrl: "/audio/testimonial4.mp3"
+  }, {
+    name: "ميساء",
+    package: "باك ذهبي",
+    audioUrl: "/audio/testimonial5.mp3"
+  }, {
+    name: "هاله",
+    package: "باك ذهبي",
+    audioUrl: "/audio/testimonial6.mp3"
+  }, {
+    name: "ليلى",
+    package: "باك ذهبي",
+    audioUrl: "/audio/testimonial7.mp3"
+  }, {
+    name: "نورا",
+    package: "باك ذهبي",
+    audioUrl: "/audio/testimonial8.mp3"
+  }, {
+    name: "فدوى",
+    package: "باك ذهبي",
+    audioUrl: "/audio/testimonial9.mp3"
+  }, {
+    name: "عائشة",
+    package: "باك ذهبي",
+    audioUrl: "/audio/testimonial10.mp3"
+  }, {
+    name: "سارة",
+    package: "باك ذهبي",
+    audioUrl: "/audio/testimonial11.mp3"
+  }, {
+    name: "هند",
+    package: "باك ذهبي",
+    audioUrl: "/audio/testimonial12.mp3"
+  }, {
+    name: "دنيا",
+    package: "باك ذهبي",
+    audioUrl: "/audio/testimonial13.mp3"
   }];
   const photoTestimonials = [{
     name: "أم عبد الله",
