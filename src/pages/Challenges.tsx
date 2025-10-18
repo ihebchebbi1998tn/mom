@@ -252,6 +252,7 @@ const Challenges = () => {
       <header className="bg-gradient-to-r from-white via-pink-50/30 to-white backdrop-blur-md border-b border-pink-100/50 sticky top-0 z-30 shadow-lg shadow-pink-100/20 w-full transition-all duration-300">
         <div className="px-3 sm:px-4 md:px-8 py-3 sm:py-4 lg:py-6">
           <div className="flex items-center justify-between">
+            {/* Left side - Arrow + Title/Logo on desktop, Arrow + Menu on mobile */}
             <div className="flex items-center gap-3">
               <Button variant="ghost" onClick={handleBackToDashboard} className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0 transition-all duration-200 transform hover:scale-[1.02] shadow-md p-2">
                 <ArrowLeft className="w-4 h-4" />
@@ -260,8 +261,17 @@ const Challenges = () => {
               {isMobile && <Button variant="ghost" size="sm" onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-pink-50 rounded-xl transition-colors duration-200">
                   <Menu className="w-5 h-5" />
                 </Button>}
+              {/* Title and Logo - visible on desktop */}
+              <div className="hidden md:flex items-center gap-3">
+                <img src="/lovable-uploads/134a7f12-f652-4af0-b56a-5fef2c8109bb.png" alt="MomAcademy" className="h-8 sm:h-10 lg:h-12 w-auto drop-shadow-sm" />
+                <div className="flex-1 min-w-0 text-left">
+                  <h1 className="text-base sm:text-lg font-semibold text-slate-800 truncate">تحديات تطوير الذات</h1>
+                  <p className="text-xs sm:text-sm text-slate-500 hidden sm:block">تحديات لتطوير مهاراتك الشخصية</p>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
+            {/* Right side - Title/Logo on mobile only */}
+            <div className="flex md:hidden items-center gap-3">
               <div className="flex-1 min-w-0 text-right">
                 <h1 className="text-base sm:text-lg font-semibold text-slate-800 truncate">تحديات تطوير الذات</h1>
                 <p className="text-xs sm:text-sm text-slate-500 hidden sm:block">تحديات لتطوير مهاراتك الشخصية</p>
@@ -314,9 +324,13 @@ const Challenges = () => {
                     
                     <CardContent className="p-6 lg:p-8">
                       <h3 className="text-xl font-bold text-slate-900 mb-3">{subPack.title}</h3>
-                      {subPack.description && <p className="text-slate-600 text-sm leading-relaxed mb-6">
-                          {subPack.description}
-                        </p>}
+                      {subPack.description && <div className="text-slate-600 text-sm leading-relaxed mb-6">
+                          {subPack.description.split(/\s*-\s*/).map((part, idx) => (
+                            part.trim() && <p key={idx} className={idx > 0 ? 'mt-2' : ''}>
+                              {part.trim()}
+                            </p>
+                          ))}
+                        </div>}
 
                       {/* Request Status and Actions */}
                       <div className="space-y-2">
