@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import ModernVideoModal from "@/components/ModernVideoModal";
 import VideoThumbnail from "@/components/VideoThumbnail";
+import VideoPrivacyModal from "@/components/VideoPrivacyModal";
 
 interface SubPack {
   id: number;
@@ -47,6 +48,7 @@ const SubPackViewer = () => {
     videoId?: string;
   } | null>(null);
   const [watchedVideosState, setWatchedVideosState] = useState<string[]>([]);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(true);
 
   useEffect(() => {
     if (subPackId) {
@@ -251,6 +253,7 @@ const SubPackViewer = () => {
                     alt={video.title}
                     className="w-full h-80 object-contain group-hover:scale-105 transition-transform duration-500"
                     priority={index < 2}
+                    videoId={video.id}
                   />
                   
                   {/* Video Number Badge */}
@@ -279,6 +282,12 @@ const SubPackViewer = () => {
           </div>
         )}
       </main>
+
+      {/* Privacy Modal */}
+      <VideoPrivacyModal 
+        isOpen={showPrivacyModal} 
+        onClose={() => setShowPrivacyModal(false)} 
+      />
 
       {/* Video Modal */}
       {selectedVideo && (

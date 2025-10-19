@@ -1577,7 +1577,7 @@ const Dashboard = () => {
                               </div>
                             </div>}
                           
-                          <VideoThumbnail videoUrl={video.video_url} thumbnailUrl={video.thumbnail_url} alt={video.title} className="w-full h-80 object-contain group-hover:scale-105 transition-transform duration-500" priority={index < 2} />
+                          <VideoThumbnail videoUrl={video.video_url} thumbnailUrl={video.thumbnail_url} alt={video.title} className="w-full h-80 object-contain group-hover:scale-105 transition-transform duration-500" priority={index < 2} videoId={video.id} />
                           
                           {/* Video Number Badge */}
                           <div className="absolute top-4 left-4 w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg">

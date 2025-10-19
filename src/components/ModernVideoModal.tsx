@@ -329,11 +329,17 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster, videoId }:
             <h3 className="font-semibold text-sm md:text-base" dir="rtl">{title}</h3>
           </div>
 
+          {/* Loading Spinner Overlay - only blocks when loading */}
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black z-30 pointer-events-none">
+              <Loader2 className="w-12 h-12 text-pink-500 animate-spin" />
+            </div>
+          )}
+
           {/* Video Element */}
            <video
              ref={videoRef}
-             poster={poster}
-             className="w-full h-auto max-h-[calc(85vh-8rem)] object-contain"
+             className="w-full h-auto max-h-[calc(85vh-8rem)] object-contain cursor-pointer"
              preload="auto"
              playsInline
              disablePictureInPicture
@@ -351,26 +357,28 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster, videoId }:
              متصفحك لا يدعم تشغيل الفيديو
            </video>
 
-          {/* Play Button Overlay - Only show when NOT playing */}
-          {!isPlaying && duration > 0 && (
-            <div className="absolute inset-0 flex items-center justify-center z-20">
+          {/* Play Button Overlay - Only show when NOT playing and NOT loading */}
+          {!isPlaying && !isLoading && duration > 0 && (
+            <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
               <Button
                 variant="ghost"
                 size="lg"
                 onClick={togglePlay}
-                className="bg-pink-600/90 hover:bg-pink-700/90 text-white rounded-full w-20 h-20 p-0 backdrop-blur-sm transition-all duration-200"
+                className="bg-pink-600/90 hover:bg-pink-700/90 text-white rounded-full w-20 h-20 p-0 backdrop-blur-sm transition-all duration-200 pointer-events-auto"
               >
                 <Play className="w-10 h-10 ml-1" />
               </Button>
             </div>
           )}
 
-          {/* Bottom Controls */}
-          <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4 transition-all duration-300 ${
-            showControls ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-          }`}>
-              {/* Progress Bar */}
-            <div className="mb-3" dir="ltr">
+          {/* Bottom Controls - Always allow pointer events on controls */}
+          <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4 transition-all duration-300 z-40 ${
+            showControls ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}
+          style={{ pointerEvents: showControls ? 'auto' : 'none' }}
+          >
+              {/* Progress Bar - Always interactive */}
+            <div className="mb-3" dir="ltr" style={{ pointerEvents: 'auto' }}>
               <input
                 type="range"
                 min={0}
@@ -378,12 +386,23 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster, videoId }:
                 step={0.1}
                 value={currentTime || 0}
                 onChange={handleSeek}
-                onClick={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  resetControlsTimeout();
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  resetControlsTimeout();
+                }}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  resetControlsTimeout();
+                }}
                 disabled={!duration || duration === 0}
                 className="w-full h-1 rounded-lg appearance-none cursor-pointer disabled:cursor-not-allowed [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-lg [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-lg [&::-moz-range-track]:bg-transparent [&::-moz-range-progress]:h-1 [&::-moz-range-progress]:rounded-lg [&::-moz-range-progress]:bg-pink-500"
                 style={{
-                  background: `linear-gradient(to right, rgb(236 72 153) 0%, rgb(236 72 153) ${duration > 0 ? (currentTime / duration) * 100 : 0}%, rgba(255,255,255,0.3) ${duration > 0 ? (currentTime / duration) * 100 : 0}%, rgba(255,255,255,0.3) 100%)`
+                  background: `linear-gradient(to right, rgb(236 72 153) 0%, rgb(236 72 153) ${duration > 0 ? (currentTime / duration) * 100 : 0}%, rgba(255,255,255,0.3) ${duration > 0 ? (currentTime / duration) * 100 : 0}%, rgba(255,255,255,0.3) 100%)`,
+                  pointerEvents: 'auto'
                 }}
               />
               <style dangerouslySetInnerHTML={{__html: `
@@ -433,8 +452,8 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster, videoId }:
               </div>
             </div>
 
-            {/* Control Buttons */}
-            <div className="flex items-center justify-between">
+            {/* Control Buttons - Always interactive */}
+            <div className="flex items-center justify-between" style={{ pointerEvents: 'auto' }}>
               {/* Left Side - Mute + Volume */}
               <div className="flex items-center gap-2">
                 <button
@@ -443,8 +462,9 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster, videoId }:
                     e.stopPropagation();
                     toggleMute();
                   }}
-                  className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 transition-all duration-200"
+                  className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 transition-all duration-200 cursor-pointer"
                   title={isMuted ? 'إلغاء الكتم' : 'كتم الصوت'}
+                  type="button"
                 >
                   {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                 </button>
@@ -460,11 +480,18 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster, videoId }:
                     e.stopPropagation();
                     handleVolumeChange(e);
                   }}
-                  onClick={(e) => e.stopPropagation()}
-                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    resetControlsTimeout();
+                  }}
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                    resetControlsTimeout();
+                  }}
                   className="w-20 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer hidden md:block"
                   style={{
-                    background: `linear-gradient(to right, #ec4899 0%, #ec4899 ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.2) ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.2) 100%)`
+                    background: `linear-gradient(to right, #ec4899 0%, #ec4899 ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.2) ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.2) 100%)`,
+                    pointerEvents: 'auto'
                   }}
                 />
               </div>
@@ -483,8 +510,9 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster, videoId }:
                     e.stopPropagation();
                     toggleFullscreen();
                   }}
-                  className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 transition-all duration-200"
+                  className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 transition-all duration-200 cursor-pointer"
                   title="ملء الشاشة"
+                  type="button"
                 >
                   {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
                 </button>
@@ -496,8 +524,9 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster, videoId }:
                     e.stopPropagation();
                     restart();
                   }}
-                  className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 transition-all duration-200"
+                  className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 transition-all duration-200 cursor-pointer"
                   title="إعادة التشغيل"
+                  type="button"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
@@ -509,8 +538,9 @@ const ModernVideoModal = ({ isOpen, onClose, videoUrl, title, poster, videoId }:
                     e.stopPropagation();
                     togglePlay(e);
                   }}
-                  className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 transition-all duration-200"
+                  className="bg-pink-500 hover:bg-pink-600 text-white rounded-full p-2 transition-all duration-200 cursor-pointer"
                   title={isPlaying ? 'إيقاف مؤقت' : 'تشغيل'}
+                  type="button"
                 >
                   {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
                 </button>

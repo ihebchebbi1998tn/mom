@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import ModernVideoModal from "@/components/ModernVideoModal";
 import VideoThumbnail from "@/components/VideoThumbnail";
+import VideoPrivacyModal from "@/components/VideoPrivacyModal";
 
 interface Workshop {
   id: number;
@@ -45,6 +46,7 @@ const WorkshopViewer = () => {
     videoId?: number;
   } | null>(null);
   const [watchedVideosState, setWatchedVideosState] = useState<string[]>([]);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(true);
 
   useEffect(() => {
     if (workshopId && user?.id) {
@@ -272,6 +274,7 @@ const WorkshopViewer = () => {
                     alt={video.title}
                     className="w-full h-80 object-contain group-hover:scale-105 transition-transform duration-500"
                     priority={index < 2}
+                    videoId={String(video.id)}
                   />
                   
                   {/* Video Number Badge */}
@@ -300,6 +303,12 @@ const WorkshopViewer = () => {
           </div>
         )}
       </main>
+
+      {/* Privacy Modal */}
+      <VideoPrivacyModal 
+        isOpen={showPrivacyModal} 
+        onClose={() => setShowPrivacyModal(false)} 
+      />
 
       {/* Video Modal */}
       {selectedVideo && (

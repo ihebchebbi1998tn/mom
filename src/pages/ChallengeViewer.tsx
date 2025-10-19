@@ -6,6 +6,7 @@ import { ArrowRight, Play, Clock, Eye, Loader2, Lock } from 'lucide-react';
 import { useAuth } from "@/contexts/AuthContext";
 import VideoPlayer from "@/components/VideoPlayer";
 import { useToast } from "@/hooks/use-toast";
+import VideoPrivacyModal from "@/components/VideoPrivacyModal";
 
 interface Challenge {
   id: number;
@@ -45,6 +46,7 @@ const ChallengeViewer = () => {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(true);
 
   useEffect(() => {
     if (challengeId && user?.id) {
@@ -368,6 +370,12 @@ const ChallengeViewer = () => {
           </div>
         </div>
       </div>
+
+      {/* Privacy Modal */}
+      <VideoPrivacyModal 
+        isOpen={showPrivacyModal} 
+        onClose={() => setShowPrivacyModal(false)} 
+      />
     </div>
   );
 };

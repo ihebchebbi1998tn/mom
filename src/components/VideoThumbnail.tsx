@@ -7,9 +7,10 @@ interface VideoThumbnailProps {
   alt: string;
   className?: string;
   priority?: boolean; // For above-the-fold thumbnails
+  videoId?: string; // Unique identifier for caching
 }
 
-const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className, priority = false }: VideoThumbnailProps) => {
+const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className, priority = false, videoId }: VideoThumbnailProps) => {
   const [generatedThumbnail, setGeneratedThumbnail] = useState<string | null>(null);
   const [isInView, setIsInView] = useState(priority); // Priority images start visible
   const [isLoading, setIsLoading] = useState(true);
@@ -18,15 +19,18 @@ const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className, priority = fal
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Cache key for localStorage
-  const getCacheKey = (url: string) => `video-thumb-${btoa(url).substring(0, 50)}`;
+  // Cache key for localStorage - use videoId if available for unique caching
+  const getCacheKey = (url: string, id?: string) => {
+    if (id) return `video-thumb-${id}`;
+    return `video-thumb-${btoa(url).substring(0, 50)}`;
+  };
 
   // Check cache on mount
   useEffect(() => {
     if (!videoUrl) return;
     
     try {
-      const cacheKey = getCacheKey(videoUrl);
+      const cacheKey = getCacheKey(videoUrl, videoId);
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
         setGeneratedThumbnail(cached);
@@ -34,7 +38,7 @@ const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className, priority = fal
     } catch (error) {
       console.error('Error reading thumbnail cache:', error);
     }
-  }, [videoUrl]);
+  }, [videoUrl, videoId]);
 
   // Lazy load: only generate thumbnail when in viewport
   useEffect(() => {
@@ -83,7 +87,7 @@ const VideoThumbnail = ({ videoUrl, thumbnailUrl, alt, className, priority = fal
           
           // Cache the thumbnail
           try {
-            const cacheKey = getCacheKey(videoUrl);
+            const cacheKey = getCacheKey(videoUrl, videoId);
             localStorage.setItem(cacheKey, dataUrl);
           } catch (cacheError) {
             console.warn('Could not cache thumbnail:', cacheError);
