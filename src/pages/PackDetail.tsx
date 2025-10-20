@@ -212,15 +212,11 @@ const PackDetail = () => {
             <div className="grid lg:grid-cols-2 gap-8 items-center">
               {/* Pack Image */}
               <div className="relative">
-                <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
-                  <img src={pack.image_url || "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&h=600&fit=crop"} alt={pack.title} className="w-full h-full object-cover" />
+                <div className="aspect-[16/10] rounded-2xl overflow-hidden shadow-2xl">
+                  <img src={pack.image_url || "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&h=600&fit=crop"} alt={pack.title} className="w-full h-full object-contain bg-muted" />
                   
                   {/* Students Count */}
-                  <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2">
-                    <Users className="w-5 h-5 text-primary" />
-                    <span className="font-semibold text-foreground" dir="ltr">{pack.students}+</span>
-                    <span className="text-sm text-muted-foreground">طالبة</span>
-                  </div>
+                  
                 </div>
                 
                 {/* Watch Introduction Button */}

@@ -40,7 +40,7 @@ const VideoCard = ({ video, index, onEdit, onDelete }: VideoCardProps) => {
               <img 
                 src={video.thumbnail_url} 
                 alt={video.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain bg-muted"
               />
               <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/40 transition-colors">
                 <Play className="w-16 h-16 text-white group-hover:scale-110 transition-transform" />

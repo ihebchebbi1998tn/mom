@@ -26,11 +26,11 @@ const CustomCalendar = ({ selected, onSelect, disabled, availabilities = [] }: C
   };
 
   const monthNames = [
-    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+    "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+    "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
   ];
 
-  const dayNames = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+  const dayNames = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -150,8 +150,8 @@ const CustomCalendar = ({ selected, onSelect, disabled, availabilities = [] }: C
                 }
               )}
             >
-              {/* Date number - perfectly centered */}
-              <span className="absolute inset-0 flex items-center justify-center font-medium text-center">
+              {/* Date number - perfectly centered with LTR for Latin numerals */}
+              <span className="absolute inset-0 flex items-center justify-center font-medium text-center" dir="ltr">
                 {day.getDate()}
               </span>
               
@@ -178,15 +178,15 @@ const CustomCalendar = ({ selected, onSelect, disabled, availabilities = [] }: C
       <div className="mt-4 flex justify-center gap-3 text-xs flex-wrap">
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 bg-green-500 rounded-full flex-shrink-0"></div>
-          <span>Disponible</span>
+          <span>متاح</span>
         </div>
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 bg-red-500 rounded-full flex-shrink-0"></div>
-          <span>Complet</span>
+          <span>ممتلئ</span>
         </div>
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 bg-gray-500 rounded-full flex-shrink-0"></div>
-          <span>Indisponible</span>
+          <span>غير متاح</span>
         </div>
       </div>
     </div>

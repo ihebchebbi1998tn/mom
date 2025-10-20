@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Calendar as CalendarIcon, CheckCircle, ArrowLeft, Clock, Phone, Users, MessageSquare, Video, AlertCircle, FileText, MapPin } from "lucide-react";
+import { MessageCircle, Calendar as CalendarIcon, CheckCircle, ArrowLeft, Clock, Phone, Users, MessageSquare, Video, AlertCircle, FileText, MapPin, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -191,6 +191,13 @@ const Consultation = () => {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="w-full sm:w-[95vw] max-w-sm sm:max-w-md mx-auto my-0 sm:my-4 h-[100dvh] sm:h-auto sm:max-h-[90vh] overflow-y-auto rounded-none sm:rounded-lg">
+                  <button
+                    onClick={() => setIsDialogOpen(false)}
+                    className="absolute left-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground z-50"
+                  >
+                    <X className="h-5 w-5" />
+                    <span className="sr-only">إغلاق</span>
+                  </button>
                   <DialogHeader className="pb-4 pt-8">
                     <DialogTitle className="text-right text-lg sm:text-xl">حجز موعد استشارة</DialogTitle>
                   </DialogHeader>

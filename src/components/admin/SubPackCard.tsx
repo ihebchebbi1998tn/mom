@@ -42,7 +42,7 @@ const SubPackCard = ({ subPack, videoCount, index, onSelect, onEdit, onDelete, i
             <img 
               src={subPack.banner_image_url || packImage} 
               alt={subPack.title} 
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-contain bg-muted"
             />
             <div className="absolute inset-0 bg-gradient-to-br from-secondary/80 to-primary/80"></div>
           </>

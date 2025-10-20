@@ -64,33 +64,37 @@ const Footer = () => {
             <h3 className="text-lg font-bold mb-6">روابط سريعة</h3>
             <ul className="space-y-3">
               <li>
-                <a 
-                  href="#courses"  
+                <button 
+                  onClick={() => navigate('/?tab=packs')}
                   className="text-white/80 hover:text-white transition-colors"
-                   onClick={(e) => handleNavClick('#courses', e)}
-                >
-                  الدورات
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="#workshops"
-                  className="text-white/80 hover:text-white transition-colors"
-                   onClick={(e) => handleNavClick('#workshops', e)}
-                >
-                  الورشات
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="#packs"  
-                  className="text-white/80 hover:text-white transition-colors"
-                   onClick={(e) => handleNavClick('#packs', e)}
                 >
                   الباقات
-                </a>
+                </button>
               </li>
-              <li><a href="#consultation" className="text-white/80 hover:text-white transition-colors">الاستشارات</a></li>
+              <li>
+                <button 
+                  onClick={() => navigate('/?tab=workshops')}
+                  className="text-white/80 hover:text-white transition-colors"
+                >
+                  الورشات
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => navigate('/challenges')}
+                  className="text-white/80 hover:text-white transition-colors"
+                >
+                  التحديات
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => navigate('/blogs')}
+                  className="text-white/80 hover:text-white transition-colors"
+                >
+                  المدوَّنات
+                </button>
+              </li>
             </ul>
           </div>
 

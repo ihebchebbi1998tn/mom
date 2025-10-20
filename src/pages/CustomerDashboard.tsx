@@ -205,11 +205,11 @@ const CustomerDashboard = () => {
               {coursePacks.map((pack) => (
                 <Card key={pack.id} className="card-elegant overflow-hidden hover:shadow-lg transition-all duration-300">
                   {pack.image_url && (
-                    <div className="h-48 overflow-hidden">
+                    <div className="h-40 overflow-hidden">
                       <img 
                         src={pack.image_url} 
                         alt={pack.title}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-contain bg-muted hover:scale-105 transition-transform duration-300"
                       />
                     </div>
                   )}

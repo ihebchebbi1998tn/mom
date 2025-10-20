@@ -1524,8 +1524,8 @@ const Dashboard = () => {
                 return 0;
               }).map((subPack, index) => <Card key={subPack.id} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer bg-white" onClick={() => handleSubPackClick(subPack)}>
                         {/* Sub-Pack Banner Image */}
-                        {subPack.banner_image_url ? <div className="relative h-48 overflow-hidden">
-                            <img src={subPack.banner_image_url} alt={subPack.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        {subPack.banner_image_url ? <div className="relative h-40 overflow-hidden">
+                            <img src={subPack.banner_image_url} alt={subPack.title} className="w-full h-full object-contain bg-muted group-hover:scale-105 transition-transform duration-500" />
                           </div> : <div className="bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600 p-8 text-white relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-4 translate-x-4"></div>
                             <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-4 -translate-x-4"></div>
@@ -1626,8 +1626,8 @@ const Dashboard = () => {
                 const isLoading = actionLoading === `sp_${course.id}`;
                 return <Card key={course.id} className={cn("group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white", !isLocked && !isPending && "cursor-pointer")} onClick={() => !isLocked && !isPending && handleCourseClick(course)}>
                           {/* Course Banner Image */}
-                          {course.banner_image_url ? <div className="relative h-48 overflow-hidden">
-                              <img src={course.banner_image_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          {course.banner_image_url ? <div className="relative h-40 overflow-hidden">
+                              <img src={course.banner_image_url} alt={course.title} className="w-full h-full object-contain bg-muted group-hover:scale-105 transition-transform duration-500" />
                               {isLocked && !isPending}
                               
                             </div> : <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 p-8 text-white relative overflow-hidden">
@@ -1727,7 +1727,7 @@ const Dashboard = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {workshops.map((workshop, index) => <Card key={workshop.id} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 bg-white">
                         <div className="relative overflow-hidden">
-                          {workshop.image_url ? <img src={workshop.image_url} alt={workshop.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="w-full h-48 bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                          {workshop.image_url ? <img src={workshop.image_url} alt={workshop.title} className="w-full h-40 object-contain bg-muted group-hover:scale-105 transition-transform duration-500" /> : <div className="w-full h-48 bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
                               <Users className="w-16 h-16 text-white" />
                             </div>}
                           

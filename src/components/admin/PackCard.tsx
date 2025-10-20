@@ -45,7 +45,7 @@ const PackCard = ({ pack, subPackCount, totalVideos, acceptedUsers, onSelect, on
           <img 
             src={pack.image_url} 
             alt={pack.title}
-            className="w-full h-48 object-cover"
+            className="w-full h-48 object-contain bg-muted"
           />
         ) : (
           <div className="w-full h-48 bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
