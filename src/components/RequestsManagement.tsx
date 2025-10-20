@@ -287,6 +287,9 @@ const RequestsManagement = () => {
     .filter(req => !showAccepted ? req.status !== 'accepted' : true)
     .filter(req => statusFilter === 'all' || req.status === statusFilter)
     .filter(req => {
+      // Only show pending requests if they have a receipt uploaded
+      if (req.status === 'pending' && !req.recu_link) return false;
+      
       if (!searchQuery.trim()) return true;
       const query = searchQuery.toLowerCase().trim();
       return (
@@ -300,6 +303,9 @@ const RequestsManagement = () => {
     .filter(req => !showAccepted ? req.status !== 'accepted' : true)
     .filter(req => statusFilter === 'all' || req.status === statusFilter)
     .filter(req => {
+      // Only show pending requests if they have a receipt uploaded
+      if (req.status === 'pending' && !req.recu_link) return false;
+      
       if (!searchQuery.trim()) return true;
       const query = searchQuery.toLowerCase().trim();
       return (
@@ -313,6 +319,9 @@ const RequestsManagement = () => {
     .filter(req => !showAccepted ? req.status !== 'accepted' : true)
     .filter(req => statusFilter === 'all' || req.status === statusFilter)
     .filter(req => {
+      // Only show pending requests if they have a receipt uploaded
+      if (req.status === 'pending' && !req.recu_link) return false;
+      
       if (!searchQuery.trim()) return true;
       const query = searchQuery.toLowerCase().trim();
       return (

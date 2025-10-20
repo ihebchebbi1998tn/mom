@@ -66,6 +66,12 @@ const ChallengeRequestsManagement = () => {
   const filterRequests = () => {
     let filtered = [...requests];
 
+    // Only show pending requests if they have a receipt uploaded
+    filtered = filtered.filter(req => {
+      if (req.status === 'pending' && !req.recu_link) return false;
+      return true;
+    });
+
     if (statusFilter !== 'all') {
       filtered = filtered.filter(req => req.status === statusFilter);
     }

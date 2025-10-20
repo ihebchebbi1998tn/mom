@@ -242,6 +242,7 @@ const Testimonials = () => {
   const [currentAudioIndex, setCurrentAudioIndex] = useState(0);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const itemsPerPage = isMobile ? 1 : 3;
   const maxAudioIndex = Math.max(0, audioTestimonials.length - itemsPerPage);
   const maxPhotoIndex = Math.max(0, photoTestimonials.length - itemsPerPage);
@@ -256,6 +257,20 @@ const Testimonials = () => {
   };
   const goToNextPhoto = () => {
     setCurrentPhotoIndex(prev => prev >= maxPhotoIndex ? 0 : prev + 1);
+  };
+  const openImageModal = (index: number) => {
+    setSelectedImageIndex(index);
+    setSelectedImage(photoTestimonials[index].imageUrl);
+  };
+  const goToPreviousImage = () => {
+    const newIndex = selectedImageIndex === 0 ? photoTestimonials.length - 1 : selectedImageIndex - 1;
+    setSelectedImageIndex(newIndex);
+    setSelectedImage(photoTestimonials[newIndex].imageUrl);
+  };
+  const goToNextImage = () => {
+    const newIndex = selectedImageIndex === photoTestimonials.length - 1 ? 0 : selectedImageIndex + 1;
+    setSelectedImageIndex(newIndex);
+    setSelectedImage(photoTestimonials[newIndex].imageUrl);
   };
   const visibleAudioTestimonials = audioTestimonials.slice(currentAudioIndex, currentAudioIndex + itemsPerPage);
   const visiblePhotoTestimonials = photoTestimonials.slice(currentPhotoIndex, currentPhotoIndex + itemsPerPage);
@@ -332,12 +347,15 @@ const Testimonials = () => {
 
             {/* Photo Testimonials Grid */}
             <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-3'} gap-6 px-8`}>
-              {visiblePhotoTestimonials.map((testimonial, index) => <div key={currentPhotoIndex + index} className={`relative overflow-hidden rounded-lg cursor-pointer transition-all duration-1000 hover:scale-105 hover:shadow-xl ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{
-              transitionDelay: isVisible ? `${300 + index * 200}ms` : '0ms'
-            }} onClick={() => setSelectedImage(testimonial.imageUrl!)}>
-                  {/* Review Image */}
-                  <img src={testimonial.imageUrl} alt={`Review from ${testimonial.name}`} className="w-full h-64 object-contain" />
-                </div>)}
+              {visiblePhotoTestimonials.map((testimonial, index) => {
+              const actualIndex = currentPhotoIndex + index;
+              return <div key={actualIndex} className={`relative overflow-hidden rounded-lg cursor-pointer transition-all duration-1000 hover:scale-105 hover:shadow-xl ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{
+                transitionDelay: isVisible ? `${300 + index * 200}ms` : '0ms'
+              }} onClick={() => openImageModal(actualIndex)}>
+                    {/* Review Image */}
+                    <img src={testimonial.imageUrl} alt={`Review from ${testimonial.name}`} className="w-full h-64 object-contain" />
+                  </div>;
+            })}
             </div>
             
             {/* Page Indicator */}
@@ -349,10 +367,28 @@ const Testimonials = () => {
           </div>
         </div>
 
-        {/* Image Modal */}
+        {/* Image Modal with Navigation */}
         <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-          <DialogContent className="max-w-4xl w-[95vw] p-2">
-            <img src={selectedImage || ""} alt="Testimonial" className="w-full h-auto rounded-lg" />
+          <DialogContent className="max-w-4xl w-[95vw] p-2 sm:p-4">
+            <div className="relative">
+              {/* Previous Button */}
+              <Button variant="outline" size="icon" onClick={goToPreviousImage} className="absolute -left-1 sm:-left-2 top-1/2 -translate-y-1/2 z-10 rounded-full h-10 w-10 sm:h-12 sm:w-12 bg-pink-500 hover:bg-pink-600 text-white border-pink-600 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300">
+                <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+              </Button>
+
+              {/* Image */}
+              <img src={selectedImage || ""} alt="Testimonial" className="w-full h-auto rounded-lg max-h-[80vh] object-contain" />
+
+              {/* Next Button */}
+              <Button variant="outline" size="icon" onClick={goToNextImage} className="absolute -right-1 sm:-right-2 top-1/2 -translate-y-1/2 z-10 rounded-full h-10 w-10 sm:h-12 sm:w-12 bg-pink-500 hover:bg-pink-600 text-white border-pink-600 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300">
+                <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
+              </Button>
+
+              {/* Image Counter */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
+                
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

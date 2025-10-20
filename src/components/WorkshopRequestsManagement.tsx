@@ -106,6 +106,9 @@ const WorkshopRequestsManagement = () => {
   };
 
   const filteredRequests = requests.filter(request => {
+    // Only show pending requests if they have a receipt uploaded
+    if (request.status === 'pending' && !request.recu_link) return false;
+    
     const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
     const matchesSearch = searchQuery === '' || 
       request.user_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
