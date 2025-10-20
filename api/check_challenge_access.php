@@ -39,7 +39,46 @@ try {
         exit;
     }
 
-    // Check 1: Direct challenge access
+    // Check 1: Special admin-granted access (for challenges linked to restricted sub-packs 6, 7, 8)
+    // Challenges are accessed through sub-packs, so check if this challenge is linked to restricted sub-packs
+    $stmt = $db->prepare("
+        SELECT sp.id FROM mom_sub_packs sp
+        WHERE sp.id IN (6, 7, 8)
+        LIMIT 1
+    ");
+    $stmt->execute();
+    
+    // For challenges in restricted sub-packs, check special access
+    if (in_array($challenge_id, [6, 7, 8])) {
+        // Map challenge ID to corresponding sub-pack ID (assuming 1:1 mapping)
+        $corresponding_subpack_id = $challenge_id;
+        
+        $stmt = $db->prepare("
+            SELECT * FROM mom_special_access 
+            WHERE user_id = :user_id AND sub_pack_id = :sub_pack_id
+        ");
+        $stmt->execute([':user_id' => $user_id, ':sub_pack_id' => $corresponding_subpack_id]);
+        $specialAccess = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($specialAccess) {
+            echo json_encode([
+                'success' => true,
+                'hasAccess' => true,
+                'accessType' => 'special',
+                'message' => 'Special admin-granted access'
+            ]);
+            exit;
+        } else {
+            echo json_encode([
+                'success' => true,
+                'hasAccess' => false,
+                'message' => 'This content requires special admin authorization'
+            ]);
+            exit;
+        }
+    }
+
+    // Check 2: Direct challenge access (for non-restricted challenges)
     $stmt = $db->prepare("
         SELECT * FROM mom_challenge_requests 
         WHERE user_id = :user_id AND challenge_id = :challenge_id AND status = 'accepted'
@@ -57,7 +96,7 @@ try {
         exit;
     }
 
-    // Check 2: Access via pack purchase
+    // Check 3: Access via pack purchase
     $stmt = $db->prepare("
         SELECT p.*, r.status, r.request_date
         FROM mom_packs p

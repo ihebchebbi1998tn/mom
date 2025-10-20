@@ -46,7 +46,7 @@ const WorkshopViewer = () => {
     videoId?: number;
   } | null>(null);
   const [watchedVideosState, setWatchedVideosState] = useState<string[]>([]);
-  const [showPrivacyModal, setShowPrivacyModal] = useState(true);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   useEffect(() => {
     if (workshopId && user?.id) {
@@ -64,6 +64,12 @@ const WorkshopViewer = () => {
     // Load watched videos from localStorage
     const watchedVideos = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
     setWatchedVideosState(watchedVideos);
+    
+    // Show privacy modal if not seen before
+    const hasSeenPrivacyModal = localStorage.getItem('hasSeenVideoPrivacyModal');
+    if (!hasSeenPrivacyModal) {
+      setShowPrivacyModal(true);
+    }
   }, []);
 
   const checkAccess = async () => {
@@ -307,7 +313,10 @@ const WorkshopViewer = () => {
       {/* Privacy Modal */}
       <VideoPrivacyModal 
         isOpen={showPrivacyModal} 
-        onClose={() => setShowPrivacyModal(false)} 
+        onClose={() => {
+          setShowPrivacyModal(false);
+          localStorage.setItem('hasSeenVideoPrivacyModal', 'true');
+        }} 
       />
 
       {/* Video Modal */}

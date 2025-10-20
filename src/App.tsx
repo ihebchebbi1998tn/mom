@@ -26,6 +26,7 @@ import CourseDetail from "./pages/CourseDetail";
 import CapsulesManagement from "./pages/CapsulesManagement";
 import NotFound from "./pages/NotFound";
 import ChallengesManagement from "./pages/ChallengesManagement";
+import SpecialAccessManagement from "./pages/SpecialAccessManagement";
 import Ebook from "./pages/Ebook";
 
 const queryClient = new QueryClient();
@@ -54,6 +55,7 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/capsules" element={<CapsulesManagement />} />
             <Route path="/admin/challenges" element={<ChallengesManagement />} />
+            <Route path="/admin/special-access" element={<SpecialAccessManagement />} />
             <Route path="/courses" element={
               <ProtectedRoute>
                 <CoursePacks />

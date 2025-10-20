@@ -7,6 +7,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowRight, Play, Clock, Eye, ChevronDown, ChevronRight, Lock } from "lucide-react";
 import VideoPlayer from "@/components/VideoPlayer";
 import { checkSubPackLock, recordFirstAccess } from "@/config/access_timing";
+import VideoPrivacyModal from "@/components/VideoPrivacyModal";
 
 interface CoursePack {
   id: number;
@@ -53,6 +54,7 @@ const CourseViewer = () => {
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
   const [lockedSubPacks, setLockedSubPacks] = useState<{[key: number]: { isLocked: boolean; message?: string }}>({});
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   
   // Mock user ID - in real app this would come from auth context
   const currentUserId = 1;
@@ -69,6 +71,14 @@ const CourseViewer = () => {
       checkLockedSubPacks();
     }
   }, [hasAccess, packageId]);
+
+  useEffect(() => {
+    // Show privacy modal if not seen before
+    const hasSeenPrivacyModal = localStorage.getItem('hasSeenVideoPrivacyModal');
+    if (!hasSeenPrivacyModal) {
+      setShowPrivacyModal(true);
+    }
+  }, []);
 
   const checkLockedSubPacks = () => {
     if (!packageId) return;
@@ -453,6 +463,15 @@ const CourseViewer = () => {
           </div>
         </div>
       </div>
+
+      {/* Privacy Modal */}
+      <VideoPrivacyModal 
+        isOpen={showPrivacyModal} 
+        onClose={() => {
+          setShowPrivacyModal(false);
+          localStorage.setItem('hasSeenVideoPrivacyModal', 'true');
+        }} 
+      />
     </div>
   );
 };

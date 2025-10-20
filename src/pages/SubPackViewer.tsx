@@ -48,7 +48,7 @@ const SubPackViewer = () => {
     videoId?: string;
   } | null>(null);
   const [watchedVideosState, setWatchedVideosState] = useState<string[]>([]);
-  const [showPrivacyModal, setShowPrivacyModal] = useState(true);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   useEffect(() => {
     if (subPackId) {
@@ -60,6 +60,12 @@ const SubPackViewer = () => {
     // Load watched videos from localStorage
     const watchedVideos = JSON.parse(localStorage.getItem('watchedVideos') || '[]');
     setWatchedVideosState(watchedVideos);
+    
+    // Show privacy modal if not seen before
+    const hasSeenPrivacyModal = localStorage.getItem('hasSeenVideoPrivacyModal');
+    if (!hasSeenPrivacyModal) {
+      setShowPrivacyModal(true);
+    }
   }, []);
 
   const checkAccessAndFetchData = async () => {
@@ -286,7 +292,10 @@ const SubPackViewer = () => {
       {/* Privacy Modal */}
       <VideoPrivacyModal 
         isOpen={showPrivacyModal} 
-        onClose={() => setShowPrivacyModal(false)} 
+        onClose={() => {
+          setShowPrivacyModal(false);
+          localStorage.setItem('hasSeenVideoPrivacyModal', 'true');
+        }} 
       />
 
       {/* Video Modal */}

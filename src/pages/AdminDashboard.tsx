@@ -316,6 +316,9 @@ const AdminDashboard = () => {
               <Button variant="outline" onClick={() => navigate('/admin/challenges')} className="btn-outline hidden sm:flex">
                 Gérer les Challenges
               </Button>
+              <Button variant="outline" onClick={() => navigate('/admin/special-access')} className="btn-outline hidden lg:flex">
+                Accès Spéciaux
+              </Button>
               <Button variant="outline" onClick={() => setActiveTab("blogs")} className="btn-outline hidden sm:flex">
                 Gérer les Articles
               </Button>

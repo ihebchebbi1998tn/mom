@@ -21,6 +21,7 @@ import MobileLanding from "@/components/MobileLanding";
 import ModernVideoModal from "@/components/ModernVideoModal";
 import ReceiptUpload from "@/components/ReceiptUpload";
 import VideoThumbnail from "@/components/VideoThumbnail";
+import VideoPrivacyModal from "@/components/VideoPrivacyModal";
 import { getTextAlignmentClasses, getTextDirection, getContainerDirection, hasArabicCharacters, getNameDirection } from "@/utils/textAlignment";
 import mamanattentionLogo from "@/assets/mamanattention.png";
 import oldLogo from "@/assets/maman-attentionnee-logo.png";
@@ -154,6 +155,7 @@ const Dashboard = () => {
     videoId?: string;
   } | null>(null);
   const [watchedVideosState, setWatchedVideosState] = useState<string[]>([]);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   // Receipt modal state
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
@@ -214,6 +216,16 @@ const Dashboard = () => {
       setPlayingPackVideo(null);
     }
   }, [isMobile, visiblePackInView]);
+
+  // Show privacy modal when entering videos view
+  useEffect(() => {
+    if (currentView === 'videos' && !showPrivacyModal) {
+      const hasSeenPrivacyModal = localStorage.getItem('hasSeenVideoPrivacyModal');
+      if (!hasSeenPrivacyModal) {
+        setShowPrivacyModal(true);
+      }
+    }
+  }, [currentView]);
 
   // Control pack video playback with optimized loading
   useEffect(() => {
@@ -1895,6 +1907,15 @@ const Dashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Privacy Modal */}
+      <VideoPrivacyModal 
+        isOpen={showPrivacyModal} 
+        onClose={() => {
+          setShowPrivacyModal(false);
+          localStorage.setItem('hasSeenVideoPrivacyModal', 'true');
+        }} 
+      />
     </div>;
 };
 export default Dashboard;

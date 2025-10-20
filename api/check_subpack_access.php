@@ -39,7 +39,35 @@ try {
         exit;
     }
 
-    // Check 1: Direct sub-pack access
+    // Check 1: Special admin-granted access (for restricted sub-packs 6, 7, 8)
+    if (in_array($sub_pack_id, [6, 7, 8])) {
+        $stmt = $db->prepare("
+            SELECT * FROM mom_special_access 
+            WHERE user_id = :user_id AND sub_pack_id = :sub_pack_id
+        ");
+        $stmt->execute([':user_id' => $user_id, ':sub_pack_id' => $sub_pack_id]);
+        $specialAccess = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($specialAccess) {
+            echo json_encode([
+                'success' => true,
+                'hasAccess' => true,
+                'accessType' => 'special',
+                'message' => 'Special admin-granted access'
+            ]);
+            exit;
+        } else {
+            // For restricted sub-packs, ONLY special access works
+            echo json_encode([
+                'success' => true,
+                'hasAccess' => false,
+                'message' => 'This content requires special admin authorization'
+            ]);
+            exit;
+        }
+    }
+
+    // Check 2: Direct sub-pack access (for non-restricted sub-packs)
     $stmt = $db->prepare("
         SELECT * FROM mom_sub_pack_requests 
         WHERE user_id = :user_id AND sub_pack_id = :sub_pack_id AND status = 'accepted'
@@ -57,7 +85,7 @@ try {
         exit;
     }
 
-    // Check 2: Access via pack purchase
+    // Check 3: Access via pack purchase
     $stmt = $db->prepare("
         SELECT p.*, r.status, r.request_date
         FROM mom_packs p

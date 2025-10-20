@@ -46,7 +46,7 @@ const ChallengeViewer = () => {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
-  const [showPrivacyModal, setShowPrivacyModal] = useState(true);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   useEffect(() => {
     if (challengeId && user?.id) {
@@ -59,6 +59,14 @@ const ChallengeViewer = () => {
       fetchChallengeData();
     }
   }, [hasAccess, challengeId]);
+
+  useEffect(() => {
+    // Show privacy modal if not seen before
+    const hasSeenPrivacyModal = localStorage.getItem('hasSeenVideoPrivacyModal');
+    if (!hasSeenPrivacyModal) {
+      setShowPrivacyModal(true);
+    }
+  }, []);
 
   const checkAccess = async () => {
     try {
@@ -374,7 +382,10 @@ const ChallengeViewer = () => {
       {/* Privacy Modal */}
       <VideoPrivacyModal 
         isOpen={showPrivacyModal} 
-        onClose={() => setShowPrivacyModal(false)} 
+        onClose={() => {
+          setShowPrivacyModal(false);
+          localStorage.setItem('hasSeenVideoPrivacyModal', 'true');
+        }} 
       />
     </div>
   );
